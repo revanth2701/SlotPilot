@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LoginSelection from "@/components/LoginSelection";
+import StudentLoginRegister from "@/components/StudentLoginRegister";
 import StudentDashboard from "@/components/StudentDashboard";
 import EmployerDashboard from "@/components/EmployerDashboard";
 import { GraduationCap, Globe, Users, CheckCircle, ArrowRight, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 
-type ViewState = "landing" | "login" | "student" | "employer";
+type ViewState = "landing" | "login" | "student-auth" | "student" | "employer";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>("landing");
@@ -45,10 +46,14 @@ const Index = () => {
     }
   ];
 
+  if (currentView === "student-auth") {
+    return <StudentLoginRegister onBack={() => setCurrentView("landing")} />;
+  }
+
   if (currentView === "login") {
     return (
       <LoginSelection
-        onStudentLogin={() => setCurrentView("student")}
+        onStudentLogin={() => setCurrentView("student-auth")}
         onEmployerLogin={() => setCurrentView("employer")}
       />
     );
@@ -75,7 +80,7 @@ const Index = () => {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setCurrentView("student")} variant="outline" size="sm">
+              <Button onClick={() => setCurrentView("student-auth")} variant="outline" size="sm">
                 Student Login
               </Button>
               <Button onClick={() => setCurrentView("employer")} variant="hero" size="sm">
@@ -108,7 +113,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={() => setCurrentView("login")}
+              onClick={() => setCurrentView("student-auth")}
               className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8 py-3 h-auto"
             >
               Start Your Journey
@@ -201,7 +206,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => setCurrentView("login")}
+              onClick={() => setCurrentView("student-auth")}
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-lg px-8 py-3 h-auto"
             >
               Apply Now
