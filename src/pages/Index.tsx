@@ -75,9 +75,14 @@ const Index = () => {
                 GlobalEdu Consultancy
               </span>
             </div>
-            <Button onClick={() => setCurrentView("login")} variant="hero">
-              Get Started
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => setCurrentView("student")} variant="outline" size="sm">
+                Student Login
+              </Button>
+              <Button onClick={() => setCurrentView("employer")} variant="hero" size="sm">
+                Employer Login
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
