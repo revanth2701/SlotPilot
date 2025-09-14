@@ -1,16 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Building2 } from "lucide-react";
+import { GraduationCap, Building2, ArrowLeft } from "lucide-react";
 
 interface LoginSelectionProps {
   onStudentLogin: () => void;
   onEmployerLogin: () => void;
+  onBack: () => void;
 }
 
-const LoginSelection = ({ onStudentLogin, onEmployerLogin }: LoginSelectionProps) => {
+const LoginSelection = ({ onStudentLogin, onEmployerLogin, onBack }: LoginSelectionProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
+        <div className="flex justify-start mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={onBack}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </div>
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-hero bg-clip-text text-transparent">
             Welcome to GlobalEdu Consultancy

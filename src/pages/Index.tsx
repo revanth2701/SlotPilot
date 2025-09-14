@@ -50,6 +50,7 @@ const Index = () => {
       <LoginSelection
         onStudentLogin={() => setCurrentView("student")}
         onEmployerLogin={() => setCurrentView("employer")}
+        onBack={() => setCurrentView("landing")}
       />
     );
   }
