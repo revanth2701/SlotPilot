@@ -72,20 +72,44 @@ const StudentDashboardNew = ({ onBack }) => {
 
   const loadStudentData = async (email) => {
     try {
-      const { data, error } = await supabase
+      // Load basic student data
+      const { data: basicData, error: basicError } = await supabase
         .from('StudentData')
         .select('*')
         .eq('Mailid', email)
-        .single();
+        .maybeSingle();
       
-      if (data) {
-        setPersonalDetails(prev => ({
-          ...prev,
-          firstName: data['First Name'] || '',
-          lastName: data['Last Name'] || '',
-          phone: data['Contact Number']?.toString() || ''
-        }));
+      // Load detailed personal data
+      const { data: personalData, error: personalError } = await supabase
+        .from('Studentpersonaldata')
+        .select('*')
+        .eq('Email', email)
+        .maybeSingle();
+      
+      // Update state with existing data from both tables
+      setPersonalDetails(prev => ({
+        ...prev,
+        // Basic data from StudentData table
+        firstName: basicData?.['First Name'] || personalData?.['First Name'] || '',
+        lastName: basicData?.['Last Name'] || personalData?.['Last Name'] || '',
+        phone: basicData?.['Contact Number']?.toString() || personalData?.['contact Number']?.toString() || '',
+        // Detailed data from Studentpersonaldata table
+        dateOfBirth: personalData?.['Date of Birth'] || '',
+        address: personalData?.['Address'] || '',
+        emergencyContact: personalData?.['Emergency Contact Name'] || '',
+        emergencyPhone: personalData?.['Emergency Contact Number']?.toString() || '',
+        passportNumber: personalData?.['Passport Number'] || '',
+        passportIssuedDate: personalData?.['Issued Date'] || '',
+        passportExpiryDate: personalData?.['Expiry Date'] || ''
+      }));
+      
+      if (personalData || basicData) {
+        toast({ 
+          title: "Welcome back!", 
+          description: "Your existing details have been loaded automatically." 
+        });
       }
+      
     } catch (error) {
       console.log('No existing student data found');
     }
