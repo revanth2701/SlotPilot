@@ -115,7 +115,7 @@ const Index = () => {
             Transform your academic dreams into reality with expert guidance for Masters programs 
             in USA, UK, Canada, Ireland, Germany, and Australia.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button 
               size="lg" 
               onClick={() => setCurrentView("student-auth")}
@@ -123,13 +123,6 @@ const Index = () => {
             >
               Start Your Journey
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary text-lg px-8 py-3 h-auto"
-            >
-              Learn More
             </Button>
           </div>
         </div>
