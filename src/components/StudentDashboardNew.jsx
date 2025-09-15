@@ -91,7 +91,7 @@ const StudentDashboardNew = ({ onBack }) => {
   const savePersonalDetails = async () => {
     try {
       const { error } = await supabase
-        .from('Sstudentpersonaldata')
+        .from('Studentpersonaldata')
         .upsert([
           {
             'First Name': personalDetails.firstName,

@@ -62,6 +62,48 @@ export type Database = {
         }
         Relationships: []
       }
+      Studentpersonaldata: {
+        Row: {
+          Address: string
+          "contact Number": number
+          "Date of Birth": string
+          Email: string
+          "Emergency Contact Name": string | null
+          "Emergency Contact Number": number
+          "Expiry Date": string
+          "First Name": string
+          "Issued Date": string
+          "Last Name": string
+          "Passport Number": string
+        }
+        Insert: {
+          Address: string
+          "contact Number": number
+          "Date of Birth": string
+          Email: string
+          "Emergency Contact Name"?: string | null
+          "Emergency Contact Number": number
+          "Expiry Date": string
+          "First Name": string
+          "Issued Date": string
+          "Last Name": string
+          "Passport Number": string
+        }
+        Update: {
+          Address?: string
+          "contact Number"?: number
+          "Date of Birth"?: string
+          Email?: string
+          "Emergency Contact Name"?: string | null
+          "Emergency Contact Number"?: number
+          "Expiry Date"?: string
+          "First Name"?: string
+          "Issued Date"?: string
+          "Last Name"?: string
+          "Passport Number"?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
