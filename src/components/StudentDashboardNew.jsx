@@ -191,40 +191,112 @@ const StudentDashboardNew = ({ onBack }) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Check if personal details are filled
+    if (!personalDetails.firstName || !personalDetails.lastName) {
+      toast({ 
+        title: "Missing Information", 
+        description: "Please fill in your first name and last name before uploading documents.",
+        variant: "destructive" 
+      });
+      return;
+    }
+
     setUploading(true);
     try {
-      // For now, just simulate upload - in real app you'd upload to Supabase Storage
-      const newDocument = {
-        id: Date.now(),
-        name: file.name,
-        type: documentType,
-        status: 'uploaded',
-        uploadDate: new Date().toLocaleDateString()
+      // Convert file to base64
+      const fileReader = new FileReader();
+      fileReader.onload = async (e) => {
+        const base64Content = e.target.result.split(',')[1]; // Remove data:... prefix
+
+        try {
+          // Upload to Google Drive via edge function
+          const { data, error } = await supabase.functions.invoke('upload-to-drive', {
+            body: {
+              fileName: file.name,
+              fileContent: base64Content,
+              mimeType: file.type,
+              documentType: documentType,
+              studentFirstName: personalDetails.firstName,
+              studentLastName: personalDetails.lastName,
+              studentEmail: personalDetails.email
+            }
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Create document record for UI
+          const newDocument = {
+            id: data.fileId || Date.now(),
+            name: file.name,
+            type: documentType,
+            status: 'uploaded',
+            uploadDate: new Date().toLocaleDateString(),
+            driveFileId: data.fileId,
+            driveFolderId: data.folderId,
+            folderName: data.folderName
+          };
+          
+          // Map display names to keys
+          const typeKey = {
+            'Passport': 'passport',
+            'Graduation Certificate': 'graduation',
+            'Academic Transcripts': 'transcripts',
+            'IELTS/TOEFL Score': 'ielts',
+            'Statement of Purpose': 'sop',
+            'CV/Resume': 'cv',
+            'Letter of Recommendation': 'lor'
+          }[documentType] || 'other';
+          
+          setDocumentsByType(prev => ({
+            ...prev,
+            [typeKey]: [...prev[typeKey], newDocument]
+          }));
+          
+          toast({ 
+            title: "Success", 
+            description: `${documentType} uploaded successfully to Google Drive!`,
+            duration: 5000
+          });
+
+        } catch (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast({ 
+            title: "Upload Failed", 
+            description: uploadError.message || "Failed to upload document to Google Drive",
+            variant: "destructive" 
+          });
+        } finally {
+          setUploading(false);
+          // Reset file input
+          event.target.value = '';
+        }
       };
-      
-      // Map display names to keys
-      const typeKey = {
-        'Passport': 'passport',
-        'Graduation Certificate': 'graduation',
-        'Academic Transcripts': 'transcripts',
-        'IELTS/TOEFL Score': 'ielts',
-        'Statement of Purpose': 'sop',
-        'CV/Resume': 'cv',
-        'Letter of Recommendation': 'lor'
-      }[documentType] || 'other';
-      
-      setDocumentsByType(prev => ({
-        ...prev,
-        [typeKey]: [...prev[typeKey], newDocument]
-      }));
-      
-      toast({ title: "Success", description: `${documentType} uploaded successfully!` });
+
+      fileReader.onerror = () => {
+        toast({ 
+          title: "Error", 
+          description: "Failed to read file", 
+          variant: "destructive" 
+        });
+        setUploading(false);
+      };
+
+      fileReader.readAsDataURL(file);
+
     } catch (error) {
-      toast({ title: "Error", description: "Failed to upload document", variant: "destructive" });
-    } finally {
+      console.error('File reading error:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to process file", 
+        variant: "destructive" 
+      });
       setUploading(false);
-      // Reset file input
-      event.target.value = '';
     }
   };
 
