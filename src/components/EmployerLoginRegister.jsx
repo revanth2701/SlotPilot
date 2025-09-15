@@ -5,17 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Mail, Lock } from "lucide-react";
 
-interface EmployerLoginRegisterProps {
-  onBack: () => void;
-}
-
-const EmployerLoginRegister = ({ onBack }: EmployerLoginRegisterProps) => {
+const EmployerLoginRegister = ({ onBack }) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     // TODO: Implement login logic with Supabase
     console.log("Employer Login:", loginData);

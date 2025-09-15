@@ -11,10 +11,8 @@ import JourneyForm from "@/components/JourneyForm";
 import { GraduationCap, Globe, Users, CheckCircle, ArrowRight, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 
-type ViewState = "landing" | "login" | "student-auth" | "employer-auth" | "student" | "employer" | "journey";
-
 const Index = () => {
-  const [currentView, setCurrentView] = useState<ViewState>("landing");
+  const [currentView, setCurrentView] = useState("landing");
 
   const countries = [
     { name: "United States", flag: "🇺🇸", universities: "500+" },

@@ -8,21 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, ArrowLeft, Save } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-interface EducationDetail {
-  id: string;
-  qualification: string;
-  collegeName: string;
-  branch: string;
-  fromYear: string;
-  toYear: string;
-  cgpaPercentage: string;
-}
-
-interface StudentDashboardProps {
-  onBack: () => void;
-}
-
-const StudentDashboard = ({ onBack }: StudentDashboardProps) => {
+const StudentDashboard = ({ onBack }) => {
   const [personalDetails, setPersonalDetails] = useState({
     fullName: "",
     email: "",
@@ -31,7 +17,7 @@ const StudentDashboard = ({ onBack }: StudentDashboardProps) => {
     aadhaarNumber: ""
   });
 
-  const [educationDetails, setEducationDetails] = useState<EducationDetail[]>([
+  const [educationDetails, setEducationDetails] = useState([
     {
       id: "1",
       qualification: "",
@@ -44,7 +30,7 @@ const StudentDashboard = ({ onBack }: StudentDashboardProps) => {
   ]);
 
   const addEducation = () => {
-    const newEducation: EducationDetail = {
+    const newEducation = {
       id: Date.now().toString(),
       qualification: "",
       collegeName: "",
@@ -56,13 +42,13 @@ const StudentDashboard = ({ onBack }: StudentDashboardProps) => {
     setEducationDetails([...educationDetails, newEducation]);
   };
 
-  const removeEducation = (id: string) => {
+  const removeEducation = (id) => {
     if (educationDetails.length > 1) {
       setEducationDetails(educationDetails.filter(edu => edu.id !== id));
     }
   };
 
-  const updateEducation = (id: string, field: string, value: string) => {
+  const updateEducation = (id, field, value) => {
     setEducationDetails(educationDetails.map(edu => 
       edu.id === id ? { ...edu, [field]: value } : edu
     ));

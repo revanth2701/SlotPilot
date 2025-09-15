@@ -2,12 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Building2 } from "lucide-react";
 
-interface LoginSelectionProps {
-  onStudentLogin: () => void;
-  onEmployerLogin: () => void;
-}
-
-const LoginSelection = ({ onStudentLogin, onEmployerLogin }: LoginSelectionProps) => {
+const LoginSelection = ({ onStudentLogin, onEmployerLogin }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">

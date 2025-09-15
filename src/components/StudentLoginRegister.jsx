@@ -6,11 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, Mail, Lock, User, Phone, FileText, Calendar } from "lucide-react";
 
-interface StudentLoginRegisterProps {
-  onBack: () => void;
-}
-
-const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
+const StudentLoginRegister = ({ onBack }) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
@@ -28,13 +24,13 @@ const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
     confirmPassword: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     // TODO: Implement login logic with Supabase
     console.log("Login:", loginData);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = (e) => {
     e.preventDefault();
     // TODO: Implement register logic with Supabase
     console.log("Register:", registerData);

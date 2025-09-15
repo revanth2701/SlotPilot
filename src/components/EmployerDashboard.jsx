@@ -6,26 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Search, Eye, Download, Users, GraduationCap, Globe, BookOpen } from "lucide-react";
 
-interface StudentData {
-  id: string;
-  name: string;
-  email: string;
-  contact: string;
-  passport: string;
-  qualifications: string[];
-  status: "pending" | "reviewing" | "approved" | "rejected";
-  appliedDate: string;
-}
-
-interface EmployerDashboardProps {
-  onBack: () => void;
-}
-
-const EmployerDashboard = ({ onBack }: EmployerDashboardProps) => {
+const EmployerDashboard = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState("");
   
   // Mock data - In real app, this would come from Supabase
-  const studentsData: StudentData[] = [
+  const studentsData = [
     {
       id: "1",
       name: "Rajesh Kumar",
@@ -63,7 +48,7 @@ const EmployerDashboard = ({ onBack }: EmployerDashboardProps) => {
     student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800";
       case "reviewing": return "bg-blue-100 text-blue-800";

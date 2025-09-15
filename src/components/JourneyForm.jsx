@@ -7,21 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, GraduationCap } from "lucide-react";
 
-interface JourneyFormProps {
-  onBack: () => void;
-}
-
-interface ExamScore {
-  exam: string;
-  score: string;
-}
-
-const JourneyForm = ({ onBack }: JourneyFormProps) => {
+const JourneyForm = ({ onBack }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [studyLevel, setStudyLevel] = useState("");
   const [courseInterest, setCourseInterest] = useState("");
-  const [selectedExams, setSelectedExams] = useState<string[]>([]);
-  const [examScores, setExamScores] = useState<ExamScore[]>([]);
+  const [selectedExams, setSelectedExams] = useState([]);
+  const [examScores, setExamScores] = useState([]);
 
   const countries = [
     "United States", "United Kingdom", "Canada", "Australia", "Germany", "Ireland"
@@ -31,7 +22,7 @@ const JourneyForm = ({ onBack }: JourneyFormProps) => {
     "IELTS", "TOEFL", "GRE", "GMAT", "SAT", "ACT", "PTE", "Duolingo"
   ];
 
-  const handleExamToggle = (exam: string, checked: boolean) => {
+  const handleExamToggle = (exam, checked) => {
     if (checked) {
       setSelectedExams([...selectedExams, exam]);
       setExamScores([...examScores, { exam, score: "" }]);
@@ -41,7 +32,7 @@ const JourneyForm = ({ onBack }: JourneyFormProps) => {
     }
   };
 
-  const handleScoreChange = (exam: string, score: string) => {
+  const handleScoreChange = (exam, score) => {
     setExamScores(examScores.map(examScore => 
       examScore.exam === exam ? { ...examScore, score } : examScore
     ));
@@ -150,7 +141,7 @@ const JourneyForm = ({ onBack }: JourneyFormProps) => {
                       <Checkbox
                         id={exam}
                         checked={selectedExams.includes(exam)}
-                        onCheckedChange={(checked) => handleExamToggle(exam, checked as boolean)}
+                        onCheckedChange={(checked) => handleExamToggle(exam, checked)}
                       />
                       <Label htmlFor={exam} className="font-medium">{exam}</Label>
                     </div>
