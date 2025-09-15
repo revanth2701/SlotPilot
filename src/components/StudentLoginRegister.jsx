@@ -51,18 +51,55 @@ const StudentLoginRegister = ({ onBack }) => {
       return;
     }
     setRegisterLoading(true);
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signUp({
-      email: registerData.email,
-      password: registerData.password,
-      options: { emailRedirectTo: redirectUrl }
-    });
-    if (error) {
-      toast({ title: "Registration failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Check your email", description: "We sent a confirmation link to finish sign up." });
+    
+    try {
+      // First create the auth user
+      const redirectUrl = `${window.location.origin}/`;
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: registerData.email,
+        password: registerData.password,
+        options: { emailRedirectTo: redirectUrl }
+      });
+
+      if (authError) {
+        toast({ title: "Registration failed", description: authError.message, variant: "destructive" });
+        return;
+      }
+
+      // Then save student data to StudentData table
+      const { error: dataError } = await supabase
+        .from('StudentData')
+        .insert([
+          {
+            'First Name': registerData.firstName,
+            'Last Name': registerData.surname,
+            'Mailid': registerData.email,
+            'Contact Number': parseInt(registerData.contactNumber),
+            'Passport Number': registerData.passportNumber,
+            'Passport Issued Date': registerData.passportIssuedDate,
+            'Passport Expiry Date': registerData.passportExpiryDate,
+            'dtCreatedon': new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
+            'Registrationid': Date.now() // Using timestamp as registration ID
+          }
+        ]);
+
+      if (dataError) {
+        console.error('Error saving student data:', dataError);
+        toast({ 
+          title: "Registration successful", 
+          description: "Check your email to confirm. Note: Some profile data may need to be re-entered.",
+          variant: "default"
+        });
+      } else {
+        toast({ title: "Registration successful", description: "Check your email to confirm your account." });
+      }
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({ title: "Registration failed", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setRegisterLoading(false);
     }
-    setRegisterLoading(false);
   };
 
   return (
