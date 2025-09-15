@@ -34,7 +34,10 @@ const StudentDashboardNew = ({ onBack }) => {
     nationality: "",
     address: "",
     emergencyContact: "",
-    emergencyPhone: ""
+    emergencyPhone: "",
+    passportNumber: "",
+    passportIssuedDate: "",
+    passportExpiryDate: ""
   });
   const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -96,9 +99,6 @@ const StudentDashboardNew = ({ onBack }) => {
             'Last Name': personalDetails.lastName,
             'Mailid': personalDetails.email,
             'Contact Number': parseInt(personalDetails.phone) || 0,
-            'Passport Number': '', // Will be filled later
-            'Passport Issued Date': '2025-01-01',
-            'Passport Expiry Date': '2035-01-01',
             'dtCreatedon': new Date().toISOString().split('T')[0],
             'Registrationid': Math.floor(Math.random() * 1000000)
           }
@@ -282,6 +282,46 @@ const StudentDashboardNew = ({ onBack }) => {
                     onChange={(e) => handlePersonalDetailsChange('address', e.target.value)}
                     placeholder="Enter your full address"
                   />
+                </div>
+
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Passport Information
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="passportNumber">Passport Number</Label>
+                    <Input
+                      id="passportNumber"
+                      value={personalDetails.passportNumber}
+                      onChange={(e) => handlePersonalDetailsChange('passportNumber', e.target.value)}
+                      placeholder="Enter your passport number"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="passportIssuedDate">Passport Issued Date</Label>
+                      <Input
+                        id="passportIssuedDate"
+                        type="date"
+                        value={personalDetails.passportIssuedDate}
+                        onChange={(e) => handlePersonalDetailsChange('passportIssuedDate', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="passportExpiryDate">Passport Expiry Date</Label>
+                      <Input
+                        id="passportExpiryDate"
+                        type="date"
+                        value={personalDetails.passportExpiryDate}
+                        onChange={(e) => handlePersonalDetailsChange('passportExpiryDate', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <Separator />

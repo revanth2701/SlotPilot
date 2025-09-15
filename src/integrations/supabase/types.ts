@@ -42,9 +42,6 @@ export type Database = {
           "First Name": string
           "Last Name": string
           Mailid: string
-          "Passport Expiry Date": string
-          "Passport Issued Date": string
-          "Passport Number": string
           Registrationid: number
         }
         Insert: {
@@ -53,9 +50,6 @@ export type Database = {
           "First Name": string
           "Last Name": string
           Mailid?: string
-          "Passport Expiry Date": string
-          "Passport Issued Date": string
-          "Passport Number": string
           Registrationid?: number
         }
         Update: {
@@ -64,9 +58,6 @@ export type Database = {
           "First Name"?: string
           "Last Name"?: string
           Mailid?: string
-          "Passport Expiry Date"?: string
-          "Passport Issued Date"?: string
-          "Passport Number"?: string
           Registrationid?: number
         }
         Relationships: []

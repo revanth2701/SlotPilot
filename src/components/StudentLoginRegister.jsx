@@ -19,9 +19,6 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
     surname: "",
     email: "",
     contactNumber: "",
-    passportNumber: "",
-    passportIssuedDate: "",
-    passportExpiryDate: "",
     password: "",
     confirmPassword: ""
   });
@@ -76,9 +73,6 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
             'Last Name': registerData.surname,
             'Mailid': registerData.email,
             'Contact Number': parseInt(registerData.contactNumber),
-            'Passport Number': registerData.passportNumber,
-            'Passport Issued Date': registerData.passportIssuedDate,
-            'Passport Expiry Date': registerData.passportExpiryDate,
             'dtCreatedon': new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
             'Registrationid': Math.floor(Math.random() * 1000000) // Random ID within int range
           }
@@ -239,52 +233,6 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="register-passport">Passport Number</Label>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="register-passport"
-                        type="text"
-                        placeholder="Enter your passport number"
-                        className="pl-10"
-                        value={registerData.passportNumber}
-                        onChange={(e) => setRegisterData({ ...registerData, passportNumber: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="register-passport-issued">Passport Issued Date</Label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="register-passport-issued"
-                          type="date"
-                          className="pl-10"
-                          value={registerData.passportIssuedDate}
-                          onChange={(e) => setRegisterData({ ...registerData, passportIssuedDate: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="register-passport-expiry">Passport Expiry Date</Label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="register-passport-expiry"
-                          type="date"
-                          className="pl-10"
-                          value={registerData.passportExpiryDate}
-                          onChange={(e) => setRegisterData({ ...registerData, passportExpiryDate: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Password</Label>
