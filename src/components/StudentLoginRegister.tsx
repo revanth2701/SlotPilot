@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, Mail, Lock, User } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Phone, FileText, Calendar } from "lucide-react";
 
 interface StudentLoginRegisterProps {
   onBack: () => void;
@@ -17,8 +17,13 @@ const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
   });
 
   const [registerData, setRegisterData] = useState({
-    fullName: "",
+    firstName: "",
+    surname: "",
     email: "",
+    contactNumber: "",
+    passportNumber: "",
+    passportIssuedDate: "",
+    passportExpiryDate: "",
     password: "",
     confirmPassword: ""
   });
@@ -37,7 +42,7 @@ const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <GraduationCap className="h-8 w-8 text-primary" />
@@ -106,19 +111,36 @@ const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
               
               <TabsContent value="register">
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="register-name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        className="pl-10"
-                        value={registerData.fullName}
-                        onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
-                        required
-                      />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="register-firstname">First Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="register-firstname"
+                          type="text"
+                          placeholder="First name"
+                          className="pl-10"
+                          value={registerData.firstName}
+                          onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-surname">Surname</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="register-surname"
+                          type="text"
+                          placeholder="Surname"
+                          className="pl-10"
+                          value={registerData.surname}
+                          onChange={(e) => setRegisterData({ ...registerData, surname: e.target.value })}
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
                   
@@ -135,6 +157,69 @@ const StudentLoginRegister = ({ onBack }: StudentLoginRegisterProps) => {
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                         required
                       />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-contact">Contact Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="register-contact"
+                        type="tel"
+                        placeholder="Enter your contact number"
+                        className="pl-10"
+                        value={registerData.contactNumber}
+                        onChange={(e) => setRegisterData({ ...registerData, contactNumber: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-passport">Passport Number</Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="register-passport"
+                        type="text"
+                        placeholder="Enter your passport number"
+                        className="pl-10"
+                        value={registerData.passportNumber}
+                        onChange={(e) => setRegisterData({ ...registerData, passportNumber: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="register-passport-issued">Passport Issued Date</Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="register-passport-issued"
+                          type="date"
+                          className="pl-10"
+                          value={registerData.passportIssuedDate}
+                          onChange={(e) => setRegisterData({ ...registerData, passportIssuedDate: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-passport-expiry">Passport Expiry Date</Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="register-passport-expiry"
+                          type="date"
+                          className="pl-10"
+                          value={registerData.passportExpiryDate}
+                          onChange={(e) => setRegisterData({ ...registerData, passportExpiryDate: e.target.value })}
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
                   
