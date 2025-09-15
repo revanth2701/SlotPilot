@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, Mail, Lock, User, Phone, FileText, Calendar } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const StudentLoginRegister = ({ onBack }) => {
   const [loginData, setLoginData] = useState({
@@ -23,17 +25,44 @@ const StudentLoginRegister = ({ onBack }) => {
     password: "",
     confirmPassword: ""
   });
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic with Supabase
-    console.log("Login:", loginData);
+    setLoginLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginData.email,
+      password: loginData.password,
+    });
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Logged in", description: "Welcome back!" });
+    }
+    setLoginLoading(false);
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // TODO: Implement register logic with Supabase
-    console.log("Register:", registerData);
+    if (registerData.password !== registerData.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    setRegisterLoading(true);
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signUp({
+      email: registerData.email,
+      password: registerData.password,
+      options: { emailRedirectTo: redirectUrl }
+    });
+    if (error) {
+      toast({ title: "Registration failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Check your email", description: "We sent a confirmation link to finish sign up." });
+    }
+    setRegisterLoading(false);
   };
 
   return (
@@ -99,7 +128,7 @@ const StudentLoginRegister = ({ onBack }) => {
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" variant="hero">
+                  <Button type="submit" className="w-full" variant="hero" disabled={loginLoading} aria-busy={loginLoading}>
                     Sign In
                   </Button>
                 </form>
@@ -251,7 +280,7 @@ const StudentLoginRegister = ({ onBack }) => {
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" variant="hero">
+                  <Button type="submit" className="w-full" variant="hero" disabled={registerLoading} aria-busy={registerLoading}>
                     Create Account
                   </Button>
                 </form>
