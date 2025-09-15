@@ -38,7 +38,15 @@ const StudentDashboardNew = ({ onBack }) => {
     passportIssuedDate: "",
     passportExpiryDate: ""
   });
-  const [documents, setDocuments] = useState([]);
+  const [documentsByType, setDocumentsByType] = useState({
+    passport: [],
+    graduation: [],
+    transcripts: [],
+    ielts: [],
+    sop: [],
+    cv: [],
+    lor: []
+  });
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -170,17 +178,48 @@ const StudentDashboardNew = ({ onBack }) => {
         uploadDate: new Date().toLocaleDateString()
       };
       
-      setDocuments(prev => [...prev, newDocument]);
+      // Map display names to keys
+      const typeKey = {
+        'Passport': 'passport',
+        'Graduation Certificate': 'graduation',
+        'Academic Transcripts': 'transcripts',
+        'IELTS/TOEFL Score': 'ielts',
+        'Statement of Purpose': 'sop',
+        'CV/Resume': 'cv',
+        'Letter of Recommendation': 'lor'
+      }[documentType] || 'other';
+      
+      setDocumentsByType(prev => ({
+        ...prev,
+        [typeKey]: [...prev[typeKey], newDocument]
+      }));
+      
       toast({ title: "Success", description: `${documentType} uploaded successfully!` });
     } catch (error) {
       toast({ title: "Error", description: "Failed to upload document", variant: "destructive" });
     } finally {
       setUploading(false);
+      // Reset file input
+      event.target.value = '';
     }
   };
 
-  const removeDocument = (id) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id));
+  const removeDocument = (documentType, id) => {
+    const typeKey = {
+      'Passport': 'passport',
+      'Graduation Certificate': 'graduation',
+      'Academic Transcripts': 'transcripts',
+      'IELTS/TOEFL Score': 'ielts',
+      'Statement of Purpose': 'sop',
+      'CV/Resume': 'cv',
+      'Letter of Recommendation': 'lor'
+    }[documentType] || 'other';
+    
+    setDocumentsByType(prev => ({
+      ...prev,
+      [typeKey]: prev[typeKey].filter(doc => doc.id !== id)
+    }));
+    
     toast({ title: "Document removed", description: "Document has been removed" });
   };
 
@@ -407,83 +446,77 @@ const StudentDashboardNew = ({ onBack }) => {
                     Document Upload
                   </CardTitle>
                   <CardDescription>
-                    Upload the required documents for your application. All documents should be in PDF format.
+                    Upload the required documents for your application. All documents should be in PDF format. You can upload multiple documents for each category.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
                       { id: 'passport', label: 'Passport', icon: FileText },
                       { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
                       { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
                       { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
                       { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                      { id: 'cv', label: 'CV/Resume', icon: FileText }
+                      { id: 'cv', label: 'CV/Resume', icon: FileText },
+                      { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
                     ].map((docType) => (
-                      <div key={docType.id} className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
-                        <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <h3 className="font-medium mb-2">{docType.label}</h3>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.png,.jpeg"
-                          onChange={(e) => handleFileUpload(e, docType.label)}
-                          className="hidden"
-                          id={`upload-${docType.id}`}
-                          disabled={uploading}
-                        />
-                        <Label
-                          htmlFor={`upload-${docType.id}`}
-                          className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors"
-                        >
-                          <Upload className="h-4 w-4" />
-                          {uploading ? 'Uploading...' : 'Upload'}
-                        </Label>
+                      <div key={docType.id} className="space-y-3">
+                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
+                          <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                          <h3 className="font-medium mb-2">{docType.label}</h3>
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.png,.jpeg"
+                            onChange={(e) => handleFileUpload(e, docType.label)}
+                            className="hidden"
+                            id={`upload-${docType.id}`}
+                            disabled={uploading}
+                          />
+                          <Label
+                            htmlFor={`upload-${docType.id}`}
+                            className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors"
+                          >
+                            <Upload className="h-4 w-4" />
+                            {uploading ? 'Uploading...' : 'Upload'}
+                          </Label>
+                        </div>
+                        
+                        {/* Show uploaded documents for this type */}
+                        {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-muted-foreground">Uploaded Files:</h4>
+                            {documentsByType[docType.id].map((doc) => (
+                              <div key={doc.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md border">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{doc.name}</p>
+                                    <p className="text-xs text-muted-foreground">{doc.uploadDate}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Uploaded
+                                  </Badge>
+                                  <Button
+                                    onClick={() => removeDocument(docType.label, doc.id)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Uploaded Documents */}
-              {documents.length > 0 && (
-                <Card className="shadow-elegant">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      Uploaded Documents
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                              <p className="font-medium">{doc.type}</p>
-                              <p className="text-sm text-muted-foreground">{doc.name} • {doc.uploadDate}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Uploaded
-                            </Badge>
-                            <Button
-                              onClick={() => removeDocument(doc.id)}
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </TabsContent>
         </Tabs>
