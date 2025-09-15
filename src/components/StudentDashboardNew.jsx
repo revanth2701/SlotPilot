@@ -31,7 +31,6 @@ const StudentDashboardNew = ({ onBack }) => {
     email: "",
     phone: "",
     dateOfBirth: "",
-    nationality: "",
     address: "",
     emergencyContact: "",
     emergencyPhone: "",
@@ -92,15 +91,20 @@ const StudentDashboardNew = ({ onBack }) => {
   const savePersonalDetails = async () => {
     try {
       const { error } = await supabase
-        .from('StudentData')
+        .from('Sstudentpersonaldata')
         .upsert([
           {
             'First Name': personalDetails.firstName,
             'Last Name': personalDetails.lastName,
-            'Mailid': personalDetails.email,
-            'Contact Number': parseInt(personalDetails.phone) || 0,
-            'dtCreatedon': new Date().toISOString().split('T')[0],
-            'Registrationid': Math.floor(Math.random() * 1000000)
+            'Email': personalDetails.email,
+            'contact Number': parseInt(personalDetails.phone) || 0,
+            'Date of Birth': personalDetails.dateOfBirth,
+            'Address': personalDetails.address,
+            'Emergency Contact Name': personalDetails.emergencyContact,
+            'Emergency Contact Number': parseInt(personalDetails.emergencyPhone) || 0,
+            'Passport Number': personalDetails.passportNumber,
+            'Issued Date': personalDetails.passportIssuedDate,
+            'Expiry Date': personalDetails.passportExpiryDate
           }
         ]);
 
@@ -253,25 +257,14 @@ const StudentDashboardNew = ({ onBack }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      value={personalDetails.dateOfBirth}
-                      onChange={(e) => handlePersonalDetailsChange('dateOfBirth', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="nationality">Nationality</Label>
-                    <Input
-                      id="nationality"
-                      value={personalDetails.nationality}
-                      onChange={(e) => handlePersonalDetailsChange('nationality', e.target.value)}
-                      placeholder="Enter your nationality"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={personalDetails.dateOfBirth}
+                    onChange={(e) => handlePersonalDetailsChange('dateOfBirth', e.target.value)}
+                  />
                 </div>
 
                 <div className="space-y-2">
