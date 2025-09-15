@@ -7,10 +7,11 @@ import StudentLoginRegister from "@/components/StudentLoginRegister";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import StudentDashboard from "@/components/StudentDashboard";
 import EmployerDashboard from "@/components/EmployerDashboard";
+import JourneyForm from "@/components/JourneyForm";
 import { GraduationCap, Globe, Users, CheckCircle, ArrowRight, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 
-type ViewState = "landing" | "login" | "student-auth" | "employer-auth" | "student" | "employer";
+type ViewState = "landing" | "login" | "student-auth" | "employer-auth" | "student" | "employer" | "journey";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>("landing");
@@ -72,6 +73,10 @@ const Index = () => {
     return <EmployerDashboard onBack={() => setCurrentView("login")} />;
   }
 
+  if (currentView === "journey") {
+    return <JourneyForm onBack={() => setCurrentView("landing")} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -118,7 +123,7 @@ const Index = () => {
           <div className="flex justify-center">
             <Button 
               size="lg" 
-              onClick={() => setCurrentView("student-auth")}
+              onClick={() => setCurrentView("journey")}
               className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8 py-3 h-auto"
             >
               Start Your Journey
@@ -211,8 +216,7 @@ const Index = () => {
             </Button>
             <Button 
               size="lg" 
-              variant="outline"
-              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary text-lg px-8 py-3 h-auto"
+              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-lg px-8 py-3 h-auto"
             >
               Schedule Consultation
             </Button>
