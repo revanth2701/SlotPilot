@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import LoginSelection from "@/components/LoginSelection";
 import StudentLoginRegister from "@/components/StudentLoginRegister";
+import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import StudentDashboard from "@/components/StudentDashboard";
 import EmployerDashboard from "@/components/EmployerDashboard";
 import { GraduationCap, Globe, Users, CheckCircle, ArrowRight, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 
-type ViewState = "landing" | "login" | "student-auth" | "student" | "employer";
+type ViewState = "landing" | "login" | "student-auth" | "employer-auth" | "student" | "employer";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>("landing");
@@ -50,6 +51,10 @@ const Index = () => {
     return <StudentLoginRegister onBack={() => setCurrentView("landing")} />;
   }
 
+  if (currentView === "employer-auth") {
+    return <EmployerLoginRegister onBack={() => setCurrentView("landing")} />;
+  }
+
   if (currentView === "login") {
     return (
       <LoginSelection
@@ -83,7 +88,7 @@ const Index = () => {
               <Button onClick={() => setCurrentView("student-auth")} variant="outline" size="sm">
                 Student Login
               </Button>
-              <Button onClick={() => setCurrentView("employer")} variant="hero" size="sm">
+              <Button onClick={() => setCurrentView("employer-auth")} variant="hero" size="sm">
                 Employer Login
               </Button>
             </div>
