@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import LoginSelection from "@/components/LoginSelection";
 import StudentLoginRegister from "@/components/StudentLoginRegister";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
-import StudentDashboard from "@/components/StudentDashboard";
+import StudentDashboardNew from "@/components/StudentDashboardNew";
 import EmployerDashboard from "@/components/EmployerDashboard";
 import JourneyForm from "@/components/JourneyForm";
 import { GraduationCap, Globe, Users, CheckCircle, ArrowRight, MapPin } from "lucide-react";
@@ -47,7 +47,7 @@ const Index = () => {
   ];
 
   if (currentView === "student-auth") {
-    return <StudentLoginRegister onBack={() => setCurrentView("landing")} />;
+    return <StudentLoginRegister onBack={() => setCurrentView("landing")} onLogin={() => setCurrentView("student")} />;
   }
 
   if (currentView === "employer-auth") {
@@ -64,7 +64,7 @@ const Index = () => {
   }
 
   if (currentView === "student") {
-    return <StudentDashboard onBack={() => setCurrentView("login")} />;
+    return <StudentDashboardNew onBack={() => setCurrentView("landing")} />;
   }
 
   if (currentView === "employer") {

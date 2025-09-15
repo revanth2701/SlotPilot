@@ -8,7 +8,7 @@ import { GraduationCap, Mail, Lock, User, Phone, FileText, Calendar } from "luci
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const StudentLoginRegister = ({ onBack }) => {
+const StudentLoginRegister = ({ onBack, onLogin }) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
@@ -40,6 +40,7 @@ const StudentLoginRegister = ({ onBack }) => {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Logged in", description: "Welcome back!" });
+      onLogin(); // Navigate to student dashboard
     }
     setLoginLoading(false);
   };
@@ -79,7 +80,7 @@ const StudentLoginRegister = ({ onBack }) => {
             'Passport Issued Date': registerData.passportIssuedDate,
             'Passport Expiry Date': registerData.passportExpiryDate,
             'dtCreatedon': new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-            'Registrationid': Date.now() // Using timestamp as registration ID
+            'Registrationid': Math.floor(Math.random() * 1000000) // Random ID within int range
           }
         ]);
 
