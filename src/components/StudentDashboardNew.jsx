@@ -41,6 +41,8 @@ const StudentDashboardNew = ({ onBack }) => {
   const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -89,30 +91,67 @@ const StudentDashboardNew = ({ onBack }) => {
   };
 
   const savePersonalDetails = async () => {
+    setSaving(true);
     try {
-      const { error } = await supabase
+      // Check if record exists with same email and passport number
+      const { data: existingRecord } = await supabase
         .from('Studentpersonaldata')
-        .upsert([
-          {
+        .select('*')
+        .eq('Email', personalDetails.email)
+        .eq('Passport Number', personalDetails.passportNumber)
+        .maybeSingle();
+
+      if (existingRecord) {
+        // Update existing record
+        const { error } = await supabase
+          .from('Studentpersonaldata')
+          .update({
             'First Name': personalDetails.firstName,
             'Last Name': personalDetails.lastName,
-            'Email': personalDetails.email,
             'contact Number': parseInt(personalDetails.phone) || 0,
             'Date of Birth': personalDetails.dateOfBirth,
             'Address': personalDetails.address,
             'Emergency Contact Name': personalDetails.emergencyContact,
             'Emergency Contact Number': parseInt(personalDetails.emergencyPhone) || 0,
-            'Passport Number': personalDetails.passportNumber,
             'Issued Date': personalDetails.passportIssuedDate,
             'Expiry Date': personalDetails.passportExpiryDate
-          }
-        ]);
+          })
+          .eq('Email', personalDetails.email)
+          .eq('Passport Number', personalDetails.passportNumber);
 
-      if (error) throw error;
-      toast({ title: "Success", description: "Personal details saved successfully!" });
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('Studentpersonaldata')
+          .insert([
+            {
+              'First Name': personalDetails.firstName,
+              'Last Name': personalDetails.lastName,
+              'Email': personalDetails.email,
+              'contact Number': parseInt(personalDetails.phone) || 0,
+              'Date of Birth': personalDetails.dateOfBirth,
+              'Address': personalDetails.address,
+              'Emergency Contact Name': personalDetails.emergencyContact,
+              'Emergency Contact Number': parseInt(personalDetails.emergencyPhone) || 0,
+              'Passport Number': personalDetails.passportNumber,
+              'Issued Date': personalDetails.passportIssuedDate,
+              'Expiry Date': personalDetails.passportExpiryDate
+            }
+          ]);
+
+        if (error) throw error;
+      }
+
+      // Show success message
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+      
     } catch (error) {
       console.error('Error saving details:', error);
       toast({ title: "Error", description: "Failed to save details", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -162,7 +201,7 @@ const StudentDashboardNew = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary relative">
       {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -340,8 +379,20 @@ const StudentDashboardNew = ({ onBack }) => {
                   </div>
                 </div>
 
-                <Button onClick={savePersonalDetails} className="w-full" variant="hero">
-                  Save Personal Details
+                <Button 
+                  onClick={savePersonalDetails} 
+                  className="w-full" 
+                  variant="hero"
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                      Saving...
+                    </div>
+                  ) : (
+                    'Save Personal Details'
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -437,6 +488,19 @@ const StudentDashboardNew = ({ onBack }) => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Success Message Overlay */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center">
+            <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Success!</h3>
+            <p className="text-muted-foreground">
+              Your personal details have been saved successfully.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
