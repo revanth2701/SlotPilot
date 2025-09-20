@@ -48,7 +48,7 @@ async function getAccessToken() {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientEmail,
-    scope: 'https://www.googleapis.com/auth/drive.file',
+    scope: 'https://www.googleapis.com/auth/drive',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now,
@@ -90,8 +90,9 @@ async function getAccessToken() {
 
 async function createFolder(accessToken: string, folderName: string) {
   // Check if folder exists first
+  const query = encodeURIComponent("name='" + folderName + "' and mimeType='application/vnd.google-apps.folder' and trashed=false");
   const searchResponse = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`,
     {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -117,6 +118,10 @@ async function createFolder(accessToken: string, folderName: string) {
       mimeType: 'application/vnd.google-apps.folder',
     }),
   });
+
+  if (!createResponse.ok) {
+    throw new Error(`Failed to create folder: ${await createResponse.text()}`);
+  }
 
   const folderData = await createResponse.json();
   return folderData.id;
