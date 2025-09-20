@@ -1132,9 +1132,9 @@ const StudentDashboardNew = ({ onBack }) => {
 
       {/* Document Type Selection Modal */}
       {showDocumentSelector && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-card border rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-scale-in">
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-t-xl border-b">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="bg-card border rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-scale-in">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-t-xl border-b flex-shrink-0">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Upload className="h-6 w-6 text-primary" />
@@ -1146,7 +1146,7 @@ const StudentDashboardNew = ({ onBack }) => {
               </p>
             </div>
             
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1">
               <div className="grid grid-cols-3 gap-4 mb-8">
                 {[
                   { id: 'passport', label: 'Passport', icon: FileText, color: 'bg-blue-50 border-blue-200 text-blue-700' },
@@ -1213,7 +1213,9 @@ const StudentDashboardNew = ({ onBack }) => {
                   )}
                 </div>
               </div>
+            </div>
 
+            <div className="p-6 border-t bg-muted/10 rounded-b-xl flex-shrink-0">
               <div className="flex gap-4">
                 <Button 
                   onClick={() => {
