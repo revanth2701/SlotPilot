@@ -9,85 +9,78 @@ const corsHeaders = {
 // Google Drive API helpers
 async function getAccessToken() {
   const clientEmail = Deno.env.get('GOOGLE_DRIVE_CLIENT_EMAIL');
-  const privateKey = Deno.env.get('GOOGLE_DRIVE_PRIVATE_KEY');
+  const privateKeyPem = Deno.env.get('GOOGLE_DRIVE_PRIVATE_KEY');
   
-  if (!clientEmail || !privateKey) {
+  if (!clientEmail || !privateKeyPem) {
     throw new Error('Google Drive credentials not configured');
   }
 
   console.log('Creating JWT for Google Drive authentication...');
-  
-  // Create proper JWT for Google Service Account
+
+  // Helpers
+  const encoder = new TextEncoder();
+  const base64UrlEncode = (bytes: Uint8Array) => {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  };
+  const importPrivateKey = async (pem: string) => {
+    // Normalize PEM and extract base64
+    const pemBody = pem
+      .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+      .replace(/-----END PRIVATE KEY-----/g, '')
+      .replace(/\r?\n|\\n/g, '')
+      .trim();
+    const derBinary = atob(pemBody);
+    const derBytes = new Uint8Array(derBinary.length);
+    for (let i = 0; i < derBinary.length; i++) derBytes[i] = derBinary.charCodeAt(i);
+    return await crypto.subtle.importKey(
+      'pkcs8',
+      derBytes.buffer,
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+  };
+
+  // JWT header & payload
+  const header = { alg: 'RS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
-  
-  // JWT Header
-  const header = {
-    "alg": "RS256",
-    "typ": "JWT"
-  };
-  
-  // JWT Payload
   const payload = {
-    "iss": clientEmail,
-    "scope": "https://www.googleapis.com/auth/drive.file",
-    "aud": "https://oauth2.googleapis.com/token", 
-    "exp": now + 3600,
-    "iat": now
+    iss: clientEmail,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
   };
 
-  // Encode header and payload
-  const encodedHeader = btoa(JSON.stringify(header))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-    
-  const encodedPayload = btoa(JSON.stringify(payload))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  const headerB64 = base64UrlEncode(encoder.encode(JSON.stringify(header)));
+  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(payload)));
+  const signingInput = `${headerB64}.${payloadB64}`;
 
-  // Create the assertion (we'll use a different approach since we can't sign RSA256 easily in Deno)
-  const assertion = `${encodedHeader}.${encodedPayload}`;
-  
+  // Sign with RSA-SHA256
+  const key = await importPrivateKey(privateKeyPem);
+  const signature = new Uint8Array(
+    await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(signingInput))
+  );
+  const signatureB64 = base64UrlEncode(signature);
+  const assertion = `${signingInput}.${signatureB64}`;
+
   console.log('Making token request to Google OAuth2...');
-  
-  // Use the correct JWT assertion flow for service accounts
+
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      'assertion': assertion
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
     }),
   });
 
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
     console.error('Token request failed:', errorText);
-    
-    // Fallback: Try using the service account directly (alternative approach)
-    console.log('Trying alternative authentication approach...');
-    
-    const altResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        'grant_type': 'refresh_token',
-        'client_id': clientEmail,
-        'client_secret': privateKey.replace(/\\n/g, '\n'),
-      }),
-    });
-    
-    if (!altResponse.ok) {
-      throw new Error(`Authentication failed: ${errorText}`);
-    }
-    
-    const altTokenData = await altResponse.json();
-    return altTokenData.access_token;
+    throw new Error(`Authentication failed: ${errorText}`);
   }
 
   const tokenData = await tokenResponse.json();
