@@ -24,23 +24,47 @@ async function getAccessToken() {
     for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
     return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
   };
-  const importPrivateKey = async (pem: string) => {
-    // Normalize PEM and extract base64
-    const pemBody = pem
-      .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-      .replace(/-----END PRIVATE KEY-----/g, '')
-      .replace(/\r?\n|\\n/g, '')
-      .trim();
-    const derBinary = atob(pemBody);
-    const derBytes = new Uint8Array(derBinary.length);
-    for (let i = 0; i < derBinary.length; i++) derBytes[i] = derBinary.charCodeAt(i);
-    return await crypto.subtle.importKey(
-      'pkcs8',
-      derBytes.buffer,
-      { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } },
-      false,
-      ['sign']
-    );
+  const importPrivateKey = async (keyData: string) => {
+    try {
+      let pemBody: string;
+      
+      // Check if it's base64 encoded first
+      if (!keyData.includes('-----BEGIN')) {
+        // It's base64 encoded, decode it first
+        pemBody = atob(keyData);
+      } else {
+        // It's already in PEM format
+        pemBody = keyData;
+      }
+      
+      // Extract base64 content from PEM
+      const base64Content = pemBody
+        .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+        .replace(/-----END PRIVATE KEY-----/g, '')
+        .replace(/-----BEGIN RSA PRIVATE KEY-----/g, '')
+        .replace(/-----END RSA PRIVATE KEY-----/g, '')
+        .replace(/\r?\n|\\n|\s/g, '')
+        .trim();
+      
+      // Convert to binary
+      const derBinary = atob(base64Content);
+      const derBytes = new Uint8Array(derBinary.length);
+      for (let i = 0; i < derBinary.length; i++) {
+        derBytes[i] = derBinary.charCodeAt(i);
+      }
+      
+      return await crypto.subtle.importKey(
+        'pkcs8',
+        derBytes.buffer,
+        { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } },
+        false,
+        ['sign']
+      );
+    } catch (error) {
+      console.error('Private key import failed:', error);
+      console.error('Key format received:', keyData.substring(0, 100) + '...');
+      throw new Error(`Invalid private key format: ${error.message}`);
+    }
   };
 
   // JWT header & payload
