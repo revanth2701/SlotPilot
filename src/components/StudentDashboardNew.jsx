@@ -1132,83 +1132,108 @@ const StudentDashboardNew = ({ onBack }) => {
 
       {/* Document Type Selection Modal */}
       {showDocumentSelector && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-lg mx-4">
-            <div className="flex items-center gap-2 mb-6">
-              <Upload className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-bold">Select Documents to Re-upload</h2>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              Choose which document categories you want to re-upload. You can select one or multiple categories.
-            </p>
-            
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              {[
-                { id: 'passport', label: 'Passport', icon: FileText },
-                { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
-                { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
-                { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
-                { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                { id: 'cv', label: 'CV/Resume', icon: FileText },
-                { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
-                { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
-                { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
-              ].map((docType) => (
-                <div 
-                  key={docType.id} 
-                  className={`flex flex-col items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all min-h-[120px] ${
-                    selectedDocumentTypes.includes(docType.id) 
-                      ? 'border-primary bg-primary/5 shadow-md' 
-                      : 'border-muted hover:border-primary/50 hover:shadow-sm'
-                  }`}
-                  onClick={() => handleDocumentTypeToggle(docType)}
-                >
-                  <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
-                    selectedDocumentTypes.includes(docType.id) 
-                      ? 'border-primary bg-primary' 
-                      : 'border-muted-foreground'
-                  }`}>
-                    {selectedDocumentTypes.includes(docType.id) && (
-                      <CheckCircle className="h-4 w-4 text-white" />
-                    )}
-                  </div>
-                  <docType.icon className="h-6 w-6 text-muted-foreground" />
-                  <span className="font-medium text-center text-sm leading-tight">{docType.label}</span>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-card border rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-scale-in">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-t-xl border-b">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Upload className="h-6 w-6 text-primary" />
                 </div>
-              ))}
+                <h2 className="text-2xl font-bold text-foreground">Select Documents to Re-upload</h2>
+              </div>
+              <p className="text-muted-foreground">
+                Choose which document categories you want to re-upload. You can select multiple categories and update them individually.
+              </p>
             </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {[
+                  { id: 'passport', label: 'Passport', icon: FileText, color: 'bg-blue-50 border-blue-200 text-blue-700' },
+                  { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap, color: 'bg-green-50 border-green-200 text-green-700' },
+                  { id: 'transcripts', label: 'Academic Transcripts', icon: FileText, color: 'bg-purple-50 border-purple-200 text-purple-700' },
+                  { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText, color: 'bg-orange-50 border-orange-200 text-orange-700' },
+                  { id: 'sop', label: 'Statement of Purpose', icon: FileText, color: 'bg-pink-50 border-pink-200 text-pink-700' },
+                  { id: 'cv', label: 'CV/Resume', icon: FileText, color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+                  { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText, color: 'bg-teal-50 border-teal-200 text-teal-700' },
+                  { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText, color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
+                  { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText, color: 'bg-red-50 border-red-200 text-red-700' }
+                ].map((docType) => (
+                  <div 
+                    key={docType.id} 
+                    className={`group relative flex flex-col items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 min-h-[140px] hover:shadow-lg hover:scale-105 ${
+                      selectedDocumentTypes.includes(docType.id) 
+                        ? 'border-primary bg-primary/5 shadow-md ring-2 ring-primary/20' 
+                        : 'border-muted hover:border-primary/30 hover:bg-muted/30'
+                    }`}
+                    onClick={() => handleDocumentTypeToggle(docType)}
+                  >
+                    {selectedDocumentTypes.includes(docType.id) && (
+                      <div className="absolute -top-2 -right-2 bg-primary rounded-full p-1 shadow-lg">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    
+                    <div className={`p-3 rounded-lg ${docType.color} group-hover:scale-110 transition-transform duration-200`}>
+                      <docType.icon className="h-6 w-6" />
+                    </div>
+                    
+                    <span className="font-medium text-center text-sm leading-tight px-2">{docType.label}</span>
+                    
+                    <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      selectedDocumentTypes.includes(docType.id) 
+                        ? 'border-primary bg-primary scale-110' 
+                        : 'border-muted-foreground group-hover:border-primary'
+                    }`}>
+                      {selectedDocumentTypes.includes(docType.id) && (
+                        <div className="w-2 h-2 bg-white rounded-full" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            <div className="flex items-center justify-between mb-6">
-              <Button 
-                onClick={handleSelectAllDocuments}
-                variant="outline" 
-                size="sm"
-              >
-                Select All
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {selectedDocumentTypes.length} document(s) selected
-              </span>
-            </div>
+              <div className="flex items-center justify-between mb-6 p-4 bg-muted/30 rounded-lg">
+                <Button 
+                  onClick={handleSelectAllDocuments}
+                  variant="outline" 
+                  size="sm"
+                  className="hover:bg-primary hover:text-white transition-colors"
+                >
+                  Select All Documents
+                </Button>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedDocumentTypes.length} document(s) selected
+                  </span>
+                  {selectedDocumentTypes.length > 0 && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      {selectedDocumentTypes.length}
+                    </Badge>
+                  )}
+                </div>
+              </div>
 
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => {
-                  setShowDocumentSelector(false);
-                  setSelectedDocumentTypes([]);
-                }}
-                variant="outline" 
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleConfirmReupload}
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={selectedDocumentTypes.length === 0}
-              >
-                Enable Re-upload
-              </Button>
+              <div className="flex gap-4">
+                <Button 
+                  onClick={() => {
+                    setShowDocumentSelector(false);
+                    setSelectedDocumentTypes([]);
+                  }}
+                  variant="outline" 
+                  className="flex-1 hover:bg-muted"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleConfirmReupload}
+                  className="flex-1 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+                  disabled={selectedDocumentTypes.length === 0}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Enable Re-upload ({selectedDocumentTypes.length})
+                </Button>
+              </div>
             </div>
           </div>
         </div>
