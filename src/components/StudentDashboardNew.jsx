@@ -927,105 +927,107 @@ const StudentDashboardNew = ({ onBack }) => {
                    </div>
                  )}
                  
-                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     {[
-                      { id: 'passport', label: 'Passport', icon: FileText },
-                      { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
-                      { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
-                      { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
-                      { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                      { id: 'cv', label: 'CV/Resume', icon: FileText },
-                      { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
-                      { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
-                      { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
-                     ].map((docType) => (
-                       <div key={docType.id} className="space-y-3">
-                         <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
-                           // Check if this document is missing and show red border
-                           validationError && validationError.some(err => err.id === docType.id)
-                             ? 'border-red-400 bg-red-50'
-                             : uploadStatus[docType.label] === 'uploading' 
-                             ? 'border-blue-400 bg-blue-50' 
-                             : uploadStatus[docType.label] === 'success'
-                             ? 'border-green-400 bg-green-50'
-                             : uploadStatus[docType.label] === 'error'
-                             ? 'border-red-400 bg-red-50'
-                             : 'border-muted-foreground/25 hover:border-primary/50'
-                         }`}>
-                          <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                          <h3 className="font-medium mb-2">{docType.label}</h3>
-                          
-                          {/* Upload Status Indicator */}
-                          {uploadStatus[docType.label] && (
-                            <div className="mb-2">
-                              {uploadStatus[docType.label] === 'uploading' && (
-                                <div className="flex items-center justify-center gap-2 text-blue-600">
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                  <span className="text-sm">Uploading...</span>
-                                </div>
-                              )}
-                              {uploadStatus[docType.label] === 'success' && (
-                                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <CardContent className="space-y-6">
+                   <div className="space-y-4">
+                      {[
+                       { id: 'passport', label: 'Passport', icon: FileText },
+                       { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
+                       { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
+                       { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
+                       { id: 'sop', label: 'Statement of Purpose', icon: FileText },
+                       { id: 'cv', label: 'CV/Resume', icon: FileText },
+                       { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
+                       { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
+                       { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
+                      ].map((docType) => (
+                        <div key={docType.id} className="space-y-3">
+                          <div className={`border-2 border-dashed rounded-lg p-4 flex items-center gap-4 transition-all ${
+                            // Check if this document is missing and show red border
+                            validationError && validationError.some(err => err.id === docType.id)
+                              ? 'border-red-400 bg-red-50'
+                              : uploadStatus[docType.label] === 'uploading' 
+                              ? 'border-blue-400 bg-blue-50' 
+                              : uploadStatus[docType.label] === 'success'
+                              ? 'border-green-400 bg-green-50'
+                              : uploadStatus[docType.label] === 'error'
+                              ? 'border-red-400 bg-red-50'
+                              : 'border-muted-foreground/25 hover:border-primary/50'
+                          }`}>
+                           <docType.icon className="h-8 w-8 text-muted-foreground flex-shrink-0" />
+                           <div className="flex-1">
+                             <h3 className="font-medium mb-2">{docType.label}</h3>
+                           
+                           {/* Upload Status Indicator */}
+                           {uploadStatus[docType.label] && (
+                             <div className="mb-2">
+                               {uploadStatus[docType.label] === 'uploading' && (
+                                 <div className="flex items-center gap-2 text-blue-600">
+                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                   <span className="text-sm">Uploading...</span>
+                                 </div>
+                               )}
+                               {uploadStatus[docType.label] === 'success' && (
+                                 <div className="flex items-center gap-2 text-green-600">
+                                   <CheckCircle className="h-4 w-4" />
+                                   <span className="text-sm">Upload Complete!</span>
+                                 </div>
+                               )}
+                               {uploadStatus[docType.label] === 'error' && (
+                                 <div className="flex items-center gap-2 text-red-600">
+                                   <X className="h-4 w-4" />
+                                   <span className="text-sm">Upload Failed</span>
+                                 </div>
+                               )}
+                             </div>
+                           )}
+                           </div>
+                           
+                            <input
+                             type="file"
+                             accept=".pdf,.jpg,.png,.jpeg"
+                             onChange={(e) => handleFileUpload(e, docType.label)}
+                             className="hidden"
+                             id={`upload-${docType.id}`}
+                             disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))}
+                           />
+                            <Label
+                             htmlFor={`upload-${docType.id}`}
+                             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all flex-shrink-0 ${
+                                uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))
+                                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
+                                  : uploadStatus[docType.label] === 'success'
+                                  ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
+                                  : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
+                              }`}
+                           >
+                              {uploading[docType.label] ? (
+                               <>
+                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                 Uploading...
+                               </>
+                              ) : (applicationSubmitted && !isEditMode) ? (
+                                <>
                                   <CheckCircle className="h-4 w-4" />
-                                  <span className="text-sm">Upload Complete!</span>
-                                </div>
-                              )}
-                              {uploadStatus[docType.label] === 'error' && (
-                                <div className="flex items-center justify-center gap-2 text-red-600">
+                                  Submitted
+                                </>
+                              ) : (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id)) ? (
+                                <>
                                   <X className="h-4 w-4" />
-                                  <span className="text-sm">Upload Failed</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                           <input
-                            type="file"
-                            accept=".pdf,.jpg,.png,.jpeg"
-                            onChange={(e) => handleFileUpload(e, docType.label)}
-                            className="hidden"
-                            id={`upload-${docType.id}`}
-                            disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))}
-                          />
-                           <Label
-                            htmlFor={`upload-${docType.id}`}
-                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
-                               uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))
-                                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
-                                 : uploadStatus[docType.label] === 'success'
-                                 ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
-                                 : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-                             }`}
-                          >
-                             {uploading[docType.label] ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                                Uploading...
-                              </>
-                             ) : (applicationSubmitted && !isEditMode) ? (
+                                  Not Selected
+                                </>
+                              ) : uploadStatus[docType.label] === 'success' ? (
                                <>
                                  <CheckCircle className="h-4 w-4" />
-                                 Submitted
+                                 Upload Another
                                </>
-                             ) : (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id)) ? (
+                             ) : (
                                <>
-                                 <X className="h-4 w-4" />
-                                 Not Selected
+                                 <Upload className="h-4 w-4" />
+                                 Upload
                                </>
-                             ) : uploadStatus[docType.label] === 'success' ? (
-                              <>
-                                <CheckCircle className="h-4 w-4" />
-                                Upload Another
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="h-4 w-4" />
-                                Upload
-                              </>
-                            )}
-                          </Label>
-                        </div>
+                             )}
+                           </Label>
+                         </div>
                         
                         {/* Show uploaded documents for this type */}
                         {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
