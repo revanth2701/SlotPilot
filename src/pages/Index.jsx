@@ -1,4 +1,5 @@
 import { useState } from "react";
+import slotpilotLogo from "@/assets/slotpilot-logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,9 +83,9 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-primary" />
+              <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-8 w-8" />
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                GlobalEdu Consultancy
+                Slotpilot Consultancy
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -227,13 +228,13 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <GraduationCap className="h-6 w-6 text-primary" />
+              <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-6 w-6" />
               <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                GlobalEdu Consultancy
+                Slotpilot Consultancy
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 GlobalEdu Consultancy. Empowering students worldwide.
+              © 2024 Slotpilot Consultancy. Empowering students worldwide.
             </p>
           </div>
         </div>

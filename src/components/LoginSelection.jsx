@@ -8,7 +8,7 @@ const LoginSelection = ({ onStudentLogin, onEmployerLogin }) => {
       <div className="w-full max-w-4xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-hero bg-clip-text text-transparent">
-            Welcome to GlobalEdu Consultancy
+            Welcome to Slotpilot Consultancy
           </h1>
           <p className="text-xl text-muted-foreground">
             Choose your login type to continue
@@ -23,7 +23,7 @@ const LoginSelection = ({ onStudentLogin, onEmployerLogin }) => {
               </div>
               <CardTitle className="text-2xl">Student Portal</CardTitle>
               <CardDescription className="text-lg">
-                Apply for your dream university abroad. Start your journey to global education.
+                Global Education
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">

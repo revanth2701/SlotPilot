@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import slotpilotLogo from "@/assets/slotpilot-logo.png";
 import { 
   User, 
   Mail, 
@@ -45,7 +46,9 @@ const StudentDashboardNew = ({ onBack }) => {
     ielts: [],
     sop: [],
     cv: [],
-    lor: []
+    lor1: [],
+    lor2: [],
+    lor3: []
   });
   const [uploading, setUploading] = useState({});
   const [loading, setLoading] = useState(true);
@@ -155,7 +158,9 @@ const StudentDashboardNew = ({ onBack }) => {
           ielts: [],
           sop: [],
           cv: [],
-          lor: []
+          lor1: [],
+          lor2: [],
+          lor3: []
         };
 
         documents.forEach(doc => {
@@ -167,7 +172,9 @@ const StudentDashboardNew = ({ onBack }) => {
             'IELTS/TOEFL Score': 'ielts',
             'Statement of Purpose': 'sop',
             'CV/Resume': 'cv',
-            'Letter of Recommendation': 'lor'
+            'Letter of Recommendation 1': 'lor1',
+            'Letter of Recommendation 2': 'lor2',
+            'Letter of Recommendation 3': 'lor3'
           }[doc.document_type] || 'other';
 
           // Only add if this category is empty (keeps only the latest document per category)
@@ -205,7 +212,9 @@ const StudentDashboardNew = ({ onBack }) => {
               'ielts': 'IELTS/TOEFL Score',
               'sop': 'Statement of Purpose',
               'cv': 'CV/Resume',
-              'lor': 'Letter of Recommendation'
+              'lor1': 'Letter of Recommendation 1',
+              'lor2': 'Letter of Recommendation 2',
+              'lor3': 'Letter of Recommendation 3'
             }[key];
             if (displayName) {
               uploadStatusMap[displayName] = 'success';
@@ -466,7 +475,9 @@ const StudentDashboardNew = ({ onBack }) => {
         'IELTS/TOEFL Score': 'ielts',
         'Statement of Purpose': 'sop',
         'CV/Resume': 'cv',
-        'Letter of Recommendation': 'lor'
+        'Letter of Recommendation 1': 'lor1',
+        'Letter of Recommendation 2': 'lor2',
+        'Letter of Recommendation 3': 'lor3'
       }[documentType] || 'other';
       
       setDocumentsByType(prev => ({
@@ -522,7 +533,9 @@ const StudentDashboardNew = ({ onBack }) => {
       'IELTS/TOEFL Score': 'ielts',
       'Statement of Purpose': 'sop',
       'CV/Resume': 'cv',
-      'Letter of Recommendation': 'lor'
+      'Letter of Recommendation 1': 'lor1',
+      'Letter of Recommendation 2': 'lor2',
+      'Letter of Recommendation 3': 'lor3'
     }[documentType] || 'other';
     
     setDocumentsByType(prev => ({
@@ -545,7 +558,9 @@ const StudentDashboardNew = ({ onBack }) => {
       { id: 'ielts', label: 'IELTS/TOEFL Score' },
       { id: 'sop', label: 'Statement of Purpose' },
       { id: 'cv', label: 'CV/Resume' },
-      { id: 'lor', label: 'Letter of Recommendation' }
+      { id: 'lor1', label: 'Letter of Recommendation 1' },
+      { id: 'lor2', label: 'Letter of Recommendation 2' },
+      { id: 'lor3', label: 'Letter of Recommendation 3' }
     ];
     
     // Determine which documents to validate based on mode
@@ -604,7 +619,7 @@ const StudentDashboardNew = ({ onBack }) => {
 
   const handleSelectAllDocuments = () => {
     const allDocTypes = [
-      'passport', 'graduation', 'transcripts', 'ielts', 'sop', 'cv', 'lor'
+      'passport', 'graduation', 'transcripts', 'ielts', 'sop', 'cv', 'lor1', 'lor2', 'lor3'
     ];
     setSelectedDocumentTypes(allDocTypes);
   };
@@ -654,7 +669,7 @@ const StudentDashboardNew = ({ onBack }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-primary" />
+              <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-8 w-8" />
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 Student Portal
               </span>
@@ -914,14 +929,16 @@ const StudentDashboardNew = ({ onBack }) => {
                  
                  <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[
+                     {[
                       { id: 'passport', label: 'Passport', icon: FileText },
                       { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
                       { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
                       { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
                       { id: 'sop', label: 'Statement of Purpose', icon: FileText },
                       { id: 'cv', label: 'CV/Resume', icon: FileText },
-                      { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
+                      { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
+                      { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
+                      { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
                      ].map((docType) => (
                        <div key={docType.id} className="space-y-3">
                          <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
@@ -1133,7 +1150,9 @@ const StudentDashboardNew = ({ onBack }) => {
                 { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
                 { id: 'sop', label: 'Statement of Purpose', icon: FileText },
                 { id: 'cv', label: 'CV/Resume', icon: FileText },
-                { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
+                { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
+                { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
+                { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
               ].map((docType) => (
                 <div 
                   key={docType.id} 

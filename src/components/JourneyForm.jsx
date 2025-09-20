@@ -58,7 +58,7 @@ const JourneyForm = ({ onBack }) => {
             <div className="flex items-center gap-2">
               <GraduationCap className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                GlobalEdu Consultancy
+                Slotpilot Consultancy
               </span>
             </div>
             <Button onClick={onBack} variant="outline" size="sm">
