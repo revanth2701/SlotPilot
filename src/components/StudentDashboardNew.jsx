@@ -759,8 +759,7 @@ const StudentDashboardNew = ({ onBack }) => {
                     </p>
                   </div>
                 </CardContent>
-               </Card>
-               )}
+                </Card>
             </div>
           </TabsContent>
         </Tabs>
