@@ -396,12 +396,7 @@ const StudentDashboardNew = ({ onBack }) => {
 
   const handleEditDocuments = () => {
     setIsEditMode(true);
-    setShowSuccessPopup(false); // Close the success popup
-    // Optionally switch to documents tab to show the changes
-    const documentsTab = document.querySelector('[data-value="documents"]');
-    if (documentsTab) {
-      documentsTab.click();
-    }
+    setShowSuccessPopup(false); // Close the success popup if it's open
     
     toast({ 
       title: "Edit Mode Enabled", 
@@ -628,15 +623,39 @@ const StudentDashboardNew = ({ onBack }) => {
           <TabsContent value="documents">
             <div className="space-y-6">
               <Card className="shadow-elegant">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Document Upload
-                  </CardTitle>
-                  <CardDescription>
-                    Upload the required documents for your application. All documents should be in PDF format. You can upload multiple documents for each category.
-                  </CardDescription>
-                </CardHeader>
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Upload className="h-5 w-5" />
+                     Document Upload
+                   </CardTitle>
+                   <CardDescription>
+                     Upload the required documents for your application. All documents should be in PDF format. You can upload multiple documents for each category.
+                   </CardDescription>
+                   
+                   {/* Show Edit Documents button when application is submitted but not in edit mode */}
+                   {applicationSubmitted && !isEditMode && (
+                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                           <CheckCircle className="h-5 w-5 text-green-600" />
+                           <span className="text-green-800 font-medium">Application Submitted Successfully</span>
+                         </div>
+                         <Button 
+                           onClick={handleEditDocuments}
+                           variant="outline"
+                           size="sm"
+                           className="border-green-300 text-green-700 hover:bg-green-100"
+                         >
+                           <Upload className="h-4 w-4 mr-2" />
+                           Edit Documents
+                         </Button>
+                       </div>
+                       <p className="text-green-700 text-sm mt-2">
+                         Your documents have been successfully submitted. Click "Edit Documents" to modify them.
+                       </p>
+                     </div>
+                   )}
+                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
