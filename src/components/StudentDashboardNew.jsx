@@ -396,6 +396,19 @@ const StudentDashboardNew = ({ onBack }) => {
 
   const handleEditDocuments = () => {
     setIsEditMode(true);
+    setShowSuccessPopup(false); // Close the success popup
+    // Optionally switch to documents tab to show the changes
+    const documentsTab = document.querySelector('[data-value="documents"]');
+    if (documentsTab) {
+      documentsTab.click();
+    }
+    
+    toast({ 
+      title: "Edit Mode Enabled", 
+      description: "You can now upload or remove documents again.",
+      duration: 3000,
+      className: "bg-blue-50 border-blue-200"
+    });
   };
 
   const handleLogout = async () => {
