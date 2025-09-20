@@ -131,9 +131,10 @@ async function getAccessToken() {
   return tokenData.access_token;
 }
 
-async function createFolder(accessToken: string, folderName: string) {
+async function createFolder(accessToken: string, folderName: string, parentId?: string) {
   // Check if folder exists first
-  const query = encodeURIComponent("name='" + folderName + "' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  const parentFilter = parentId ? ` and '${parentId}' in parents` : '';
+  const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parentFilter}`);
   const searchResponse = await fetch(
     `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`,
     {
@@ -159,6 +160,7 @@ async function createFolder(accessToken: string, folderName: string) {
     body: JSON.stringify({
       name: folderName,
       mimeType: 'application/vnd.google-apps.folder',
+      ...(parentId ? { parents: [parentId] } : {}),
     }),
   });
 
@@ -247,16 +249,19 @@ serve(async (req) => {
     // Get access token
     const accessToken = await getAccessToken();
 
-    // Create student folder (FirstName LastName)
+    // Optional root folder to place student folders inside
+    const rootFolderId = (Deno.env.get('GOOGLE_DRIVE_FOLDER_ID') || '').trim() || undefined;
+
+    // Create student folder (FirstName LastName) inside root if provided
     const studentFolderName = `${studentFirstName} ${studentLastName}`;
-    const studentFolderId = await createFolder(accessToken, studentFolderName);
+    const studentFolderId = await createFolder(accessToken, studentFolderName, rootFolderId);
 
     // Upload file to Google Drive
     const uploadResult = await uploadFile(
-      accessToken, 
-      fileName, 
-      fileContent, 
-      mimeType, 
+      accessToken,
+      fileName,
+      fileContent,
+      mimeType,
       studentFolderId
     );
 
