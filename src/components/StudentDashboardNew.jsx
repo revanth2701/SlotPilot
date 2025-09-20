@@ -1142,7 +1142,7 @@ const StudentDashboardNew = ({ onBack }) => {
               Choose which document categories you want to re-upload. You can select one or multiple categories.
             </p>
             
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6">
               {[
                 { id: 'passport', label: 'Passport', icon: FileText },
                 { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
