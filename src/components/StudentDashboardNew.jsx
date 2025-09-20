@@ -262,9 +262,6 @@ const StudentDashboardNew = ({ onBack }) => {
       } else {
         uploadData = firstTry.data;
       }
-        console.error('Storage upload error:', uploadError);
-        throw uploadError;
-      }
 
       console.log('File uploaded to storage:', uploadData);
 
