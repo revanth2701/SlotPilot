@@ -1227,7 +1227,7 @@ const StudentDashboardNew = ({ onBack }) => {
                 </Button>
                 <Button 
                   onClick={handleConfirmReupload}
-                  className="flex-1 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all font-semibold"
                   disabled={selectedDocumentTypes.length === 0}
                 >
                   <Upload className="h-4 w-4 mr-2" />
