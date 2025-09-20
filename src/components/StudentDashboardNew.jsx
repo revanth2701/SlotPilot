@@ -1144,40 +1144,66 @@ const StudentDashboardNew = ({ onBack }) => {
               Choose which document categories you want to re-upload. You can select one or multiple categories.
             </p>
             
-            <div className="space-y-3 mb-6">
-              {[
-                { id: 'passport', label: 'Passport', icon: FileText },
-                { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
-                { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
-                { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
-                { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                { id: 'cv', label: 'CV/Resume', icon: FileText },
-                { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
-                { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
-                { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
-              ].map((docType) => (
-                <div 
-                  key={docType.id} 
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                    selectedDocumentTypes.includes(docType.id) 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleDocumentTypeToggle(docType)}
-                >
-                  <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center ${
-                    selectedDocumentTypes.includes(docType.id) 
-                      ? 'border-primary bg-primary' 
-                      : 'border-muted-foreground'
-                  }`}>
-                    {selectedDocumentTypes.includes(docType.id) && (
-                      <CheckCircle className="h-3 w-3 text-white" />
-                    )}
-                  </div>
-                  <docType.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium">{docType.label}</span>
-                </div>
-              ))}
+            <div className="mb-6">
+              <div className="overflow-hidden rounded-lg border border-muted">
+                <table className="min-w-full divide-y divide-muted">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Select
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Document Type
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Category
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-card divide-y divide-muted">
+                    {[
+                      { id: 'passport', label: 'Passport', icon: FileText, category: 'Identity' },
+                      { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap, category: 'Education' },
+                      { id: 'transcripts', label: 'Academic Transcripts', icon: FileText, category: 'Education' },
+                      { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText, category: 'Language' },
+                      { id: 'sop', label: 'Statement of Purpose', icon: FileText, category: 'Application' },
+                      { id: 'cv', label: 'CV/Resume', icon: FileText, category: 'Application' },
+                      { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText, category: 'Reference' },
+                      { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText, category: 'Reference' },
+                      { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText, category: 'Reference' }
+                    ].map((docType) => (
+                      <tr 
+                        key={docType.id}
+                        className={`cursor-pointer transition-colors hover:bg-muted/30 ${
+                          selectedDocumentTypes.includes(docType.id) ? 'bg-primary/10' : ''
+                        }`}
+                        onClick={() => handleDocumentTypeToggle(docType)}
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center ${
+                            selectedDocumentTypes.includes(docType.id) 
+                              ? 'border-primary bg-primary' 
+                              : 'border-muted-foreground'
+                          }`}>
+                            {selectedDocumentTypes.includes(docType.id) && (
+                              <CheckCircle className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <docType.icon className="h-5 w-5 text-muted-foreground" />
+                            <span className="font-medium text-foreground">{docType.label}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm text-muted-foreground">{docType.category}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
