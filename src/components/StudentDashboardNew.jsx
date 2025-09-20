@@ -599,14 +599,32 @@ const StudentDashboardNew = ({ onBack }) => {
                     <Button
                       onClick={async () => {
                         try {
+                          console.log('Starting connection test...');
                           toast({ title: "🔍 Testing Connection", description: "Checking Google Drive setup..." });
+                          
                           const { data, error } = await supabase.functions.invoke('test-drive');
-                          if (error) throw error;
+                          console.log('Test response:', { data, error });
+                          
+                          if (error) {
+                            console.error('Test function error:', error);
+                            throw new Error(error.message || 'Function invocation failed');
+                          }
+                          
+                          if (!data) {
+                            throw new Error('No response data received from test function');
+                          }
+                          
+                          const success = data.success;
+                          const message = success ? 
+                            `✅ SUCCESS: ${data.message}` : 
+                            `❌ FAILED: ${data.error}`;
                           
                           toast({ 
-                            title: data.success ? "✅ Connection Test" : "❌ Connection Test",
-                            description: data.success ? "Google Drive is properly configured!" : data.error,
-                            variant: data.success ? "default" : "destructive",
+                            title: success ? "✅ Connection Test Passed" : "❌ Connection Test Failed",
+                            description: success ? 
+                              `Google Drive is properly configured! OAuth token obtained.` : 
+                              data.error || 'Unknown error occurred',
+                            variant: success ? "default" : "destructive",
                             duration: 10000
                           });
                           
@@ -614,8 +632,8 @@ const StudentDashboardNew = ({ onBack }) => {
                         } catch (err) {
                           console.error('Connection test failed:', err);
                           toast({ 
-                            title: "❌ Connection Test Failed", 
-                            description: err.message || "Failed to test connection",
+                            title: "❌ Connection Test Error", 
+                            description: `Error: ${err.message || 'Failed to test connection'}`,
                             variant: "destructive",
                             duration: 10000
                           });
@@ -624,7 +642,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       variant="outline"
                       size="sm"
                     >
-                      Test Google Drive Connection
+                      🔍 Test Google Drive Connection
                     </Button>
                   </div>
                   
