@@ -177,7 +177,7 @@ const StudentDashboardNew = ({ onBack }) => {
               name: doc.file_name,
               type: doc.document_type,
               status: 'uploaded',
-              uploadDate: new Date(doc.uploaded_at).toLocaleDateString(),
+              uploadDate: new Date(doc.uploaded_at).toLocaleString(),
               filePath: doc.file_path,
               fileSize: doc.file_size,
               mimeType: doc.mime_type
@@ -397,7 +397,7 @@ const StudentDashboardNew = ({ onBack }) => {
         name: file.name,
         type: documentType,
         status: 'uploaded',
-        uploadDate: new Date().toLocaleDateString(),
+        uploadDate: new Date().toLocaleString(),
         filePath: uploadData.path,
         fileSize: file.size,
         mimeType: file.type
