@@ -54,6 +54,7 @@ const StudentDashboardNew = ({ onBack }) => {
   const [uploadStatus, setUploadStatus] = useState({}); // Track upload status per document type
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -357,32 +358,40 @@ const StudentDashboardNew = ({ onBack }) => {
   };
 
   const handleSubmitApplication = () => {
-    const totalUploaded = Object.values(documentsByType).reduce((sum, docs) => sum + docs.length, 0);
-    if (totalUploaded === 0) {
+    // Define all required document types
+    const requiredDocuments = [
+      { id: 'passport', label: 'Passport' },
+      { id: 'graduation', label: 'Graduation Certificate' },
+      { id: 'transcripts', label: 'Academic Transcripts' },
+      { id: 'ielts', label: 'IELTS/TOEFL Score' },
+      { id: 'sop', label: 'Statement of Purpose' },
+      { id: 'cv', label: 'CV/Resume' },
+      { id: 'lor', label: 'Letter of Recommendation' }
+    ];
+    
+    // Check which documents are missing
+    const missingDocuments = requiredDocuments.filter(doc => 
+      !documentsByType[doc.id] || documentsByType[doc.id].length === 0
+    );
+    
+    if (missingDocuments.length > 0) {
+      const missingNames = missingDocuments.map(doc => doc.label).join(', ');
       toast({ 
-        title: "No Documents", 
-        description: "Please upload at least one document before submitting.",
-        variant: "destructive" 
+        title: "Missing Documents", 
+        description: `Please upload the following required documents: ${missingNames}`,
+        variant: "destructive",
+        duration: 7000
       });
       return;
     }
     
-    // Mark application as submitted
+    // All documents uploaded, mark application as submitted
     setApplicationSubmitted(true);
     setIsEditMode(false);
     localStorage.setItem(`application_submitted_${user.id}`, 'true');
     
-    toast({ 
-      title: "Application Submitted! 🎉", 
-      description: `Successfully submitted with ${totalUploaded} documents. Our team will review your application.`,
-      duration: 3000,
-      className: "bg-green-50 border-green-200"
-    });
-    
-    // Reload page after short delay
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
+    // Show success popup instead of reloading page
+    setShowSuccessPopup(true);
   };
 
   const handleEditDocuments = () => {
@@ -774,6 +783,34 @@ const StudentDashboardNew = ({ onBack }) => {
             <p className="text-muted-foreground">
               Your personal details have been saved successfully.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Application Submitted Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center">
+            <CheckCircle className="h-20 w-20 text-green-600 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold mb-4 text-green-700">Application Submitted Successfully! 🎉</h2>
+            <p className="text-muted-foreground mb-6">
+              All your documents have been uploaded successfully. Our team will review your application and get back to you soon.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                onClick={() => setShowSuccessPopup(false)}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                Continue
+              </Button>
+              <Button 
+                onClick={handleEditDocuments}
+                variant="outline" 
+                className="w-full"
+              >
+                Edit Documents
+              </Button>
+            </div>
           </div>
         </div>
       )}
