@@ -173,47 +173,44 @@ async function createFolder(accessToken: string, folderName: string) {
 async function uploadFile(accessToken: string, fileName: string, fileContent: string, mimeType: string, folderId: string) {
   // Convert base64 to binary
   const binaryString = atob(fileContent);
-  const bytes = new Uint8Array(binaryString.length);
+  const fileBytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+    fileBytes[i] = binaryString.charCodeAt(i);
   }
 
-  // Create multipart form data
-  const boundary = `----formdata-${Date.now()}`;
-  const metadata = JSON.stringify({
-    name: fileName,
-    parents: [folderId],
-  });
-
-  const multipartBody = [
-    `--${boundary}`,
-    'Content-Type: application/json; charset=UTF-8',
-    '',
-    metadata,
-    `--${boundary}`,
-    `Content-Type: ${mimeType}`,
-    '',
-    // File content as binary
-  ].join('\r\n');
-
+  // Build proper multipart/related body per Google Drive spec
+  const boundary = `===============${Date.now()}==`;
   const encoder = new TextEncoder();
-  const textPart = encoder.encode(multipartBody);
-  const endBoundary = encoder.encode(`\r\n--${boundary}--`);
-  
-  // Combine text and binary parts
-  const body = new Uint8Array(textPart.length + bytes.length + endBoundary.length);
-  body.set(textPart, 0);
-  body.set(bytes, textPart.length);
-  body.set(endBoundary, textPart.length + bytes.length);
 
-  const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+  const preamble = `--${boundary}\r\n` +
+    `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+    JSON.stringify({ name: fileName, parents: [folderId] }) +
+    `\r\n--${boundary}\r\n` +
+    `Content-Type: ${mimeType}\r\n\r\n`;
+
+  const closing = `\r\n--${boundary}--`;
+
+  const preambleBytes = encoder.encode(preamble);
+  const closingBytes = encoder.encode(closing);
+
+  const body = new Uint8Array(preambleBytes.length + fileBytes.length + closingBytes.length);
+  body.set(preambleBytes, 0);
+  body.set(fileBytes, preambleBytes.length);
+  body.set(closingBytes, preambleBytes.length + fileBytes.length);
+
+  const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,parents', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': `multipart/related; boundary=${boundary}`,
     },
-    body: body,
+    body,
   });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Google Drive upload failed: ${errText}`);
+  }
 
   return await response.json();
 }
