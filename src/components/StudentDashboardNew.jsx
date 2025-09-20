@@ -216,8 +216,9 @@ const StudentDashboardNew = ({ onBack }) => {
 
       console.log(`Starting upload for ${documentType}: ${file.name}`);
       
-      // Create file path: user_id/document_type/filename
-      const filePath = `${user.id}/${documentType.replace(/[^a-zA-Z0-9]/g, '_')}/${file.name}`;
+      // Create file path: FirstName_LastName/document_type/filename
+      const studentName = `${personalDetails.firstName}_${personalDetails.lastName}`.replace(/[^a-zA-Z0-9_]/g, '_');
+      const filePath = `${studentName}/${documentType.replace(/[^a-zA-Z0-9]/g, '_')}/${file.name}`;
       
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -690,7 +691,40 @@ const StudentDashboardNew = ({ onBack }) => {
                           </div>
                         )}
                       </div>
-                    ))}
+                     ))}
+                  </div>
+                  
+                  <Separator className="my-6" />
+                  
+                  {/* Final Submit Button */}
+                  <div className="text-center">
+                    <Button 
+                      size="lg" 
+                      className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                      onClick={() => {
+                        const totalUploaded = Object.values(documentsByType).reduce((sum, docs) => sum + docs.length, 0);
+                        if (totalUploaded === 0) {
+                          toast({ 
+                            title: "No Documents", 
+                            description: "Please upload at least one document before submitting.",
+                            variant: "destructive" 
+                          });
+                          return;
+                        }
+                        toast({ 
+                          title: "Application Submitted! 🎉", 
+                          description: `Successfully submitted with ${totalUploaded} documents. Our team will review your application.`,
+                          duration: 6000,
+                          className: "bg-green-50 border-green-200"
+                        });
+                      }}
+                    >
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      Submit Application
+                    </Button>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Review all uploaded documents before final submission
+                    </p>
                   </div>
                 </CardContent>
               </Card>
