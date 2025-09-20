@@ -592,6 +592,42 @@ const StudentDashboardNew = ({ onBack }) => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Test Connection Button */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-medium text-yellow-800 mb-2">Debug Upload Issues</h4>
+                    <p className="text-sm text-yellow-700 mb-3">If uploads are failing, test the Google Drive connection first:</p>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          toast({ title: "🔍 Testing Connection", description: "Checking Google Drive setup..." });
+                          const { data, error } = await supabase.functions.invoke('test-drive');
+                          if (error) throw error;
+                          
+                          toast({ 
+                            title: data.success ? "✅ Connection Test" : "❌ Connection Test",
+                            description: data.success ? "Google Drive is properly configured!" : data.error,
+                            variant: data.success ? "default" : "destructive",
+                            duration: 10000
+                          });
+                          
+                          console.log('Connection test result:', data);
+                        } catch (err) {
+                          console.error('Connection test failed:', err);
+                          toast({ 
+                            title: "❌ Connection Test Failed", 
+                            description: err.message || "Failed to test connection",
+                            variant: "destructive",
+                            duration: 10000
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Test Google Drive Connection
+                    </Button>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
                       { id: 'passport', label: 'Passport', icon: FileText },
