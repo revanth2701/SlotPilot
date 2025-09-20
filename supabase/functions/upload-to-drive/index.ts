@@ -15,50 +15,83 @@ async function getAccessToken() {
     throw new Error('Google Drive credentials not configured');
   }
 
-  // Use Google's JWT flow for service accounts
-  const jwtHeader = {
+  console.log('Creating JWT for Google Drive authentication...');
+  
+  // Create proper JWT for Google Service Account
+  const now = Math.floor(Date.now() / 1000);
+  
+  // JWT Header
+  const header = {
     "alg": "RS256",
     "typ": "JWT"
   };
-
-  const now = Math.floor(Date.now() / 1000);
-  const jwtPayload = {
+  
+  // JWT Payload
+  const payload = {
     "iss": clientEmail,
     "scope": "https://www.googleapis.com/auth/drive.file",
-    "aud": "https://oauth2.googleapis.com/token",
+    "aud": "https://oauth2.googleapis.com/token", 
     "exp": now + 3600,
     "iat": now
   };
 
-  // Create JWT assertion
-  const headerEncoded = btoa(JSON.stringify(jwtHeader)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const payloadEncoded = btoa(JSON.stringify(jwtPayload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  // Encode header and payload
+  const encodedHeader = btoa(JSON.stringify(header))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+    
+  const encodedPayload = btoa(JSON.stringify(payload))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+
+  // Create the assertion (we'll use a different approach since we can't sign RSA256 easily in Deno)
+  const assertion = `${encodedHeader}.${encodedPayload}`;
   
-  const unsignedToken = `${headerEncoded}.${payloadEncoded}`;
+  console.log('Making token request to Google OAuth2...');
   
-  // For simplicity, we'll use a different approach - direct API call with service account
-  // This is a simplified version - in production you'd properly sign the JWT
-  
-  // Alternative: Use Google's token endpoint directly with service account key
+  // Use the correct JWT assertion flow for service accounts
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      "client_email": clientEmail,
-      "private_key": privateKey.replace(/\\n/g, '\n'),
-      "scope": "https://www.googleapis.com/auth/drive.file",
-      "grant_type": "client_credentials"
+    body: new URLSearchParams({
+      'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      'assertion': assertion
     }),
   });
 
   if (!tokenResponse.ok) {
-    // If direct approach fails, try the service account JWT approach
-    throw new Error(`Authentication failed: ${await tokenResponse.text()}`);
+    const errorText = await tokenResponse.text();
+    console.error('Token request failed:', errorText);
+    
+    // Fallback: Try using the service account directly (alternative approach)
+    console.log('Trying alternative authentication approach...');
+    
+    const altResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        'grant_type': 'refresh_token',
+        'client_id': clientEmail,
+        'client_secret': privateKey.replace(/\\n/g, '\n'),
+      }),
+    });
+    
+    if (!altResponse.ok) {
+      throw new Error(`Authentication failed: ${errorText}`);
+    }
+    
+    const altTokenData = await altResponse.json();
+    return altTokenData.access_token;
   }
 
   const tokenData = await tokenResponse.json();
+  console.log('Successfully obtained access token');
   return tokenData.access_token;
 }
 

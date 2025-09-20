@@ -47,7 +47,7 @@ const StudentDashboardNew = ({ onBack }) => {
     cv: [],
     lor: []
   });
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -566,14 +566,14 @@ const StudentDashboardNew = ({ onBack }) => {
                             onChange={(e) => handleFileUpload(e, docType.label)}
                             className="hidden"
                             id={`upload-${docType.id}`}
-                            disabled={uploading}
+                            disabled={uploading[docType.id]}
                           />
                           <Label
                             htmlFor={`upload-${docType.id}`}
                             className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors"
                           >
                             <Upload className="h-4 w-4" />
-                            {uploading ? 'Uploading...' : 'Upload'}
+                            {uploading[docType.id] ? 'Uploading...' : 'Upload'}
                           </Label>
                         </div>
                         
