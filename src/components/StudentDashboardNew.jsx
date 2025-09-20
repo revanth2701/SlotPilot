@@ -51,6 +51,7 @@ const StudentDashboardNew = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState({}); // Track upload status per document type
   const { toast } = useToast();
 
   useEffect(() => {
@@ -201,14 +202,26 @@ const StudentDashboardNew = ({ onBack }) => {
       return;
     }
 
-    setUploading(true);
+    // Set upload status to loading
+    setUploadStatus(prev => ({ ...prev, [documentType]: 'uploading' }));
+    setUploading(prev => ({ ...prev, [documentType]: true }));
+    
     try {
+      // Show immediate feedback
+      toast({ 
+        title: "📤 Upload Started", 
+        description: `Uploading ${documentType}...`,
+        duration: 2000
+      });
+
       // Convert file to base64
       const fileReader = new FileReader();
       fileReader.onload = async (e) => {
         const base64Content = e.target.result.split(',')[1]; // Remove data:... prefix
 
         try {
+          console.log(`Starting upload for ${documentType}: ${file.name}`);
+          
           // Upload to Google Drive via edge function
           const { data, error } = await supabase.functions.invoke('upload-to-drive', {
             body: {
@@ -222,12 +235,22 @@ const StudentDashboardNew = ({ onBack }) => {
             }
           });
 
+          console.log('Upload response:', { data, error });
+
           if (error) {
+            console.error('Upload error:', error);
             throw error;
           }
 
-          if (data.error) {
-            throw new Error(data.error);
+          if (!data || data.error) {
+            console.error('Upload failed with data error:', data);
+            throw new Error(data?.error || 'Upload failed');
+          }
+
+          // Check if upload was successful
+          if (!data.success || !data.fileId) {
+            console.error('Upload response indicates failure:', data);
+            throw new Error('Upload did not complete successfully');
           }
 
           // Create document record for UI
@@ -258,45 +281,69 @@ const StudentDashboardNew = ({ onBack }) => {
             [typeKey]: [...prev[typeKey], newDocument]
           }));
           
+          // Set successful upload status
+          setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
+          
           toast({ 
-            title: "Success", 
-            description: `${documentType} uploaded successfully to Google Drive!`,
-            duration: 5000
+            title: "✅ Upload Successful!", 
+            description: `${documentType} uploaded successfully! File ID: ${data.fileId}`,
+            duration: 5000,
+            className: "bg-green-50 border-green-200"
           });
 
+          console.log(`Upload successful for ${documentType}:`, newDocument);
+
         } catch (uploadError) {
-          console.error('Upload error:', uploadError);
+          console.error('Upload error details:', uploadError);
+          
+          // Set failed upload status
+          setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
+          
+          let errorMessage = 'Failed to upload document to Google Drive';
+          if (uploadError.message) {
+            errorMessage = uploadError.message;
+          } else if (typeof uploadError === 'string') {
+            errorMessage = uploadError;
+          }
+          
           toast({ 
-            title: "Upload Failed", 
-            description: uploadError.message || "Failed to upload document to Google Drive",
-            variant: "destructive" 
+            title: "❌ Upload Failed", 
+            description: `${documentType}: ${errorMessage}`,
+            variant: "destructive",
+            duration: 7000
           });
         } finally {
-          setUploading(false);
+          setUploading(prev => ({ ...prev, [documentType]: false }));
+          // Clear upload status after 3 seconds
+          setTimeout(() => {
+            setUploadStatus(prev => ({ ...prev, [documentType]: null }));
+          }, 3000);
           // Reset file input
           event.target.value = '';
         }
       };
 
       fileReader.onerror = () => {
+        setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
+        setUploading(prev => ({ ...prev, [documentType]: false }));
         toast({ 
-          title: "Error", 
-          description: "Failed to read file", 
+          title: "❌ File Read Error", 
+          description: "Failed to read the selected file", 
           variant: "destructive" 
         });
-        setUploading(false);
       };
 
       fileReader.readAsDataURL(file);
 
     } catch (error) {
-      console.error('File reading error:', error);
+      console.error('File processing error:', error);
+      setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
+      setUploading(prev => ({ ...prev, [documentType]: false }));
       toast({ 
-        title: "Error", 
-        description: "Failed to process file", 
+        title: "❌ File Processing Error", 
+        description: "Failed to process the selected file", 
         variant: "destructive" 
       });
-      setUploading(false);
     }
   };
 
@@ -555,25 +602,78 @@ const StudentDashboardNew = ({ onBack }) => {
                       { id: 'sop', label: 'Statement of Purpose', icon: FileText },
                       { id: 'cv', label: 'CV/Resume', icon: FileText },
                       { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
-                    ].map((docType) => (
+                     ].map((docType) => (
                       <div key={docType.id} className="space-y-3">
-                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
+                        <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
+                          uploadStatus[docType.label] === 'uploading' 
+                            ? 'border-blue-400 bg-blue-50' 
+                            : uploadStatus[docType.label] === 'success'
+                            ? 'border-green-400 bg-green-50'
+                            : uploadStatus[docType.label] === 'error'
+                            ? 'border-red-400 bg-red-50'
+                            : 'border-muted-foreground/25 hover:border-primary/50'
+                        }`}>
                           <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <h3 className="font-medium mb-2">{docType.label}</h3>
+                          
+                          {/* Upload Status Indicator */}
+                          {uploadStatus[docType.label] && (
+                            <div className="mb-2">
+                              {uploadStatus[docType.label] === 'uploading' && (
+                                <div className="flex items-center justify-center gap-2 text-blue-600">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                  <span className="text-sm">Uploading...</span>
+                                </div>
+                              )}
+                              {uploadStatus[docType.label] === 'success' && (
+                                <div className="flex items-center justify-center gap-2 text-green-600">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span className="text-sm">Upload Complete!</span>
+                                </div>
+                              )}
+                              {uploadStatus[docType.label] === 'error' && (
+                                <div className="flex items-center justify-center gap-2 text-red-600">
+                                  <X className="h-4 w-4" />
+                                  <span className="text-sm">Upload Failed</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
                           <input
                             type="file"
                             accept=".pdf,.jpg,.png,.jpeg"
                             onChange={(e) => handleFileUpload(e, docType.label)}
                             className="hidden"
                             id={`upload-${docType.id}`}
-                            disabled={uploading[docType.id]}
+                            disabled={uploading[docType.label]}
                           />
                           <Label
                             htmlFor={`upload-${docType.id}`}
-                            className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors"
+                            className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
+                              uploading[docType.label] 
+                                ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
+                                : uploadStatus[docType.label] === 'success'
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            }`}
                           >
-                            <Upload className="h-4 w-4" />
-                            {uploading[docType.id] ? 'Uploading...' : 'Upload'}
+                            {uploading[docType.label] ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                Uploading...
+                              </>
+                            ) : uploadStatus[docType.label] === 'success' ? (
+                              <>
+                                <CheckCircle className="h-4 w-4" />
+                                Upload Another
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4" />
+                                Upload
+                              </>
+                            )}
                           </Label>
                         </div>
                         
