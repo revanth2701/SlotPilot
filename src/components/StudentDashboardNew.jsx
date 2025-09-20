@@ -1142,7 +1142,7 @@ const StudentDashboardNew = ({ onBack }) => {
               Choose which document categories you want to re-upload. You can select one or multiple categories.
             </p>
             
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               {[
                 { id: 'passport', label: 'Passport', icon: FileText },
                 { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
@@ -1156,26 +1156,27 @@ const StudentDashboardNew = ({ onBack }) => {
               ].map((docType) => (
                 <div 
                   key={docType.id} 
-                  className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                  className={`flex flex-col items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all min-h-[120px] ${
                     selectedDocumentTypes.includes(docType.id) 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
+                      ? 'border-primary bg-primary/5 shadow-md' 
+                      : 'border-muted hover:border-primary/50 hover:shadow-sm'
                   }`}
                   onClick={() => handleDocumentTypeToggle(docType)}
                 >
-                  <div className={`w-4 h-4 border-2 rounded-md flex items-center justify-center ${
+                  <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
                     selectedDocumentTypes.includes(docType.id) 
                       ? 'border-primary bg-primary' 
                       : 'border-muted-foreground'
                   }`}>
                     {selectedDocumentTypes.includes(docType.id) && (
-                      <CheckCircle className="h-2.5 w-2.5 text-white" />
+                      <CheckCircle className="h-4 w-4 text-white" />
                     )}
                   </div>
-                  <docType.icon className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">{docType.label}</span>
+                  <docType.icon className="h-6 w-6 text-muted-foreground" />
+                  <span className="font-medium text-center text-sm leading-tight">{docType.label}</span>
                 </div>
               ))}
+            </div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
