@@ -177,7 +177,14 @@ const StudentDashboardNew = ({ onBack }) => {
               name: doc.file_name,
               type: doc.document_type,
               status: 'uploaded',
-              uploadDate: new Date(doc.uploaded_at).toLocaleString(),
+              uploadDate: new Date(doc.uploaded_at).toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric', 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+              }),
               filePath: doc.file_path,
               fileSize: doc.file_size,
               mimeType: doc.mime_type
@@ -292,6 +299,47 @@ const StudentDashboardNew = ({ onBack }) => {
     }
   };
 
+  const handleDownloadDocument = async (doc) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('student-documents')
+        .download(doc.filePath);
+
+      if (error) {
+        console.error('Error downloading file:', error);
+        toast({ 
+          title: "Download Failed", 
+          description: "Could not download the document", 
+          variant: "destructive" 
+        });
+        return;
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({ 
+        title: "Download Started", 
+        description: `Downloading ${doc.name}...`, 
+        duration: 2000 
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({ 
+        title: "Download Failed", 
+        description: "An error occurred while downloading", 
+        variant: "destructive" 
+      });
+    }
+  };
+
   const handleFileUpload = async (event, documentType) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -397,7 +445,14 @@ const StudentDashboardNew = ({ onBack }) => {
         name: file.name,
         type: documentType,
         status: 'uploaded',
-        uploadDate: new Date().toLocaleString(),
+        uploadDate: new Date().toLocaleString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric', 
+          hour: 'numeric', 
+          minute: '2-digit', 
+          hour12: true 
+        }),
         filePath: uploadData.path,
         fileSize: file.size,
         mimeType: file.type
@@ -971,22 +1026,31 @@ const StudentDashboardNew = ({ onBack }) => {
                                      </p>
                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Uploaded
-                                  </Badge>
-                                   {(!applicationSubmitted || isEditMode) && (
-                                    <Button
-                                      onClick={() => removeDocument(docType.label, doc.id)}
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  )}
-                                </div>
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                                     <CheckCircle className="h-3 w-3 mr-1" />
+                                     Uploaded
+                                   </Badge>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => handleDownloadDocument(doc)}
+                                     className="h-6 px-2 text-xs"
+                                   >
+                                     <Download className="h-3 w-3 mr-1" />
+                                     Download
+                                   </Button>
+                                    {(!applicationSubmitted || isEditMode) && (
+                                     <Button
+                                       onClick={() => removeDocument(docType.label, doc.id)}
+                                       variant="ghost"
+                                       size="sm"
+                                       className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                     >
+                                       <X className="h-3 w-3" />
+                                     </Button>
+                                   )}
+                                 </div>
                               </div>
                             ))}
                           </div>
