@@ -1142,7 +1142,7 @@ const StudentDashboardNew = ({ onBack }) => {
               Choose which document categories you want to re-upload. You can select one or multiple categories.
             </p>
             
-            <div className="space-y-3 mb-6">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {[
                 { id: 'passport', label: 'Passport', icon: FileText },
                 { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
@@ -1156,24 +1156,24 @@ const StudentDashboardNew = ({ onBack }) => {
               ].map((docType) => (
                 <div 
                   key={docType.id} 
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
                     selectedDocumentTypes.includes(docType.id) 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleDocumentTypeToggle(docType)}
                 >
-                  <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center ${
+                  <div className={`w-4 h-4 border-2 rounded-md flex items-center justify-center ${
                     selectedDocumentTypes.includes(docType.id) 
                       ? 'border-primary bg-primary' 
                       : 'border-muted-foreground'
                   }`}>
                     {selectedDocumentTypes.includes(docType.id) && (
-                      <CheckCircle className="h-3 w-3 text-white" />
+                      <CheckCircle className="h-2.5 w-2.5 text-white" />
                     )}
                   </div>
-                  <docType.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium">{docType.label}</span>
+                  <docType.icon className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-sm">{docType.label}</span>
                 </div>
               ))}
             </div>
