@@ -26,43 +26,62 @@ async function getAccessToken() {
   };
   const importPrivateKey = async (keyData: string) => {
     try {
-      let pemBody: string;
+      console.log('Processing private key...');
+      let cleanKey = keyData;
       
-      // Check if it's base64 encoded first
-      if (!keyData.includes('-----BEGIN')) {
-        // It's base64 encoded, decode it first
-        pemBody = atob(keyData);
-      } else {
-        // It's already in PEM format
-        pemBody = keyData;
+      // Handle JSON escaped strings (\\n -> \n)
+      if (cleanKey.includes('\\n')) {
+        cleanKey = cleanKey.replace(/\\n/g, '\n');
       }
       
-      // Extract base64 content from PEM
-      const base64Content = pemBody
+      // If it doesn't have PEM headers, assume it's base64 encoded
+      if (!cleanKey.includes('-----BEGIN')) {
+        try {
+          cleanKey = atob(cleanKey);
+        } catch (e) {
+          console.error('Failed to base64 decode key');
+          throw new Error('Invalid base64 encoded private key');
+        }
+      }
+      
+      // Extract the base64 content from PEM format
+      let base64Content = cleanKey
         .replace(/-----BEGIN PRIVATE KEY-----/g, '')
         .replace(/-----END PRIVATE KEY-----/g, '')
         .replace(/-----BEGIN RSA PRIVATE KEY-----/g, '')
         .replace(/-----END RSA PRIVATE KEY-----/g, '')
-        .replace(/\r?\n|\\n|\s/g, '')
+        .replace(/\r/g, '')
+        .replace(/\n/g, '')
+        .replace(/\s/g, '')
         .trim();
       
-      // Convert to binary
+      console.log('Extracted base64 content length:', base64Content.length);
+      
+      // Convert base64 to binary
       const derBinary = atob(base64Content);
       const derBytes = new Uint8Array(derBinary.length);
       for (let i = 0; i < derBinary.length; i++) {
         derBytes[i] = derBinary.charCodeAt(i);
       }
       
-      return await crypto.subtle.importKey(
-        'pkcs8',
-        derBytes.buffer,
-        { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } },
-        false,
-        ['sign']
-      );
+      console.log('DER bytes length:', derBytes.length);
+      
+      // Try to import as PKCS#8 first
+      try {
+        return await crypto.subtle.importKey(
+          'pkcs8',
+          derBytes.buffer,
+          { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } },
+          false,
+          ['sign']
+        );
+      } catch (pkcs8Error) {
+        console.log('PKCS#8 import failed, trying different approach:', pkcs8Error.message);
+        throw pkcs8Error;
+      }
     } catch (error) {
       console.error('Private key import failed:', error);
-      console.error('Key format received:', keyData.substring(0, 100) + '...');
+      console.error('Key starts with:', keyData.substring(0, 50));
       throw new Error(`Invalid private key format: ${error.message}`);
     }
   };
