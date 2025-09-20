@@ -1027,18 +1027,14 @@ const StudentDashboardNew = ({ onBack }) => {
                                    </div>
                                 </div>
                                  <div className="flex items-center gap-2">
-                                   <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                                     <CheckCircle className="h-3 w-3 mr-1" />
-                                     Uploaded
-                                   </Badge>
                                    <Button
-                                     variant="outline"
+                                     variant="ghost"
                                      size="sm"
                                      onClick={() => handleDownloadDocument(doc)}
-                                     className="h-6 px-2 text-xs"
+                                     className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                                     title="Download document"
                                    >
-                                     <Download className="h-3 w-3 mr-1" />
-                                     Download
+                                     <Download className="h-4 w-4" />
                                    </Button>
                                     {(!applicationSubmitted || isEditMode) && (
                                      <Button
