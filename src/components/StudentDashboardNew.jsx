@@ -229,15 +229,39 @@ const StudentDashboardNew = ({ onBack }) => {
       const studentName = `${personalDetails.firstName}_${personalDetails.lastName}`.replace(/[^a-zA-Z0-9_]/g, '_');
       const filePath = `${studentName}/${documentType.replace(/[^a-zA-Z0-9]/g, '_')}/${file.name}`;
       
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // Upload to Supabase Storage with duplicate handling
+      let uploadData;
+      let replacedExisting = false;
+      const firstTry = await supabase.storage
         .from('student-documents')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
         });
 
-      if (uploadError) {
+      if (firstTry.error) {
+        const isDuplicate = firstTry.error.statusCode === '409' || /exists/i.test(firstTry.error.message || '');
+        if (isDuplicate) {
+          // Try replacing the existing file
+          const secondTry = await supabase.storage
+            .from('student-documents')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: true,
+            });
+          if (secondTry.error) {
+            console.error('Storage upload (replace) error:', secondTry.error);
+            throw secondTry.error;
+          }
+          uploadData = secondTry.data;
+          replacedExisting = true;
+        } else {
+          console.error('Storage upload error:', firstTry.error);
+          throw firstTry.error;
+        }
+      } else {
+        uploadData = firstTry.data;
+      }
         console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
@@ -304,8 +328,10 @@ const StudentDashboardNew = ({ onBack }) => {
       setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
       
       toast({ 
-        title: "✅ Upload Successful!", 
-        description: `${documentType} uploaded successfully to secure storage!`,
+        title: replacedExisting ? "✅ File Replaced" : "✅ Upload Successful!", 
+        description: replacedExisting 
+          ? `${documentType} replaced successfully in secure storage.` 
+          : `${documentType} uploaded successfully to secure storage!`,
         duration: 5000,
         className: "bg-green-50 border-green-200"
       });
