@@ -35,6 +35,48 @@ export type Database = {
         }
         Relationships: []
       }
+      student_documents: {
+        Row: {
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          student_email: string
+          student_first_name: string
+          student_last_name: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          student_email: string
+          student_first_name: string
+          student_last_name: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          student_email?: string
+          student_first_name?: string
+          student_last_name?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       StudentData: {
         Row: {
           "Contact Number": number

@@ -214,135 +214,117 @@ const StudentDashboardNew = ({ onBack }) => {
         duration: 2000
       });
 
-      // Convert file to base64
-      const fileReader = new FileReader();
-      fileReader.onload = async (e) => {
-        const base64Content = e.target.result.split(',')[1]; // Remove data:... prefix
-
-        try {
-          console.log(`Starting upload for ${documentType}: ${file.name}`);
-          
-          // Upload to Google Drive via edge function
-          const { data, error } = await supabase.functions.invoke('upload-to-drive', {
-            body: {
-              fileName: file.name,
-              fileContent: base64Content,
-              mimeType: file.type,
-              documentType: documentType,
-              studentFirstName: personalDetails.firstName,
-              studentLastName: personalDetails.lastName,
-              studentEmail: personalDetails.email
-            }
-          });
-
-          console.log('Upload response:', { data, error });
-
-          if (error) {
-            console.error('Upload error:', error);
-            throw error;
-          }
-
-          if (!data) {
-            console.error('No data in response');
-            throw new Error('No response data received');
-          }
-
-          if (data.error) {
-            console.error('Upload failed with data error:', data);
-            throw new Error(data.error);
-          }
-
-          // Log the actual response to debug
-          console.log('Actual response data:', JSON.stringify(data, null, 2));
-
-          // Create document record for UI - be more flexible with the response
-          const newDocument = {
-            id: data.fileId || data.id || Date.now(),
-            name: file.name,
-            type: documentType,
-            status: 'uploaded',
-            uploadDate: new Date().toLocaleDateString(),
-            driveFileId: data.fileId || data.id,
-            driveFolderId: data.folderId,
-            folderName: data.folderName
-          };
-          
-          // Map display names to keys
-          const typeKey = {
-            'Passport': 'passport',
-            'Graduation Certificate': 'graduation',
-            'Academic Transcripts': 'transcripts',
-            'IELTS/TOEFL Score': 'ielts',
-            'Statement of Purpose': 'sop',
-            'CV/Resume': 'cv',
-            'Letter of Recommendation': 'lor'
-          }[documentType] || 'other';
-          
-          setDocumentsByType(prev => ({
-            ...prev,
-            [typeKey]: [...prev[typeKey], newDocument]
-          }));
-          
-          // Set successful upload status
-          setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
-          
-          toast({ 
-            title: "✅ Upload Successful!", 
-            description: `${documentType} uploaded successfully! File ID: ${data.fileId}`,
-            duration: 5000,
-            className: "bg-green-50 border-green-200"
-          });
-
-          console.log(`Upload successful for ${documentType}:`, newDocument);
-
-        } catch (uploadError) {
-          console.error('Upload error details:', uploadError);
-          
-          // Set failed upload status
-          setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
-          
-          let errorMessage = 'Failed to upload document to Google Drive';
-          if (uploadError.message) {
-            errorMessage = uploadError.message;
-          } else if (typeof uploadError === 'string') {
-            errorMessage = uploadError;
-          }
-          
-          toast({ 
-            title: "❌ Upload Failed", 
-            description: `${documentType}: ${errorMessage}`,
-            variant: "destructive",
-            duration: 7000
-          });
-        } finally {
-          setUploading(prev => ({ ...prev, [documentType]: false }));
-          // Don't clear upload status - keep it persistent until next upload
-          // Reset file input
-          event.target.value = '';
-        }
-      };
-
-      fileReader.onerror = () => {
-        setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
-        setUploading(prev => ({ ...prev, [documentType]: false }));
-        toast({ 
-          title: "❌ File Read Error", 
-          description: "Failed to read the selected file", 
-          variant: "destructive" 
+      console.log(`Starting upload for ${documentType}: ${file.name}`);
+      
+      // Create file path: user_id/document_type/filename
+      const filePath = `${user.id}/${documentType.replace(/[^a-zA-Z0-9]/g, '_')}/${file.name}`;
+      
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('student-documents')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
         });
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('File uploaded to storage:', uploadData);
+
+      // Create document record in database
+      const { data: docRecord, error: docError } = await supabase
+        .from('student_documents')
+        .insert([
+          {
+            user_id: user.id,
+            student_email: personalDetails.email,
+            student_first_name: personalDetails.firstName,
+            student_last_name: personalDetails.lastName,
+            document_type: documentType,
+            file_name: file.name,
+            file_path: uploadData.path,
+            file_size: file.size,
+            mime_type: file.type
+          }
+        ])
+        .select()
+        .single();
+
+      if (docError) {
+        console.error('Database record error:', docError);
+        // Try to clean up uploaded file
+        await supabase.storage.from('student-documents').remove([filePath]);
+        throw docError;
+      }
+
+      console.log('Document record created:', docRecord);
+
+      // Create document record for UI
+      const newDocument = {
+        id: docRecord.id,
+        name: file.name,
+        type: documentType,
+        status: 'uploaded',
+        uploadDate: new Date().toLocaleDateString(),
+        filePath: uploadData.path,
+        fileSize: file.size,
+        mimeType: file.type
       };
-
-      fileReader.readAsDataURL(file);
-
-    } catch (error) {
-      console.error('File processing error:', error);
-      setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
-      setUploading(prev => ({ ...prev, [documentType]: false }));
+      
+      // Map display names to keys
+      const typeKey = {
+        'Passport': 'passport',
+        'Graduation Certificate': 'graduation',
+        'Academic Transcripts': 'transcripts',
+        'IELTS/TOEFL Score': 'ielts',
+        'Statement of Purpose': 'sop',
+        'CV/Resume': 'cv',
+        'Letter of Recommendation': 'lor'
+      }[documentType] || 'other';
+      
+      setDocumentsByType(prev => ({
+        ...prev,
+        [typeKey]: [...prev[typeKey], newDocument]
+      }));
+      
+      // Set successful upload status
+      setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
+      
       toast({ 
-        title: "❌ File Processing Error", 
-        description: "Failed to process the selected file", 
-        variant: "destructive" 
+        title: "✅ Upload Successful!", 
+        description: `${documentType} uploaded successfully to secure storage!`,
+        duration: 5000,
+        className: "bg-green-50 border-green-200"
       });
+
+      console.log(`Upload successful for ${documentType}:`, newDocument);
+
+    } catch (uploadError) {
+      console.error('Upload error details:', uploadError);
+      
+      // Set failed upload status
+      setUploadStatus(prev => ({ ...prev, [documentType]: 'error' }));
+      
+      let errorMessage = 'Failed to upload document';
+      if (uploadError.message) {
+        errorMessage = uploadError.message;
+      } else if (typeof uploadError === 'string') {
+        errorMessage = uploadError;
+      }
+      
+      toast({ 
+        title: "❌ Upload Failed", 
+        description: `${documentType}: ${errorMessage}`,
+        variant: "destructive",
+        duration: 7000
+      });
+    } finally {
+      setUploading(prev => ({ ...prev, [documentType]: false }));
+      // Reset file input
+      event.target.value = '';
     }
   };
 
@@ -592,60 +574,6 @@ const StudentDashboardNew = ({ onBack }) => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Test Connection Button */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-800 mb-2">Debug Upload Issues</h4>
-                    <p className="text-sm text-yellow-700 mb-3">If uploads are failing, test the Google Drive connection first:</p>
-                    <Button
-                      onClick={async () => {
-                        try {
-                          console.log('Starting connection test...');
-                          toast({ title: "🔍 Testing Connection", description: "Checking Google Drive setup..." });
-                          
-                          const { data, error } = await supabase.functions.invoke('test-drive');
-                          console.log('Test response:', { data, error });
-                          
-                          if (error) {
-                            console.error('Test function error:', error);
-                            throw new Error(error.message || 'Function invocation failed');
-                          }
-                          
-                          if (!data) {
-                            throw new Error('No response data received from test function');
-                          }
-                          
-                          const success = data.success;
-                          const message = success ? 
-                            `✅ SUCCESS: ${data.message}` : 
-                            `❌ FAILED: ${data.error}`;
-                          
-                          toast({ 
-                            title: success ? "✅ Connection Test Passed" : "❌ Connection Test Failed",
-                            description: success ? 
-                              `Google Drive is properly configured! OAuth token obtained.` : 
-                              data.error || 'Unknown error occurred',
-                            variant: success ? "default" : "destructive",
-                            duration: 10000
-                          });
-                          
-                          console.log('Connection test result:', data);
-                        } catch (err) {
-                          console.error('Connection test failed:', err);
-                          toast({ 
-                            title: "❌ Connection Test Error", 
-                            description: `Error: ${err.message || 'Failed to test connection'}`,
-                            variant: "destructive",
-                            duration: 10000
-                          });
-                        }
-                      }}
-                      variant="outline"
-                      size="sm"
-                    >
-                      🔍 Test Google Drive Connection
-                    </Button>
-                  </div>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
                       { id: 'passport', label: 'Passport', icon: FileText },
