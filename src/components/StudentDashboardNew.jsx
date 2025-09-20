@@ -20,7 +20,7 @@ import {
   LogOut,
   GraduationCap
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const StudentDashboardNew = ({ onBack }) => {
@@ -52,6 +52,8 @@ const StudentDashboardNew = ({ onBack }) => {
   const [saving, setSaving] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({}); // Track upload status per document type
+  const [applicationSubmitted, setApplicationSubmitted] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,6 +67,12 @@ const StudentDashboardNew = ({ onBack }) => {
           email: user.email
         }));
         await loadStudentData(user.email);
+        
+        // Check if application was previously submitted
+        const submittedStatus = localStorage.getItem(`application_submitted_${user.id}`);
+        if (submittedStatus === 'true') {
+          setApplicationSubmitted(true);
+        }
       }
       setLoading(false);
     };
@@ -348,6 +356,39 @@ const StudentDashboardNew = ({ onBack }) => {
     toast({ title: "Document removed", description: "Document has been removed" });
   };
 
+  const handleSubmitApplication = () => {
+    const totalUploaded = Object.values(documentsByType).reduce((sum, docs) => sum + docs.length, 0);
+    if (totalUploaded === 0) {
+      toast({ 
+        title: "No Documents", 
+        description: "Please upload at least one document before submitting.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    // Mark application as submitted
+    setApplicationSubmitted(true);
+    setIsEditMode(false);
+    localStorage.setItem(`application_submitted_${user.id}`, 'true');
+    
+    toast({ 
+      title: "Application Submitted! 🎉", 
+      description: `Successfully submitted with ${totalUploaded} documents. Our team will review your application.`,
+      duration: 3000,
+      className: "bg-green-50 border-green-200"
+    });
+    
+    // Reload page after short delay
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  };
+
+  const handleEditDocuments = () => {
+    setIsEditMode(true);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     onBack();
@@ -622,28 +663,33 @@ const StudentDashboardNew = ({ onBack }) => {
                             </div>
                           )}
                           
-                          <input
+                           <input
                             type="file"
                             accept=".pdf,.jpg,.png,.jpeg"
                             onChange={(e) => handleFileUpload(e, docType.label)}
                             className="hidden"
                             id={`upload-${docType.id}`}
-                            disabled={uploading[docType.label]}
+                            disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode)}
                           />
-                          <Label
+                           <Label
                             htmlFor={`upload-${docType.id}`}
-                            className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
-                              uploading[docType.label] 
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
+                              uploading[docType.label] || (applicationSubmitted && !isEditMode)
                                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
                                 : uploadStatus[docType.label] === 'success'
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
                             }`}
                           >
-                            {uploading[docType.label] ? (
+                             {uploading[docType.label] ? (
                               <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                                 Uploading...
+                              </>
+                            ) : (applicationSubmitted && !isEditMode) ? (
+                              <>
+                                <CheckCircle className="h-4 w-4" />
+                                Submitted
                               </>
                             ) : uploadStatus[docType.label] === 'success' ? (
                               <>
@@ -677,14 +723,16 @@ const StudentDashboardNew = ({ onBack }) => {
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Uploaded
                                   </Badge>
-                                  <Button
-                                    onClick={() => removeDocument(docType.label, doc.id)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
+                                   {(!applicationSubmitted || isEditMode) && (
+                                    <Button
+                                      onClick={() => removeDocument(docType.label, doc.id)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             ))}
@@ -701,23 +749,7 @@ const StudentDashboardNew = ({ onBack }) => {
                     <Button 
                       size="lg" 
                       className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-                      onClick={() => {
-                        const totalUploaded = Object.values(documentsByType).reduce((sum, docs) => sum + docs.length, 0);
-                        if (totalUploaded === 0) {
-                          toast({ 
-                            title: "No Documents", 
-                            description: "Please upload at least one document before submitting.",
-                            variant: "destructive" 
-                          });
-                          return;
-                        }
-                        toast({ 
-                          title: "Application Submitted! 🎉", 
-                          description: `Successfully submitted with ${totalUploaded} documents. Our team will review your application.`,
-                          duration: 6000,
-                          className: "bg-green-50 border-green-200"
-                        });
-                      }}
+                      onClick={handleSubmitApplication}
                     >
                       <CheckCircle className="h-5 w-5 mr-2" />
                       Submit Application
@@ -727,7 +759,8 @@ const StudentDashboardNew = ({ onBack }) => {
                     </p>
                   </div>
                 </CardContent>
-              </Card>
+               </Card>
+               )}
             </div>
           </TabsContent>
         </Tabs>
