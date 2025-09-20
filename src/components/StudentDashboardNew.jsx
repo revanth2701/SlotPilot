@@ -242,25 +242,27 @@ const StudentDashboardNew = ({ onBack }) => {
             throw error;
           }
 
-          if (!data || data.error) {
+          if (!data) {
+            console.error('No data in response');
+            throw new Error('No response data received');
+          }
+
+          if (data.error) {
             console.error('Upload failed with data error:', data);
-            throw new Error(data?.error || 'Upload failed');
+            throw new Error(data.error);
           }
 
-          // Check if upload was successful
-          if (!data.success || !data.fileId) {
-            console.error('Upload response indicates failure:', data);
-            throw new Error('Upload did not complete successfully');
-          }
+          // Log the actual response to debug
+          console.log('Actual response data:', JSON.stringify(data, null, 2));
 
-          // Create document record for UI
+          // Create document record for UI - be more flexible with the response
           const newDocument = {
-            id: data.fileId || Date.now(),
+            id: data.fileId || data.id || Date.now(),
             name: file.name,
             type: documentType,
             status: 'uploaded',
             uploadDate: new Date().toLocaleDateString(),
-            driveFileId: data.fileId,
+            driveFileId: data.fileId || data.id,
             driveFolderId: data.folderId,
             folderName: data.folderName
           };
@@ -314,10 +316,7 @@ const StudentDashboardNew = ({ onBack }) => {
           });
         } finally {
           setUploading(prev => ({ ...prev, [documentType]: false }));
-          // Clear upload status after 3 seconds
-          setTimeout(() => {
-            setUploadStatus(prev => ({ ...prev, [documentType]: null }));
-          }, 3000);
+          // Don't clear upload status - keep it persistent until next upload
           // Reset file input
           event.target.value = '';
         }

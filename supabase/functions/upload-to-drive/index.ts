@@ -235,8 +235,10 @@ serve(async (req) => {
     } = await req.json();
 
     console.log(`Processing upload for: ${studentFirstName} ${studentLastName}, file: ${fileName}`);
+    console.log(`Document type: ${documentType}, MIME type: ${mimeType}`);
 
     if (!fileName || !fileContent || !studentFirstName || !studentLastName) {
+      console.error('Missing required fields:', { fileName: !!fileName, fileContent: !!fileContent, studentFirstName: !!studentFirstName, studentLastName: !!studentLastName });
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }), 
         { 
@@ -247,16 +249,22 @@ serve(async (req) => {
     }
 
     // Get access token
+    console.log('Getting Google Drive access token...');
     const accessToken = await getAccessToken();
+    console.log('Access token obtained successfully');
 
     // Optional root folder to place student folders inside
     const rootFolderId = (Deno.env.get('GOOGLE_DRIVE_FOLDER_ID') || '').trim() || undefined;
+    console.log('Root folder ID:', rootFolderId || 'none (will create in root)');
 
     // Create student folder (FirstName LastName) inside root if provided
     const studentFolderName = `${studentFirstName} ${studentLastName}`;
+    console.log(`Creating/finding student folder: ${studentFolderName}`);
     const studentFolderId = await createFolder(accessToken, studentFolderName, rootFolderId);
+    console.log(`Student folder ID: ${studentFolderId}`);
 
     // Upload file to Google Drive
+    console.log(`Uploading file ${fileName} to folder ${studentFolderId}`);
     const uploadResult = await uploadFile(
       accessToken,
       fileName,
@@ -265,7 +273,7 @@ serve(async (req) => {
       studentFolderId
     );
 
-    console.log(`Document uploaded successfully: ${uploadResult.id}`);
+    console.log(`Upload successful! File ID: ${uploadResult.id}, Name: ${uploadResult.name}`);
 
     return new Response(
       JSON.stringify({ 
