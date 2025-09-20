@@ -391,7 +391,7 @@ const StudentDashboardNew = ({ onBack }) => {
     setValidationError(null);
     
     // Define all required document types
-    const requiredDocuments = [
+    const allRequiredDocuments = [
       { id: 'passport', label: 'Passport' },
       { id: 'graduation', label: 'Graduation Certificate' },
       { id: 'transcripts', label: 'Academic Transcripts' },
@@ -401,29 +401,43 @@ const StudentDashboardNew = ({ onBack }) => {
       { id: 'lor', label: 'Letter of Recommendation' }
     ];
     
-    // Check which documents are missing
-    const missingDocuments = requiredDocuments.filter(doc => 
+    // Determine which documents to validate based on mode
+    let documentsToValidate;
+    if (isEditMode && selectedDocumentTypes.length > 0) {
+      // In re-upload mode: only validate selected documents
+      documentsToValidate = allRequiredDocuments.filter(doc => 
+        selectedDocumentTypes.includes(doc.id)
+      );
+    } else {
+      // Normal mode: validate all documents
+      documentsToValidate = allRequiredDocuments;
+    }
+    
+    // Check which documents are missing from the validation set
+    const missingDocuments = documentsToValidate.filter(doc => 
       !documentsByType[doc.id] || documentsByType[doc.id].length === 0
     );
     
     if (missingDocuments.length > 0) {
       setValidationError(missingDocuments);
-      // Also show toast for immediate feedback
+      // Show appropriate toast message based on mode
+      const modeText = isEditMode ? "selected re-upload" : "required";
       toast({ 
         title: "Missing Documents", 
-        description: "Please check the highlighted documents below.",
+        description: `Please check the highlighted ${modeText} documents below.`,
         variant: "destructive",
         duration: 5000
       });
       return;
     }
     
-    // All documents uploaded, mark application as submitted
+    // All required/selected documents uploaded, mark application as submitted
     setApplicationSubmitted(true);
     setIsEditMode(false);
+    setSelectedDocumentTypes([]); // Clear selected documents
     localStorage.setItem(`application_submitted_${user.id}`, 'true');
     
-    // Show success popup instead of reloading page
+    // Show success popup
     setShowSuccessPopup(true);
   };
 
