@@ -37,7 +37,7 @@ async function getAccessToken() {
     return await crypto.subtle.importKey(
       'pkcs8',
       derBytes.buffer,
-      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } },
       false,
       ['sign']
     );
