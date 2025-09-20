@@ -55,6 +55,7 @@ const StudentDashboardNew = ({ onBack }) => {
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [validationError, setValidationError] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -200,6 +201,9 @@ const StudentDashboardNew = ({ onBack }) => {
   const handleFileUpload = async (event, documentType) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    // Clear validation error when user starts uploading
+    setValidationError(null);
 
     // Check if personal details are filled
     if (!personalDetails.firstName || !personalDetails.lastName) {
@@ -381,6 +385,9 @@ const StudentDashboardNew = ({ onBack }) => {
   };
 
   const handleSubmitApplication = () => {
+    // Clear any previous validation errors
+    setValidationError(null);
+    
     // Define all required document types
     const requiredDocuments = [
       { id: 'passport', label: 'Passport' },
@@ -398,12 +405,13 @@ const StudentDashboardNew = ({ onBack }) => {
     );
     
     if (missingDocuments.length > 0) {
-      const missingNames = missingDocuments.map(doc => doc.label).join(', ');
+      setValidationError(missingDocuments);
+      // Also show toast for immediate feedback
       toast({ 
         title: "Missing Documents", 
-        description: `Please upload the following required documents: ${missingNames}`,
+        description: "Please check the highlighted documents below.",
         variant: "destructive",
-        duration: 7000
+        duration: 5000
       });
       return;
     }
@@ -679,7 +687,38 @@ const StudentDashboardNew = ({ onBack }) => {
                      </div>
                    )}
                  </CardHeader>
-                <CardContent className="space-y-6">
+                 
+                 {/* Validation Error Display */}
+                 {validationError && validationError.length > 0 && (
+                   <div className="mx-6 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                     <div className="flex items-center gap-2 mb-2">
+                       <X className="h-5 w-5 text-red-600" />
+                       <h4 className="text-red-800 font-semibold">Missing Required Documents</h4>
+                     </div>
+                     <p className="text-red-700 text-sm mb-3">
+                       Please upload the following documents to submit your application:
+                     </p>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                       {validationError.map((doc, index) => (
+                         <div key={index} className="flex items-center gap-2 text-red-700 text-sm">
+                           <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                           <span>{doc.label}</span>
+                         </div>
+                       ))}
+                     </div>
+                     <Button 
+                       onClick={() => setValidationError(null)}
+                       variant="ghost" 
+                       size="sm" 
+                       className="mt-3 text-red-600 hover:text-red-800 h-auto p-1"
+                     >
+                       <X className="h-4 w-4 mr-1" />
+                       Dismiss
+                     </Button>
+                   </div>
+                 )}
+                 
+                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
                       { id: 'passport', label: 'Passport', icon: FileText },
@@ -690,16 +729,19 @@ const StudentDashboardNew = ({ onBack }) => {
                       { id: 'cv', label: 'CV/Resume', icon: FileText },
                       { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
                      ].map((docType) => (
-                      <div key={docType.id} className="space-y-3">
-                        <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
-                          uploadStatus[docType.label] === 'uploading' 
-                            ? 'border-blue-400 bg-blue-50' 
-                            : uploadStatus[docType.label] === 'success'
-                            ? 'border-green-400 bg-green-50'
-                            : uploadStatus[docType.label] === 'error'
-                            ? 'border-red-400 bg-red-50'
-                            : 'border-muted-foreground/25 hover:border-primary/50'
-                        }`}>
+                       <div key={docType.id} className="space-y-3">
+                         <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
+                           // Check if this document is missing and show red border
+                           validationError && validationError.some(err => err.id === docType.id)
+                             ? 'border-red-400 bg-red-50'
+                             : uploadStatus[docType.label] === 'uploading' 
+                             ? 'border-blue-400 bg-blue-50' 
+                             : uploadStatus[docType.label] === 'success'
+                             ? 'border-green-400 bg-green-50'
+                             : uploadStatus[docType.label] === 'error'
+                             ? 'border-red-400 bg-red-50'
+                             : 'border-muted-foreground/25 hover:border-primary/50'
+                         }`}>
                           <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <h3 className="font-medium mb-2">{docType.label}</h3>
                           
