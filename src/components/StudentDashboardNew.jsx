@@ -962,10 +962,13 @@ const StudentDashboardNew = ({ onBack }) => {
                               <div key={doc.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md border">
                                 <div className="flex items-center gap-2">
                                   <FileText className="h-4 w-4 text-muted-foreground" />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{doc.name}</p>
-                                    <p className="text-xs text-muted-foreground">{doc.uploadDate}</p>
-                                  </div>
+                                   <div className="flex-1 min-w-0">
+                                     <p className="text-sm font-medium truncate">
+                                       <span className="text-primary font-semibold">{doc.name}</span>
+                                       <span className="text-muted-foreground"> uploaded on </span>
+                                       <span className="text-green-700">{doc.uploadDate}</span>
+                                     </p>
+                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
