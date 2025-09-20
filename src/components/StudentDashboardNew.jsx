@@ -895,17 +895,11 @@ const StudentDashboardNew = ({ onBack }) => {
             </p>
             <div className="space-y-3">
               <Button 
-                onClick={() => setShowSuccessPopup(false)}
-                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={handleLogout}
+                className="w-full bg-red-600 hover:bg-red-700"
               >
-                Continue
-              </Button>
-              <Button 
-                onClick={handleEditDocuments}
-                variant="outline" 
-                className="w-full"
-              >
-                Edit Documents
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>
