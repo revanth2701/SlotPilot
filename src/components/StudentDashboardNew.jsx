@@ -1135,11 +1135,21 @@ const StudentDashboardNew = ({ onBack }) => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
           <div className="bg-card border rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-scale-in">
             <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-t-xl border-b flex-shrink-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Upload className="h-6 w-6 text-primary" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Upload className="h-6 w-6 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground">Select Documents to Re-upload</h2>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">Select Documents to Re-upload</h2>
+                <Button 
+                  onClick={handleSelectAllDocuments}
+                  variant="outline" 
+                  size="sm"
+                  className="hover:bg-primary hover:text-white transition-colors"
+                >
+                  Select All Documents
+                </Button>
               </div>
               <p className="text-muted-foreground">
                 Choose which document categories you want to re-upload. You can select multiple categories and update them individually.
@@ -1191,27 +1201,6 @@ const StudentDashboardNew = ({ onBack }) => {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="flex items-center justify-between mb-6 p-4 bg-muted/30 rounded-lg">
-                <Button 
-                  onClick={handleSelectAllDocuments}
-                  variant="outline" 
-                  size="sm"
-                  className="hover:bg-primary hover:text-white transition-colors"
-                >
-                  Select All Documents
-                </Button>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">
-                    {selectedDocumentTypes.length} document(s) selected
-                  </span>
-                  {selectedDocumentTypes.length > 0 && (
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
-                      {selectedDocumentTypes.length}
-                    </Badge>
-                  )}
-                </div>
               </div>
             </div>
 
