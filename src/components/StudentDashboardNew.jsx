@@ -98,6 +98,9 @@ const StudentDashboardNew = ({ onBack }) => {
         .select('*')
         .eq('Email', email)
         .maybeSingle();
+
+      // Load previously uploaded documents
+      await loadUploadedDocuments();
       
       // Update state with existing data from both tables
       setPersonalDetails(prev => ({
@@ -125,6 +128,94 @@ const StudentDashboardNew = ({ onBack }) => {
       
     } catch (error) {
       console.log('No existing student data found');
+    }
+  };
+
+  const loadUploadedDocuments = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: documents, error } = await supabase
+        .from('student_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('uploaded_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading documents:', error);
+        return;
+      }
+
+      if (documents && documents.length > 0) {
+        // Transform database documents to UI format
+        const documentsByTypeMap = {
+          passport: [],
+          graduation: [],
+          transcripts: [],
+          ielts: [],
+          sop: [],
+          cv: [],
+          lor: []
+        };
+
+        documents.forEach(doc => {
+          // Map document types to keys
+          const typeKey = {
+            'Passport': 'passport',
+            'Graduation Certificate': 'graduation',
+            'Academic Transcripts': 'transcripts',
+            'IELTS/TOEFL Score': 'ielts',
+            'Statement of Purpose': 'sop',
+            'CV/Resume': 'cv',
+            'Letter of Recommendation': 'lor'
+          }[doc.document_type] || 'other';
+
+          if (documentsByTypeMap[typeKey]) {
+            documentsByTypeMap[typeKey].push({
+              id: doc.id,
+              name: doc.file_name,
+              type: doc.document_type,
+              status: 'uploaded',
+              uploadDate: new Date(doc.uploaded_at).toLocaleDateString(),
+              filePath: doc.file_path,
+              fileSize: doc.file_size,
+              mimeType: doc.mime_type
+            });
+          }
+        });
+
+        setDocumentsByType(documentsByTypeMap);
+        
+        // Set success status for uploaded document types
+        const uploadStatusMap = {};
+        Object.keys(documentsByTypeMap).forEach(key => {
+          if (documentsByTypeMap[key].length > 0) {
+            const displayName = {
+              'passport': 'Passport',
+              'graduation': 'Graduation Certificate',
+              'transcripts': 'Academic Transcripts',
+              'ielts': 'IELTS/TOEFL Score',
+              'sop': 'Statement of Purpose',
+              'cv': 'CV/Resume',
+              'lor': 'Letter of Recommendation'
+            }[key];
+            if (displayName) {
+              uploadStatusMap[displayName] = 'success';
+            }
+          }
+        });
+        setUploadStatus(uploadStatusMap);
+
+        const totalDocs = documents.length;
+        toast({ 
+          title: "Documents Loaded", 
+          description: `Found ${totalDocs} previously uploaded document(s).`,
+          duration: 3000,
+          className: "bg-blue-50 border-blue-200"
+        });
+      }
+    } catch (error) {
+      console.error('Error loading uploaded documents:', error);
     }
   };
 
