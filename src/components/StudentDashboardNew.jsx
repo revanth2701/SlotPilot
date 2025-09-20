@@ -56,6 +56,8 @@ const StudentDashboardNew = ({ onBack }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [validationError, setValidationError] = useState(null);
+  const [showDocumentSelector, setShowDocumentSelector] = useState(false);
+  const [selectedDocumentTypes, setSelectedDocumentTypes] = useState([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -426,12 +428,43 @@ const StudentDashboardNew = ({ onBack }) => {
   };
 
   const handleEditDocuments = () => {
+    setShowDocumentSelector(true);
+  };
+
+  const handleDocumentTypeToggle = (docType) => {
+    setSelectedDocumentTypes(prev => {
+      if (prev.includes(docType.id)) {
+        return prev.filter(id => id !== docType.id);
+      } else {
+        return [...prev, docType.id];
+      }
+    });
+  };
+
+  const handleSelectAllDocuments = () => {
+    const allDocTypes = [
+      'passport', 'graduation', 'transcripts', 'ielts', 'sop', 'cv', 'lor'
+    ];
+    setSelectedDocumentTypes(allDocTypes);
+  };
+
+  const handleConfirmReupload = () => {
+    if (selectedDocumentTypes.length === 0) {
+      toast({ 
+        title: "No Selection", 
+        description: "Please select at least one document type to re-upload.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
     setIsEditMode(true);
-    setShowSuccessPopup(false); // Close the success popup if it's open
+    setShowDocumentSelector(false);
+    setShowSuccessPopup(false);
     
     toast({ 
-      title: "Edit Mode Enabled", 
-      description: "You can now upload or remove documents again.",
+      title: "Re-upload Mode Enabled", 
+      description: `You can now re-upload: ${selectedDocumentTypes.length} document type(s).`,
       duration: 3000,
       className: "bg-blue-50 border-blue-200"
     });
@@ -677,8 +710,8 @@ const StudentDashboardNew = ({ onBack }) => {
                            size="sm"
                            className="border-green-300 text-green-700 hover:bg-green-100"
                          >
-                           <Upload className="h-4 w-4 mr-2" />
-                           Edit Documents
+                            <Upload className="h-4 w-4 mr-2" />
+                            Re-upload Documents
                          </Button>
                        </div>
                        <p className="text-green-700 text-sm mt-2">
@@ -775,29 +808,34 @@ const StudentDashboardNew = ({ onBack }) => {
                             onChange={(e) => handleFileUpload(e, docType.label)}
                             className="hidden"
                             id={`upload-${docType.id}`}
-                            disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode)}
+                            disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))}
                           />
                            <Label
                             htmlFor={`upload-${docType.id}`}
                             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
-                              uploading[docType.label] || (applicationSubmitted && !isEditMode)
-                                ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
-                                : uploadStatus[docType.label] === 'success'
-                                ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
-                                : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-                            }`}
+                               uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))
+                                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
+                                 : uploadStatus[docType.label] === 'success'
+                                 ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
+                                 : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
+                             }`}
                           >
                              {uploading[docType.label] ? (
                               <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                                 Uploading...
                               </>
-                            ) : (applicationSubmitted && !isEditMode) ? (
-                              <>
-                                <CheckCircle className="h-4 w-4" />
-                                Submitted
-                              </>
-                            ) : uploadStatus[docType.label] === 'success' ? (
+                             ) : (applicationSubmitted && !isEditMode) ? (
+                               <>
+                                 <CheckCircle className="h-4 w-4" />
+                                 Submitted
+                               </>
+                             ) : (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id)) ? (
+                               <>
+                                 <X className="h-4 w-4" />
+                                 Not Selected
+                               </>
+                             ) : uploadStatus[docType.label] === 'success' ? (
                               <>
                                 <CheckCircle className="h-4 w-4" />
                                 Upload Another
@@ -900,6 +938,88 @@ const StudentDashboardNew = ({ onBack }) => {
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Type Selection Modal */}
+      {showDocumentSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-lg mx-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Upload className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-bold">Select Documents to Re-upload</h2>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Choose which document categories you want to re-upload. You can select one or multiple categories.
+            </p>
+            
+            <div className="space-y-3 mb-6">
+              {[
+                { id: 'passport', label: 'Passport', icon: FileText },
+                { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
+                { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
+                { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
+                { id: 'sop', label: 'Statement of Purpose', icon: FileText },
+                { id: 'cv', label: 'CV/Resume', icon: FileText },
+                { id: 'lor', label: 'Letter of Recommendation', icon: FileText }
+              ].map((docType) => (
+                <div 
+                  key={docType.id} 
+                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                    selectedDocumentTypes.includes(docType.id) 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleDocumentTypeToggle(docType)}
+                >
+                  <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center ${
+                    selectedDocumentTypes.includes(docType.id) 
+                      ? 'border-primary bg-primary' 
+                      : 'border-muted-foreground'
+                  }`}>
+                    {selectedDocumentTypes.includes(docType.id) && (
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    )}
+                  </div>
+                  <docType.icon className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium">{docType.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between mb-6">
+              <Button 
+                onClick={handleSelectAllDocuments}
+                variant="outline" 
+                size="sm"
+              >
+                Select All
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {selectedDocumentTypes.length} document(s) selected
+              </span>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => {
+                  setShowDocumentSelector(false);
+                  setSelectedDocumentTypes([]);
+                }}
+                variant="outline" 
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleConfirmReupload}
+                className="flex-1 bg-primary hover:bg-primary/90"
+                disabled={selectedDocumentTypes.length === 0}
+              >
+                Enable Re-upload
               </Button>
             </div>
           </div>
