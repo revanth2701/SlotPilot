@@ -170,7 +170,8 @@ const StudentDashboardNew = ({ onBack }) => {
             'Letter of Recommendation': 'lor'
           }[doc.document_type] || 'other';
 
-          if (documentsByTypeMap[typeKey]) {
+          // Only add if this category is empty (keeps only the latest document per category)
+          if (documentsByTypeMap[typeKey] && documentsByTypeMap[typeKey].length === 0) {
             documentsByTypeMap[typeKey].push({
               id: doc.id,
               name: doc.file_name,
