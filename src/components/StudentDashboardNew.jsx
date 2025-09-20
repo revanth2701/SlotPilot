@@ -1177,7 +1177,6 @@ const StudentDashboardNew = ({ onBack }) => {
                 </div>
               ))}
             </div>
-            </div>
 
             <div className="flex items-center justify-between mb-6">
               <Button 
