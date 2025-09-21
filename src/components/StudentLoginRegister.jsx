@@ -135,6 +135,12 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
+        <div className="mb-6">
+          <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
+            ← Back to Home
+          </Button>
+        </div>
+        
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
@@ -416,12 +422,6 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
             </Tabs>
           </CardContent>
         </Card>
-
-        <div className="text-center mt-8">
-          <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to Home
-          </Button>
-        </div>
       </div>
     </div>
   );
