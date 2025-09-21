@@ -1,5 +1,4 @@
 import { useState } from "react";
-import slotpilotLogo from "@/assets/slotpilot-logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,10 +81,17 @@ const Index = () => {
       <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-8 w-8" />
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Slotpilot Consultancy
+            <div className="flex items-center">
+              <span className="text-2xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">
+                  SLOT
+                </span>
+                <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
+                  PILOT
+                </span>
+                <span className="text-muted-foreground text-lg font-light ml-1">
+                  consultancy
+                </span>
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -227,10 +233,17 @@ const Index = () => {
       <footer className="bg-card border-t py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-6 w-6" />
-              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Slotpilot Consultancy
+            <div className="flex items-center mb-4 md:mb-0">
+              <span className="text-xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">
+                  SLOT
+                </span>
+                <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
+                  PILOT
+                </span>
+                <span className="text-muted-foreground text-base font-light ml-1">
+                  consultancy
+                </span>
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
