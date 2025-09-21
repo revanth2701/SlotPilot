@@ -187,7 +187,9 @@ const StudentDashboardNew = ({ onBack }) => {
               uploadDate: new Date(doc.uploaded_at).toLocaleString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
-                year: 'numeric', 
+                year: 'numeric'
+              }),
+              uploadTime: new Date(doc.uploaded_at).toLocaleString('en-US', { 
                 hour: 'numeric', 
                 minute: '2-digit', 
                 hour12: true 
@@ -1027,47 +1029,32 @@ const StudentDashboardNew = ({ onBack }) => {
                           </Label>
                         </div>
                         
-                        {/* Show uploaded documents for this type */}
-                        {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-medium text-muted-foreground">Uploaded Files:</h4>
-                            {documentsByType[docType.id].map((doc) => (
-                              <div key={doc.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md border">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-4 w-4 text-muted-foreground" />
-                                   <div className="flex-1 min-w-0">
-                                     <p className="text-sm font-medium truncate">
-                                       <span className="text-primary font-semibold">{doc.name}</span>
-                                       <span className="text-muted-foreground"> uploaded on </span>
-                                       <span className="text-green-700">{doc.uploadDate}</span>
-                                     </p>
-                                   </div>
-                                </div>
-                                 <div className="flex items-center gap-2">
-                                   <Button
-                                     variant="ghost"
-                                     size="sm"
-                                     onClick={() => handleDownloadDocument(doc)}
-                                     className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                                     title="Download document"
-                                   >
-                                     <Download className="h-4 w-4" />
-                                   </Button>
-                                    {(!applicationSubmitted || isEditMode) && (
-                                     <Button
-                                       onClick={() => removeDocument(docType.label, doc.id)}
-                                       variant="ghost"
-                                       size="sm"
-                                       className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                     >
-                                       <X className="h-3 w-3" />
-                                     </Button>
-                                   )}
+                         {/* Show latest uploaded document for this type */}
+                         {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
+                           <div className="mt-3">
+                             {documentsByType[docType.id].slice(0, 1).map((doc) => (
+                               <div key={doc.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                                 <div className="flex-1 min-w-0">
+                                   <p className="text-sm font-medium truncate text-green-800">
+                                     {doc.name}
+                                   </p>
+                                   <p className="text-xs text-green-600 mt-1">
+                                     {doc.uploadDate} at {doc.uploadTime}
+                                   </p>
                                  </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => handleDownloadDocument(doc)}
+                                   className="h-8 w-8 p-0 text-green-700 hover:text-green-900 hover:bg-green-100"
+                                   title="Download latest document"
+                                 >
+                                   <Download className="h-4 w-4" />
+                                 </Button>
+                               </div>
+                             ))}
+                           </div>
+                         )}
                       </div>
                      ))}
                   </div>
