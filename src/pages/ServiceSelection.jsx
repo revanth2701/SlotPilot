@@ -11,26 +11,23 @@ const ServiceSelection = () => {
     <div className="h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col">
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-center">
-          <div className="text-center">
-            <div className="relative inline-block">
-              <h1 className="text-6xl sm:text-7xl font-black tracking-tighter mb-2">
-                <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent drop-shadow-2xl">
-                  SLOT
-                </span>
-                <span className="bg-gradient-to-r from-accent via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-2xl">
-                  PILOT
-                </span>
-              </h1>
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-accent rounded-full animate-pulse"></div>
-              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary rounded-full animate-pulse delay-300"></div>
+            <div className="text-center">
+              <div className="relative inline-block">
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-1">
+                  <span className="text-primary">
+                    SLOT
+                  </span>
+                  <span className="text-accent">
+                    PILOT
+                  </span>
+                </h1>
+              </div>
+              <p className="text-sm text-muted-foreground font-medium tracking-wide uppercase">
+                Global Consultancy
+              </p>
             </div>
-            <p className="text-lg text-primary font-bold tracking-[0.3em] mt-1 uppercase opacity-90">
-              Global Consultancy
-            </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mt-3 rounded-full"></div>
-          </div>
           </div>
         </div>
       </header>
