@@ -81,6 +81,16 @@ const Index = () => {
       <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            {/* Back to Services Button */}
+            <Button
+              onClick={() => window.location.href = '/'}
+              variant="outline"
+              size="sm"
+              className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 font-semibold"
+            >
+              ← Back to Services
+            </Button>
+            
             <div className="flex items-center">
               <span className="text-2xl font-black tracking-tight">
                 <span className="bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">

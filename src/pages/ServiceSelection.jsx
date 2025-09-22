@@ -8,19 +8,19 @@ const ServiceSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
       {/* Header */}
-      <header className="relative z-10 bg-gradient-to-r from-primary/5 to-secondary/5 backdrop-blur-sm border-b">
+      <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                Slotpilot
-              </h1>
-              <p className="text-xl text-primary font-semibold tracking-wide mt-1">
-                Consultancy
-              </p>
-            </div>
+          <div className="text-center">
+            <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-hero bg-clip-text text-transparent tracking-tight">
+              SlotPilot
+            </h1>
+            <p className="text-xl text-primary font-bold tracking-wider mt-2 uppercase">
+              Global Consultancy
+            </p>
+          </div>
           </div>
         </div>
       </header>

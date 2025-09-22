@@ -100,28 +100,28 @@ const VisaServices = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Header */}
-      <header className="relative z-10 bg-gradient-to-r from-primary/5 to-secondary/5 backdrop-blur-sm border-b">
+      <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               onClick={() => navigate('/')}
-              className="text-muted-foreground hover:text-foreground"
+              className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 font-semibold"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Services
             </Button>
             <div className="text-center">
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                Visa Services
+              <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-hero bg-clip-text text-transparent tracking-tight">
+                SlotPilot Visa Services
               </h1>
-              <p className="text-lg text-primary font-semibold tracking-wide mt-1">
+              <p className="text-lg text-primary font-bold tracking-wider mt-1 uppercase">
                 Worldwide Visa Assistance
               </p>
             </div>
-            <div className="w-24"></div>
+            <div className="w-32"></div>
           </div>
         </div>
       </header>
