@@ -8,26 +8,36 @@ const ServiceSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col">
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-hero bg-clip-text text-transparent tracking-tight">
-              SlotPilot
-            </h1>
-            <p className="text-xl text-primary font-bold tracking-wider mt-2 uppercase">
+            <div className="relative inline-block">
+              <h1 className="text-6xl sm:text-7xl font-black tracking-tighter mb-2">
+                <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent drop-shadow-2xl">
+                  SLOT
+                </span>
+                <span className="bg-gradient-to-r from-accent via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-2xl">
+                  PILOT
+                </span>
+              </h1>
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-accent rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary rounded-full animate-pulse delay-300"></div>
+            </div>
+            <p className="text-lg text-primary font-bold tracking-[0.3em] mt-1 uppercase opacity-90">
               Global Consultancy
             </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mt-3 rounded-full"></div>
           </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
+      <main className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
             Choose Your Service
           </h2>
@@ -125,7 +135,7 @@ const ServiceSelection = () => {
         </div>
 
         {/* Additional Info */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <p className="text-muted-foreground">
             Need help deciding? Contact our consultants for personalized guidance.
           </p>
