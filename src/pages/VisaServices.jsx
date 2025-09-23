@@ -162,7 +162,7 @@ const VisaServices = () => {
               {countries.map((country, index) => (
                 <Card 
                   key={country.id}
-                  className="group hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 hover:border-primary/30 bg-gradient-to-br from-background to-primary/5 hover:scale-105 animate-fade-in"
+                  className="group hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 hover:border-primary/30 bg-gradient-to-br from-background to-primary/5 hover:scale-105 animate-fade-in hover-scale transform-gpu"
                   style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => handleCountrySelect(country)}
                 >
@@ -172,7 +172,7 @@ const VisaServices = () => {
                         {country.popularity}
                       </Badge>
                     </div>
-                    <div className="text-7xl mb-6 group-hover:scale-125 transition-transform duration-500 animate-bounce">
+                    <div className="text-7xl mb-6 group-hover:scale-110 transition-all duration-300 hover-scale">
                       {country.flag}
                     </div>
                     <CardTitle className="text-2xl font-bold mb-2">{country.name}</CardTitle>
@@ -238,7 +238,7 @@ const VisaServices = () => {
               </Button>
               
               <div className="text-center mb-8">
-                <div className="text-8xl mb-6 animate-bounce">{selectedCountry.flag}</div>
+                <div className="text-8xl mb-6 animate-scale-in hover-scale transition-all duration-300">{selectedCountry.flag}</div>
                 <h2 className="text-4xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {selectedCountry.name} Visa Services
                 </h2>
@@ -264,7 +264,7 @@ const VisaServices = () => {
                 return (
                   <Card 
                     key={index} 
-                    className="hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/30 bg-gradient-to-br from-background to-primary/5 hover:scale-105 animate-fade-in"
+                    className="hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/30 bg-gradient-to-br from-background to-primary/5 hover:scale-105 animate-fade-in hover-scale transform-gpu"
                     style={{ animationDelay: `${index * 150}ms` }}
                   >
                     <CardHeader>
@@ -316,7 +316,8 @@ const VisaServices = () => {
 
                         <Button 
                           onClick={() => handleApplyVisa(visa)}
-                          className="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto hover:shadow-lg transition-all duration-300"
+                          className="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto hover:shadow-lg transition-all duration-300 hover-scale transform-gpu animate-fade-in"
+                          style={{ animationDelay: `${index * 200}ms` }}
                           size="lg"
                         >
                           <Plane className="w-5 h-5 mr-2" />
