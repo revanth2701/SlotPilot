@@ -1035,25 +1035,27 @@ const StudentDashboardNew = ({ onBack }) => {
                           {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
                             <div className="mt-3">
                               {documentsByType[docType.id].slice(0, 1).map((doc) => (
-                                <div key={doc.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate text-green-800">
-                                      {doc.name}
-                                    </p>
-                                    <p className="text-xs text-green-600 mt-1">
-                                      Uploaded on {doc.uploadDate} at {doc.uploadTime}
-                                    </p>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDownloadDocument(doc)}
-                                    className="h-8 w-8 p-0 text-green-700 hover:text-green-900 hover:bg-green-100"
-                                    title={`Download ${doc.name}`}
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                                 <div key={doc.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md group hover:bg-green-100 transition-colors animate-fade-in">
+                                   <div className="flex-1 min-w-0">
+                                     <p className="text-sm font-semibold truncate text-green-800">
+                                       {doc.name}
+                                     </p>
+                                     <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                       <span>Uploaded on {doc.uploadDate}</span>
+                                       <span className="text-green-500">•</span>
+                                       <span>{doc.uploadTime}</span>
+                                     </p>
+                                   </div>
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     onClick={() => handleDownloadDocument(doc)}
+                                     className="h-8 w-8 p-0 text-green-700 hover:text-green-900 hover:bg-green-200 transition-all duration-200 hover:scale-110 hover-scale"
+                                     title={`Download ${doc.name}`}
+                                   >
+                                     <Download className="h-4 w-4" />
+                                   </Button>
+                                 </div>
                               ))}
                             </div>
                           )}
