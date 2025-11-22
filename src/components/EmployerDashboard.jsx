@@ -24,6 +24,13 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const EmployerDashboard = ({ onBack }) => {
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [studentsData, setStudentsData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,28 +49,13 @@ const EmployerDashboard = ({ onBack }) => {
       const { data, error } = await supabase.from("Studentpersonaldata").select("*");
       if (!error && data) {
         setStudentsData(data);
+      } else {
+        setStudentsData([]);
       }
       setLoading(false);
     };
     fetchStudents();
   }, []);
-
-  // Fetch documents for selected student
-  const fetchStudentDocuments = async (student) => {
-    setDocLoading(true);
-    setStudentDocuments([]);
-    const { data, error } = await supabase
-      .from("student_documents")
-      .select("*")
-      .eq("student_email", student.Email);
-    if (!error && data) {
-      setStudentDocuments(data);
-      console.log("Fetched documents for", student.Email, data);
-    } else {
-      console.warn("Error fetching documents:", error);
-    }
-    setDocLoading(false);
-  };
 
   // Fetch visa applications from Supabase
   useEffect(() => {
@@ -71,7 +63,6 @@ const EmployerDashboard = ({ onBack }) => {
       setVisaLoading(true);
       try {
         const { data, error } = await supabase.from("Visaappointments").select("*");
-        console.log("Visaappointments fetch result:", { data, error });
         if (error) {
           console.error("Error fetching Visaappointments:", error);
           setVisaData([]);
@@ -89,7 +80,7 @@ const EmployerDashboard = ({ onBack }) => {
   }, []);
 
   const filteredStudents = studentsData.filter(student =>
-    (((student?.["First Name"] || "") + " " + (student?.["Last Name"] || "")).toLowerCase().includes(searchTerm.toLowerCase())) ||
+    ((((student?.["First Name"] || "") + " " + (student?.["Last Name"] || ""))).toLowerCase().includes(searchTerm.toLowerCase())) ||
     ((student?.Email || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -108,12 +99,10 @@ const EmployerDashboard = ({ onBack }) => {
     setDocLoading(true);
     setSelectedStudent(student);
 
-    console.log("Querying documents for:", student.Email && student.Email.trim());
     const { data, error } = await supabase
       .from("student_documents")
       .select("*")
       .ilike("student_email", (student.Email || "").trim());
-    console.log("Supabase result:", data, error);
 
     if (error || !data || data.length === 0) {
       alert("No documents found for this student.");
@@ -146,9 +135,7 @@ const EmployerDashboard = ({ onBack }) => {
             return;
           }
 
-          if (blob.size === 0) {
-            console.warn("Blob is empty for:", doc.file_path);
-          } else {
+          if (blob.size > 0) {
             zip.file(doc.file_name || doc.document_type || doc.file_path.split("/").pop(), blob);
           }
         } catch (err) {
@@ -157,16 +144,17 @@ const EmployerDashboard = ({ onBack }) => {
       })
     );
 
-    zip.generateAsync({ type: "blob" }).then((content) => {
+    try {
+      const content = await zip.generateAsync({ type: "blob" });
       saveAs(
         content,
         `${(student?.["First Name"] || student?.firstName || "student")}_${(student?.["Last Name"] || student?.lastName || "")}_documents.zip`
       );
-      setDocLoading(false);
-    }).catch(err => {
+    } catch (err) {
       console.error("Error generating zip:", err);
+    } finally {
       setDocLoading(false);
-    });
+    }
   };
 
   const formatCell = (val) => {
@@ -301,21 +289,22 @@ const EmployerDashboard = ({ onBack }) => {
               {/* Students Table */}
               <Card className="shadow-card">
                 <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="flex-1 min-w-0">
                       <CardTitle className="text-xl">Student Applications</CardTitle>
                       <CardDescription>
                         Manage and Review Student Applications for International Studies
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Search students..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-8 w-64"
+                          className="pl-10 w-full"
                         />
                       </div>
                     </div>
@@ -389,23 +378,26 @@ const EmployerDashboard = ({ onBack }) => {
                 {/* decorative background placed behind content */}
                 <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 opacity-40 pointer-events-none backdrop-blur-sm" />
                 <div className="relative p-6 border-b">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-2xl font-bold">Visa Applications</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Live list of applications submitted by users</p>
-                    </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">Visa Applications</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Live list of applications submitted by users</p>
+                  </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  {/* Search + Actions block - placed above the summary chips */}
+                  <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                    <div className="w-full sm:w-1/2">
+                      <div className="relative w-full">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Search by name, email, passport, country..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 w-80"
+                          className="pl-10 w-full"
                         />
                       </div>
+                    </div>
 
+                    <div className="flex gap-3 w-full sm:w-auto">
                       <Button
                         variant="outline"
                         size="sm"
@@ -415,7 +407,7 @@ const EmployerDashboard = ({ onBack }) => {
                           setVisaData(error ? [] : (Array.isArray(data) ? data : []));
                           setVisaLoading(false);
                         }}
-                        className="px-3"
+                        className="w-full sm:w-auto px-3"
                       >
                         Refresh
                       </Button>
@@ -424,7 +416,7 @@ const EmployerDashboard = ({ onBack }) => {
                         onClick={exportVisasAsCSV}
                         disabled={visaLoading || visaData.length === 0}
                         className={
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-white shadow-md " +
+                          "w-full sm:w-auto flex items-center gap-3 rounded-lg px-3 py-2 text-white shadow-md " +
                           (visaLoading || visaData.length === 0
                             ? "opacity-50 cursor-not-allowed bg-gray-400"
                             : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:scale-[1.01] transform transition")
@@ -433,15 +425,19 @@ const EmployerDashboard = ({ onBack }) => {
                         <span className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
                           <Download className="h-4 w-4 text-white" />
                         </span>
-                        <div className="text-left">
+
+                        <div className="hidden sm:block text-left">
                           <div className="text-sm font-semibold">{visaLoading ? "Preparing..." : "Download CSV"}</div>
                           <div className="text-xs text-white/90">Export current data</div>
+                        </div>
+                        <div className="sm:hidden text-sm font-semibold">
+                          {visaLoading ? "Preparing..." : "Download"}
                         </div>
                       </Button>
                     </div>
                   </div>
 
-                  {/* refreshed summary chips (removed 'Last submitted') */}
+                  {/* refreshed summary chips (placed below the search/actions) */}
                   <div className="mt-4 flex flex-wrap gap-3">
                     <div className="px-3 py-2 rounded-lg bg-white/60 text-indigo-700 text-sm font-semibold shadow-sm backdrop-blur">
                       Total: <span className="ml-2 text-lg">{visaData.length}</span>
@@ -453,48 +449,106 @@ const EmployerDashboard = ({ onBack }) => {
                 </div>
 
                 <CardContent className="p-4">
-                  <div className="overflow-auto">
-                    <table className="min-w-full table-auto border-collapse">
-                      <thead className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm">
-                        <tr>
-                          {visaCols.length === 0 ? (
-                            <th className="px-4 py-3 text-left text-sm text-muted-foreground">No Columns</th>
-                          ) : visaCols.map(col => (
-                            <th key={col} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                              {col}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {visaLoading ? (
+                  {!isMobile ? (
+                    <div className="overflow-auto">
+                      <table className="min-w-full table-auto border-collapse">
+                        <thead className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm">
                           <tr>
-                            <td colSpan={visaCols.length || 1} className="px-4 py-6 text-center text-sm text-muted-foreground">Loading visa applications…</td>
+                            {visaCols.length === 0 ? (
+                              <th className="px-4 py-3 text-left text-sm text-muted-foreground">No Columns</th>
+                            ) : visaCols.map(col => (
+                              <th
+                                key={col}
+                                className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                              >
+                                {col}
+                              </th>
+                            ))}
                           </tr>
-                        ) : visaData.length === 0 ? (
-                          <tr>
-                            <td colSpan={visaCols.length || 1} className="px-6 py-12 text-center">
-                              <div className="inline-flex flex-col items-center gap-2">
-                                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">📭</div>
-                                <div className="text-sm font-medium">No visa applications yet</div>
-                                <div className="text-xs text-muted-foreground">Click Refresh to try again</div>
-                              </div>
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredVisa.map((row, i) => (
-                            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              {visaCols.map(col => (
-                                <td key={col} className="px-4 py-3 align-top text-sm whitespace-nowrap">
-                                  {formatCell(row[col])}
-                                </td>
-                              ))}
+                        </thead>
+                        <tbody>
+                          {visaLoading ? (
+                            <tr>
+                              <td colSpan={visaCols.length || 1} className="px-4 py-6 text-center text-sm text-muted-foreground">Loading visa applications…</td>
                             </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                          ) : visaData.length === 0 ? (
+                            <tr>
+                              <td colSpan={visaCols.length || 1} className="px-6 py-12 text-center">
+                                <div className="inline-flex flex-col items-center gap-2">
+                                  <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">📭</div>
+                                  <div className="text-sm font-medium">No visa applications yet</div>
+                                  <div className="text-xs text-muted-foreground">Click Refresh to try again</div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredVisa.map((row, i) => (
+                              <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                {visaCols.map(col => (
+                                  <td
+                                    key={col}
+                                    className="px-4 py-3 align-top text-sm break-words max-w-[220px] sm:max-w-none"
+                                  >
+                                    {formatCell(row[col])}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {visaLoading ? (
+                        <div className="text-center text-sm text-muted-foreground">Loading visa applications…</div>
+                      ) : visaData.length === 0 ? (
+                        <div className="px-4 py-8 text-center">
+                          <div className="inline-flex flex-col items-center gap-2">
+                            <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">📭</div>
+                            <div className="text-sm font-medium">No visa applications yet</div>
+                            <div className="text-xs text-muted-foreground">Click Refresh to try again</div>
+                          </div>
+                        </div>
+                      ) : (
+                        filteredVisa.map((row, idx) => {
+                          const colsToShow = visaCols.slice(0, 6);
+                          return (
+                            <div key={idx} className="bg-white/80 p-4 rounded-lg shadow-sm border">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm text-muted-foreground">#{idx + 1}</div>
+                                  <div className="text-base font-semibold truncate">
+                                    {formatCell(row["Full Name"] || row["name"] || row["ApplicantName"] || row["Email"] || "Applicant")}
+                                  </div>
+                                </div>
+                                <div className="ml-3 text-xs text-muted-foreground">
+                                  {formatCell(row["Country"] || row["country"] || "")}
+                                </div>
+                              </div>
+
+                              <div className="mt-3 grid grid-cols-1 gap-2">
+                                {colsToShow.map(col => (
+                                  <div key={col} className="flex justify-between items-start text-sm">
+                                    <div className="text-muted-foreground mr-3 truncate font-medium">{col}</div>
+                                    <div className="text-right break-words">{formatCell(row[col])}</div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="mt-3 flex justify-end">
+                                <Button size="sm" variant="outline" onClick={() => {
+                                  alert("Open detailed view for this application (implement as needed)");
+                                }}>
+                                  View
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

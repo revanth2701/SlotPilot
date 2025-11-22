@@ -135,9 +135,6 @@ const VisaServices = () => {
               <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-hero bg-clip-text text-transparent tracking-tight">
                 SlotPilot Visa Services
               </h1>
-              <p className="text-lg text-primary font-bold tracking-wider mt-1 uppercase">
-                Worldwide Visa Assistance
-              </p>
             </div>
             <div className="w-32"></div>
           </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Plane, Building2, Globe } from 'lucide-react';
+import { GraduationCap, Plane, Building2, Globe, Users } from 'lucide-react';
 
 // constant Earth — realistic 3D rotating globe component (uses an equirectangular world-map image at /public/images/world-map.jpg)
 const Earth = () => (
@@ -65,75 +65,89 @@ const ServiceSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col">
-      {/* Top Right Employer Login Button */}
-      <div className="absolute top-4 right-6 z-50">
-        <Button
-          variant="hero"
-          size="sm"
-          onClick={() => navigate('/employer-login')}
-          className="font-semibold shadow-lg"
-        >
-          Employer Login
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              {/* Animated wordmark styles (kept subtle & neat) */}
-              <style>{`
-                .slotpilot-wordmark { display:inline-flex; gap:0.06rem; align-items:baseline; }
-                .slotpilot-wordmark span {
-                  display:inline-block;
-                  font-weight:800;
-                  font-size:1.9rem;
-                  line-height:1;
-                  -webkit-background-clip:text;
-                  background-clip:text;
-                  color:transparent;
-                  background-image: linear-gradient(90deg, #F59E0B 0%, #F97316 45%, #FB7185 100%);
-                  transition: transform 220ms ease, letter-spacing 220ms ease;
-                }
-                /* subtle staggered wave */
-                .slotpilot-wordmark span:nth-child(1){ transform-origin:center; animation:wave 2200ms ease-in-out infinite; animation-delay:0ms; }
-                .slotpilot-wordmark span:nth-child(2){ animation:wave 2200ms ease-in-out infinite; animation-delay:80ms; }
-                .slotpilot-wordmark span:nth-child(3){ animation:wave 2200ms ease-in-out infinite; animation-delay:160ms; }
-                .slotpilot-wordmark span:nth-child(4){ animation:wave 2200ms ease-in-out infinite; animation-delay:240ms; }
-                .slotpilot-wordmark span:nth-child(5){ animation:wave 2200ms ease-in-out infinite; animation-delay:320ms; }
-                .slotpilot-wordmark span:nth-child(6){ animation:wave 2200ms ease-in-out infinite; animation-delay:400ms; }
-                .slotpilot-wordmark span:nth-child(7){ animation:wave 2200ms ease-in-out infinite; animation-delay:480ms; }
-                .slotpilot-wordmark span:nth-child(8){ animation:wave 2200ms ease-in-out infinite; animation-delay:560ms; }
-                .slotpilot-wordmark span:nth-child(9){ animation:wave 2200ms ease-in-out infinite; animation-delay:640ms; }
-                @keyframes wave {
-                  0% { transform: translateY(0) scale(1); }
-                  40% { transform: translateY(-6px) scale(1.03); }
-                  70% { transform: translateY(-3px) scale(1.015); }
-                  100% { transform: translateY(0) scale(1); }
-                }
-                /* hover: gentle lift and increased spacing */
-                .slotpilot-wordmark:hover span { transform: translateY(-3px) scale(1.02); letter-spacing:0.6px; }
-                /* responsive sizing */
-                @media (min-width:640px){
-                  .slotpilot-wordmark span { font-size:2.625rem; } /* sm:text-5xl */
-                }
-              `}</style>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* left placeholder (keeps balanced layout) */}
+            <div className="w-16" />
 
-              <div className="relative inline-block">
-                {/* wordmark only (logo removed) */}
+            {/* center wordmark */}
+            <div className="flex-1 flex justify-center">
+              <div className="text-center">
+                {/* Animated wordmark styles (disabled on small screens for stability) */}
+                <style>{`
+                  .slotpilot-wordmark { display:inline-flex; gap:0.04rem; align-items:baseline; }
+                  .slotpilot-wordmark span {
+                    display:inline-block;
+                    font-weight:800;
+                    font-size:1.6rem;
+                    line-height:1;
+                    -webkit-background-clip:text;
+                    background-clip:text;
+                    color:transparent;
+                    background-image: linear-gradient(90deg, #F59E0B 0%, #F97316 45%, #FB7185 100%);
+                    transition: transform 220ms ease, letter-spacing 220ms ease;
+                  }
+                  /* subtle staggered wave on md+ only */
+                  @media (min-width: 768px) {
+                    .slotpilot-wordmark span { font-size:2.625rem; }
+                    .slotpilot-wordmark span:nth-child(1){ animation:wave 2200ms ease-in-out infinite; animation-delay:0ms; }
+                    .slotpilot-wordmark span:nth-child(2){ animation:wave 2200ms ease-in-out infinite; animation-delay:80ms; }
+                    .slotpilot-wordmark span:nth-child(3){ animation:wave 2200ms ease-in-out infinite; animation-delay:160ms; }
+                    .slotpilot-wordmark span:nth-child(4){ animation:wave 2200ms ease-in-out infinite; animation-delay:240ms; }
+                    .slotpilot-wordmark span:nth-child(5){ animation:wave 2200ms ease-in-out infinite; animation-delay:320ms; }
+                    .slotpilot-wordmark span:nth-child(6){ animation:wave 2200ms ease-in-out infinite; animation-delay:400ms; }
+                    .slotpilot-wordmark span:nth-child(7){ animation:wave 2200ms ease-in-out infinite; animation-delay:480ms; }
+                    .slotpilot-wordmark span:nth-child(8){ animation:wave 2200ms ease-in-out infinite; animation-delay:560ms; }
+                    .slotpilot-wordmark span:nth-child(9){ animation:wave 2200ms ease-in-out infinite; animation-delay:640ms; }
+                    @keyframes wave {
+                      0% { transform: translateY(0) scale(1); }
+                      40% { transform: translateY(-6px) scale(1.03); }
+                      70% { transform: translateY(-3px) scale(1.015); }
+                      100% { transform: translateY(0) scale(1); }
+                    }
+                    .slotpilot-wordmark:hover span { transform: translateY(-3px) scale(1.02); letter-spacing:0.6px; }
+                  }
+                `}</style>
+
                 <div>
-                  <h1 className="mb-1">
+                  <h1 className="mb-0">
                     <span className="slotpilot-wordmark" aria-label="SlotPilot">
                       {"SlotPilot".split('').map((ch, i) => <span key={i}>{ch}</span>)}
                     </span>
                   </h1>
                 </div>
-              </div>
 
-              <p className="text-sm text-muted-foreground font-medium tracking-wide uppercase mt-1">
-                Global Education & Visa Services
-              </p>
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium tracking-wide uppercase mt-1">
+                  Global Education & Visa Services
+                </p>
+              </div>
+            </div>
+
+            {/* right: employer/student actions (responsive) */}
+            <div className="w-16 flex justify-end items-center">
+              <div className="hidden sm:block">
+                <Button
+                  variant="hero"
+                  size="sm"
+                  onClick={() => navigate('/employer-login')}
+                  className="font-semibold shadow-lg"
+                >
+                  Employer Login
+                </Button>
+              </div>
+              {/* small-screen compact action: show login icon (navigates to Employer Login) */}
+              <div className="sm:hidden">
+                <button
+                  className="p-2 rounded-md border flex items-center justify-center"
+                  aria-label="Employer Login"
+                  onClick={() => navigate('/employer-login')}
+                >
+                  <Users className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -150,7 +164,7 @@ const ServiceSelection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Higher Education Card */}
           <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/20 bg-gradient-to-br from-background to-primary/5">
             <CardHeader className="text-center pb-4">
@@ -183,8 +197,8 @@ const ServiceSelection = () => {
                   <span>Student Visa Assistance</span>
                 </div>
               </div>
-              <Button 
-                onClick={() => navigate('/higher-education')} 
+              <Button
+                onClick={() => navigate('/higher-education')}
                 className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto"
                 size="lg"
               >
@@ -226,8 +240,8 @@ const ServiceSelection = () => {
                   <span>Document Support & Review</span>
                 </div>
               </div>
-              <Button 
-                onClick={() => navigate('/visa-services')} 
+              <Button
+                onClick={() => navigate('/visa-services')}
                 className="w-full bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-secondary-foreground font-semibold py-3 h-auto"
                 size="lg"
               >
@@ -241,7 +255,7 @@ const ServiceSelection = () => {
         {/* Additional Info */}
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
-            Contact our consultants for personalized guidance at 
+            Contact our consultants for personalized guidance at
             <a href="mailto:info@slotpilot.in" className="text-primary underline"> info@slotpilot.in</a>
           </p>
           <div className="mt-4 text-xs text-muted-foreground">
