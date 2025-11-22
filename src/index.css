@@ -119,3 +119,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile responsiveness fixes: keep layout/content unchanged but make fixed-width elements fluid */
+@media (max-width: 640px) {
+  /* Make common fixed-width utilities behave fluid on small screens */
+  .w-80, .w-64, .w-56, .w-48, .w-40, .w-32, .w-24, .w-20, .max-w-sm, .max-w-md, .max-w-lg, .max-w-xl, .max-w-2xl, .max-w-3xl, .max-w-4xl, .max-w-6xl, .max-w-7xl {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Make fixed input widths expand to container width */
+  input[class*="w-"], textarea[class*="w-"], select[class*="w-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure images and svgs scale down */
+  img, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Improve horizontal scrolling for tables and long content */
+  .overflow-x-auto, .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto !important;
+  }
+
+  /* Reduce large paddings on tiny screens */
+  .p-6 { padding: 1rem !important; }
+  .py-12 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+  .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+}
+

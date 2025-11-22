@@ -76,11 +76,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative h-16">
             <div className="flex justify-between items-center h-16 z-10">
               {/* Back to Services Button (left) */}
-              <div>
+              <div className="flex items-center gap-2">
+                <div className="sm:hidden text-lg font-extrabold text-primary">SlotPilot</div>
                 <Button
                   onClick={() => window.location.href = '/'}
                   variant="outline"
@@ -99,35 +100,35 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Centered brand (absolute center of the nav) */}
-            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="text-2xl font-extrabold tracking-tight leading-none text-center">
+            {/* Centered brand: absolutely centered on sm+; show compact brand on xs in the left area */}
+            <div className="hidden sm:block sm:absolute sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 pointer-events-none text-center">
+              <div className="text-2xl font-extrabold tracking-tight leading-none">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
                   SlotPilot
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground text-center">Global Education & Visa Services</div>
+              <div className="text-xs text-muted-foreground">Global Education & Visa Services</div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center">
+      <section className="relative min-h-[50vh] sm:min-h-[80vh] flex items-center">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `linear-gradient(rgba(37, 99, 235, 0.8), rgba(37, 99, 235, 0.6)), url(${heroImage})`
           }}
         />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-primary-foreground">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        <div className="relative max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-primary-foreground">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
             Your Gateway to 
             <span className="block bg-gradient-to-r from-accent to-yellow-300 bg-clip-text text-transparent">
               Global Education
             </span>
           </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+          <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 max-w-full sm:max-w-3xl mx-auto opacity-90">
             Transform your academic dreams into reality with expert guidance for Masters programs 
             in USA, UK, Canada, Ireland, Germany, and Australia.
           </p>
@@ -135,7 +136,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => setCurrentView("student-auth")}
-              className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8 py-3 h-auto"
+              className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 text-base sm:text-lg px-6 sm:px-8 py-3 h-auto"
             >
               Start Your Journey
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -146,7 +147,7 @@ const Index = () => {
 
       {/* Countries Section */}
       <section className="py-20 bg-gradient-to-br from-secondary to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
               Study Destinations
@@ -178,7 +179,7 @@ const Index = () => {
 
       {/* Features Section */}
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
               Why Choose Us?
@@ -210,7 +211,7 @@ const Index = () => {
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-hero">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-primary-foreground">
+        <div className="max-w-full sm:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-primary-foreground">
           <h2 className="text-4xl font-bold mb-6">
             Ready to Begin Your Journey?
           </h2>
