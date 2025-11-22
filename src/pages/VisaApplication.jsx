@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, User, Calendar, MapPin, Phone, Mail, Send } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+// use relative imports instead of "@/..." aliases to avoid resolution issues
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { ArrowLeft, FileText, User, MapPin, Send } from 'lucide-react';
+import { supabase } from "../utils/supabaseClient";
+
+const TABLE_NAME = "Visaappointments";
 
 const VisaApplication = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const { country, visaType, flag } = location.state || {};
 
   const [formData, setFormData] = useState({
@@ -24,37 +26,120 @@ const VisaApplication = () => {
     passportNumber: '',
     travelPurpose: '',
     intendedStayDuration: '',
-    additionalInfo: ''
+    address: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false); // <-- added
+  const [notification, setNotification] = useState(null); // { type: 'success'|'error', title, message }
+
+  const showNotification = (type, title, message, autoHide = true) => {
+    setNotification({ type, title, message });
+    if (autoHide) setTimeout(() => setNotification(null), 5000);
+    if (type === 'error') console.error(title, message);
+    else console.info(title, message);
+  };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const required = ['firstName','lastName','email','phone','dateOfBirth','nationality','passportNumber','travelPurpose','intendedStayDuration','address'];
+    for (const key of required) {
+      if (!formData[key] || !String(formData[key]).trim()) {
+        showNotification('error', 'Missing required field', 'Please fill all required fields before submitting.');
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
-    toast({
-      title: "Application Submitted Successfully!",
-      description: `Your ${visaType} application for ${country} has been received. Our team will contact you within 24 hours.`,
-      duration: 5000,
-    });
+    try {
+      if (!supabase || typeof supabase.from !== 'function') {
+        showNotification('error', 'Configuration error', 'Database client is not configured. Contact admin.');
+        setIsSubmitting(false);
+        return;
+      }
 
-    setIsSubmitting(false);
-    
-    // Navigate back to services after successful submission
-    setTimeout(() => {
-      navigate('/');
-    }, 3000);
+      // build payload using the exact column names you provided
+      let insertPayload = {
+        "Passport Number": formData.passportNumber,
+        "First Name": formData.firstName,
+        "Last Name": formData.lastName,
+        "Address": formData.address,
+        "Contact Number": formData.phone,
+        "Mail id": formData.email,
+        "DOB": formData.dateOfBirth,
+        "Nationality": formData.nationality,
+        "Purpose of Travel": formData.travelPurpose,
+        "Length of Stay": formData.intendedStayDuration,
+        "Country": country || null
+      };
+
+      // Attempt insert and handle missing-column errors by stripping unknown columns and retrying once.
+      let attempt = 0;
+      let lastError = null;
+
+      while (attempt < 2) {
+        const res = await supabase.from(TABLE_NAME).insert([insertPayload]);
+        const error = res?.error || (res instanceof Error ? res : null);
+        const data = res?.data ?? null;
+        console.info("Supabase insert attempt", attempt + 1, { data, error });
+
+        if (!error) {
+          // show notification and set success state so UI displays the success message
+          showNotification('success', 'Application Submitted', `Your ${visaType || 'visa'} application has been received.`);
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            dateOfBirth: '',
+            nationality: '',
+            passportNumber: '',
+            travelPurpose: '',
+            intendedStayDuration: '',
+            address: ''
+          });
+          setIsSubmitting(false);
+          setSubmissionSuccess(true); // <-- added
+          // do not auto-navigate away immediately so user sees success
+          return;
+        }
+
+        lastError = error;
+        const msg = error?.message || String(error);
+
+        // detect missing-column messages like: Could not find the 'country' column...
+        const missing = [...msg.matchAll(/Could not find the '([^']+)' column/g)].map(m => m[1]);
+
+        if (missing.length === 0) break;
+
+        // drop reported missing columns from payload and retry
+        missing.forEach(col => {
+          if (col in insertPayload) delete insertPayload[col];
+          const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+          if (camel in insertPayload) delete insertPayload[camel];
+          const snake = col.replace(/([A-Z])/g, m => `_${m.toLowerCase()}`);
+          if (snake in insertPayload) delete insertPayload[snake];
+          console.warn(`Dropped unknown column from payload: ${col}`);
+        });
+
+        attempt += 1;
+      }
+
+      const message = lastError?.message || 'Unable to save your application. Please try again later.';
+      showNotification('error', 'Submission failed', message);
+      setIsSubmitting(false);
+      return;
+    } catch (err) {
+      console.error("Unexpected error while submitting visa application:", err);
+      showNotification('error', 'An error occurred', String(err?.message || err));
+      setIsSubmitting(false);
+    }
   };
 
   if (!country || !visaType) {
@@ -63,17 +148,73 @@ const VisaApplication = () => {
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground mb-4">Invalid application request</p>
-            <Button onClick={() => navigate('/visa-services')}>
-              Return to Visa Services
-            </Button>
+            <Button onClick={() => navigate('/visa-services')}>Return to Visa Services</Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  // show success screen after successful submit
+  if (submissionSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-6">
+        <div className="relative max-w-lg w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="py-8 px-6 text-center">
+            <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center shadow-inner animate-pulse">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-semibold text-foreground mb-2">You're all set!</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Thanks — we received your application for <strong>{country}</strong>. A visa consultant will contact you within 24 hours with next steps.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center px-6">
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  setSubmissionSuccess(false);
+                  navigate('/visa-services');
+                }}
+              >
+                Back to Services
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  setSubmissionSuccess(false);
+                }}
+              >
+                Submit another
+              </Button>
+            </div>
+
+            <div className="mt-6 text-xs text-muted-foreground">
+              Need faster help? Reply to the confirmation email or contact support.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-accent/10 relative">
+      {/* Loading overlay */}
+      {isSubmitting && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white/90 rounded-lg p-6 flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-foreground" />
+            <div className="text-sm font-medium">Submitting application...</div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/5 to-secondary/5 backdrop-blur-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -97,7 +238,7 @@ const VisaApplication = () => {
                 {visaType}
               </p>
             </div>
-            <div className="w-24"></div>
+            <div className="w-24" />
           </div>
         </div>
       </header>
@@ -114,6 +255,46 @@ const VisaApplication = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Notification (reworked — floating toast) */}
+            {notification && (
+              <div className="fixed top-6 right-6 z-50 animate-fade-in">
+                <div
+                  className={`max-w-sm w-full flex items-start gap-3 p-4 rounded-xl shadow-lg ring-1 ${
+                    notification.type === 'error'
+                      ? 'bg-red-50 text-red-900 ring-red-200'
+                      : 'bg-white text-green-900 ring-green-100'
+                  }`}
+                >
+                  <div className={`p-2 rounded-full ${notification.type === 'error' ? 'bg-red-100' : 'bg-green-100'}`}>
+                    {notification.type === 'error' ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-red-700">
+                        <path d="M12 9v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" fill="transparent"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-green-700">
+                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="font-semibold leading-tight">{notification.title}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{notification.message}</div>
+                  </div>
+
+                  <button
+                    onClick={() => setNotification(null)}
+                    aria-label="Close notification"
+                    className="ml-3 text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">
@@ -202,6 +383,28 @@ const VisaApplication = () => {
                     required
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address (complete) *</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    placeholder="Enter your address"
+                    required
+                  />
+                </div>
+
+                {/* Country (auto-filled from the selected service) */}
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country *</Label>
+                  <Input
+                    id="country"
+                    value={country || ""}
+                    readOnly
+                    // keep the country visible to user; it's auto-filled from the selected service
+                  />
+                </div>
               </div>
 
               {/* Travel Information */}
@@ -233,17 +436,6 @@ const VisaApplication = () => {
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="additionalInfo">Additional Information</Label>
-                  <Textarea
-                    id="additionalInfo"
-                    value={formData.additionalInfo}
-                    onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
-                    placeholder="Any additional information you'd like to share"
-                    rows={3}
-                  />
-                </div>
               </div>
 
               {/* Submission */}
@@ -268,7 +460,7 @@ const VisaApplication = () => {
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
-                      Submitting Application...
+                      Submitting...
                     </div>
                   ) : (
                     <>

@@ -19,9 +19,9 @@ const VisaServices = () => {
       successRate: '92%',
       description: 'Land of opportunities with world-class education and career prospects',
       visaTypes: [
-        { type: 'Tourist Visa (B-2)', description: 'For tourism, visiting friends/family', icon: Heart, duration: '6 months', fee: '$160' },
-        { type: 'Business Visa (B-1)', description: 'For business meetings, conferences', icon: Briefcase, duration: '6 months', fee: '$160' },
-        { type: 'Student Visa (F-1)', description: 'For academic studies', icon: Building2, duration: 'Course duration', fee: '$350' },
+        { type: 'Tourist Visa (B-2)', description: 'For tourism, visiting friends/family', icon: Heart, duration: '6 months', fee: '$185' },
+        { type: 'Business Visa (B-1)', description: 'For business meetings, conferences', icon: Briefcase, duration: '6 months', fee: '$185' },
+        { type: 'Student Visa (F-1)', description: 'For academic studies', icon: Building2, duration: 'Course duration', fee: '$185' },
         { type: 'Work Visa (H-1B)', description: 'For skilled employment', icon: Briefcase, duration: '3 years', fee: '$460' },
       ]
     },
@@ -285,7 +285,7 @@ const VisaServices = () => {
                         {/* Visa Details */}
                         <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                           <div className="text-center">
-                            <p className="text-xs text-muted-foreground">Duration</p>
+                            <p className="text-xs text-muted-foreground">Duration of Stay</p>
                             <p className="font-semibold text-sm">{visa.duration}</p>
                           </div>
                           <div className="text-center">

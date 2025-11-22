@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import LoginSelection from "@/components/LoginSelection";
 import StudentLoginRegister from "@/components/StudentLoginRegister";
-import EmployerLoginRegister from "@/components/EmployerLoginRegister";
+// import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import StudentDashboardNew from "@/components/StudentDashboardNew";
 import EmployerDashboard from "@/components/EmployerDashboard";
 import JourneyForm from "@/components/JourneyForm";
@@ -50,9 +50,6 @@ const Index = () => {
     return <StudentLoginRegister onBack={() => setCurrentView("landing")} onLogin={() => setCurrentView("student")} />;
   }
 
-  if (currentView === "employer-auth") {
-    return <EmployerLoginRegister onBack={() => setCurrentView("landing")} />;
-  }
 
   if (currentView === "login") {
     return (
@@ -80,37 +77,36 @@ const Index = () => {
       {/* Navigation */}
       <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Back to Services Button */}
-            <Button
-              onClick={() => window.location.href = '/'}
-              variant="outline"
-              size="sm"
-              className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 font-semibold"
-            >
-              ← Back to Services
-            </Button>
-            
-            <div className="flex items-center">
-              <span className="text-2xl font-black tracking-tight">
-                <span className="bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">
-                  SLOT
-                </span>
-                <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
-                  PILOT
-                </span>
-                <span className="text-muted-foreground text-lg font-light ml-1">
-                  consultancy
-                </span>
-              </span>
+          <div className="relative h-16">
+            <div className="flex justify-between items-center h-16 z-10">
+              {/* Back to Services Button (left) */}
+              <div>
+                <Button
+                  onClick={() => window.location.href = '/'}
+                  variant="outline"
+                  size="sm"
+                  className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 font-semibold"
+                >
+                  ← Back to Services
+                </Button>
+              </div>
+
+              {/* Student Login (right) */}
+              <div>
+                <Button onClick={() => setCurrentView("student-auth")} variant="outline" size="sm">
+                  Student Login
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button onClick={() => setCurrentView("student-auth")} variant="outline" size="sm">
-                Student Login
-              </Button>
-              <Button onClick={() => setCurrentView("employer-auth")} variant="hero" size="sm">
-                Employer Login
-              </Button>
+
+            {/* Centered brand (absolute center of the nav) */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="text-2xl font-extrabold tracking-tight leading-none text-center">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
+                  SlotPilot
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground text-center">Global Education & Visa Services</div>
             </div>
           </div>
         </div>
@@ -138,7 +134,7 @@ const Index = () => {
           <div className="flex justify-center">
             <Button 
               size="lg" 
-              onClick={() => setCurrentView("journey")}
+              onClick={() => setCurrentView("student-auth")}
               className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8 py-3 h-auto"
             >
               Start Your Journey
@@ -221,16 +217,26 @@ const Index = () => {
           <p className="text-xl mb-8 opacity-90">
             Join thousands of successful students who have achieved their dreams of studying abroad
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button 
               size="lg"
-              onClick={() => setCurrentView("student-auth")}
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-lg px-8 py-3 h-auto"
-            >
-              Apply Now
-            </Button>
-            <Button 
-              size="lg" 
+              onClick={() => {
+                setCurrentView("journey");
+                // ensure the Journey form loads then scroll to its top
+                setTimeout(() => {
+                  const el = document.getElementById("start-your-journey") || document.getElementById("student-name");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    // plain JS focus check
+                    // Element might be HTMLInputElement, HTMLElement, etc.
+                    // @ts-ignore - safe for runtime in plain JS/JSX projects
+                    if (typeof el.focus === "function") el.focus();
+                  } else {
+                    // fallback: scroll to page top
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }, 120);
+              }}
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-lg px-8 py-3 h-auto"
             >
               Schedule Consultation
@@ -245,19 +251,16 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
               <span className="text-xl font-black tracking-tight">
-                <span className="bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">
-                  SLOT
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent">
+                  SlotPilot
                 </span>
-                <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
-                  PILOT
-                </span>
-                <span className="text-muted-foreground text-base font-light ml-1">
-                  consultancy
+                <span className="text-muted-foreground text-base font-light ml-2">
+                  Global Education & Visa Services
                 </span>
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 Slotpilot Consultancy. Empowering students worldwide.
+              © 2024 SlotPilot Consultancy. Empowering students worldwide.
             </p>
           </div>
         </div>

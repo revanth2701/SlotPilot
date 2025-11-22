@@ -19,7 +19,8 @@ import {
   Clock,
   X,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,7 +57,8 @@ const StudentDashboardNew = ({ onBack }) => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({}); // Track upload status per document type
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // Start in edit mode
+  const [personalDetailsSaved, setPersonalDetailsSaved] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [validationError, setValidationError] = useState(null);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
@@ -73,7 +75,7 @@ const StudentDashboardNew = ({ onBack }) => {
           ...prev,
           email: user.email
         }));
-        await loadStudentData(user.email);
+        await loadStudentData(user.email,user);
         
         // Check if application was previously submitted
         const submittedStatus = localStorage.getItem(`application_submitted_${user.id}`);
@@ -86,7 +88,9 @@ const StudentDashboardNew = ({ onBack }) => {
     getCurrentUser();
   }, []);
 
-  const loadStudentData = async (email) => {
+  const loadStudentData = async (email,userObj) => {
+    setIsEditMode(false);
+    setPersonalDetailsSaved(true);
     try {
       // Load basic student data
       const { data: basicData, error: basicError } = await supabase
@@ -103,7 +107,7 @@ const StudentDashboardNew = ({ onBack }) => {
         .maybeSingle();
 
       // Load previously uploaded documents
-      await loadUploadedDocuments();
+      await loadUploadedDocuments(userObj);
       
       // Update state with existing data from both tables
       setPersonalDetails(prev => ({
@@ -134,14 +138,14 @@ const StudentDashboardNew = ({ onBack }) => {
     }
   };
 
-  const loadUploadedDocuments = async () => {
-    if (!user) return;
+  const loadUploadedDocuments = async (userObj = user) => {
+    if (!userObj) return;
     
     try {
       const { data: documents, error } = await supabase
         .from('student_documents')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userObj.id)
         .order('uploaded_at', { ascending: false });
 
       if (error) {
@@ -164,7 +168,7 @@ const StudentDashboardNew = ({ onBack }) => {
         };
 
         documents.forEach(doc => {
-          // Map document types to keys
+          // Map document types to keys (case-insensitive, trimmed)
           const typeKey = {
             'Passport': 'passport',
             'Graduation Certificate': 'graduation',
@@ -175,7 +179,9 @@ const StudentDashboardNew = ({ onBack }) => {
             'Letter of Recommendation 1': 'lor1',
             'Letter of Recommendation 2': 'lor2',
             'Letter of Recommendation 3': 'lor3'
-          }[doc.document_type] || 'other';
+          }[doc.document_type] || 'other';;
+          //const normalizedType = doc.document_type ? doc.document_type.toLowerCase().trim() : '';
+          //const typeKey = typeKeyMap[normalizedizedType] || 'other';
 
           // Only add if this category is empty (keeps only the latest document per category)
           if (documentsByTypeMap[typeKey] && documentsByTypeMap[typeKey].length === 0) {
@@ -244,9 +250,11 @@ const StudentDashboardNew = ({ onBack }) => {
       [field]: value
     }));
   };
+  //setIsEditMode(false);
+  //setPersonalDetailsSaved(true);
 
   const savePersonalDetails = async () => {
-    setSaving(true);
+  setSaving(true);
     try {
       // Check if record exists with same email and passport number
       const { data: existingRecord } = await supabase
@@ -298,9 +306,11 @@ const StudentDashboardNew = ({ onBack }) => {
         if (error) throw error;
       }
 
-      // Show success message
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
+  // Show success message
+  setShowSuccessMessage(true);
+  setTimeout(() => setShowSuccessMessage(false), 3000);
+  setIsEditMode(false); // Make fields non-editable after saving
+  setPersonalDetailsSaved(true);
       
     } catch (error) {
       console.error('Error saving details:', error);
@@ -485,9 +495,9 @@ const StudentDashboardNew = ({ onBack }) => {
       }[documentType] || 'other';
       
       setDocumentsByType(prev => ({
-        ...prev,
-        [typeKey]: [...prev[typeKey], newDocument]
-      }));
+  ...prev,
+  [typeKey]: [newDocument]
+}));
       
       // Set successful upload status
       setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
@@ -530,7 +540,7 @@ const StudentDashboardNew = ({ onBack }) => {
   };
 
   const removeDocument = (documentType, id) => {
-    const typeKey = {
+    const typeKeyMap = {
       'Passport': 'passport',
       'Graduation Certificate': 'graduation',
       'Academic Transcripts': 'transcripts',
@@ -605,6 +615,10 @@ const StudentDashboardNew = ({ onBack }) => {
     
     // Show success popup
     setShowSuccessPopup(true);
+    // Automatically close the success popup after 9 seconds
+    setTimeout(() => {
+      setShowSuccessPopup(false);
+    }, 9000);
   };
 
   const handleEditDocuments = () => {
@@ -696,7 +710,7 @@ const StudentDashboardNew = ({ onBack }) => {
           <h1 className="text-3xl font-bold mb-2">
             Welcome, {personalDetails.firstName || 'Student'}! 🎓
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-red-600 font-medium mb-2">
             Complete your profile and upload required documents to proceed with your application.
           </p>
         </div>
@@ -710,15 +724,28 @@ const StudentDashboardNew = ({ onBack }) => {
           <TabsContent value="profile">
             <Card className="shadow-elegant">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Personal Information
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Personal Information
+                  </CardTitle>
+                  {!isEditMode && personalDetailsSaved && (
+                    <Button 
+                      onClick={() => setIsEditMode(true)}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <Pencil className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
                 <CardDescription>
                   Please provide your personal details for the application process.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -727,6 +754,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.firstName}
                       onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
                       placeholder="Enter your first name"
+                      disabled={!isEditMode}
                     />
                   </div>
                   <div className="space-y-2">
@@ -736,6 +764,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.lastName}
                       onChange={(e) => handlePersonalDetailsChange('lastName', e.target.value)}
                       placeholder="Enter your last name"
+                      disabled={!isEditMode}
                     />
                   </div>
                 </div>
@@ -758,6 +787,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.phone}
                       onChange={(e) => handlePersonalDetailsChange('phone', e.target.value)}
                       placeholder="Enter your phone number"
+                      disabled={!isEditMode}
                     />
                   </div>
                 </div>
@@ -769,6 +799,7 @@ const StudentDashboardNew = ({ onBack }) => {
                     type="date"
                     value={personalDetails.dateOfBirth}
                     onChange={(e) => handlePersonalDetailsChange('dateOfBirth', e.target.value)}
+                    disabled={!isEditMode}
                   />
                 </div>
 
@@ -779,6 +810,7 @@ const StudentDashboardNew = ({ onBack }) => {
                     value={personalDetails.address}
                     onChange={(e) => handlePersonalDetailsChange('address', e.target.value)}
                     placeholder="Enter your full address"
+                    disabled={!isEditMode}
                   />
                 </div>
 
@@ -797,6 +829,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.passportNumber}
                       onChange={(e) => handlePersonalDetailsChange('passportNumber', e.target.value)}
                       placeholder="Enter your passport number"
+                      disabled={!isEditMode}
                     />
                   </div>
                   
@@ -808,6 +841,7 @@ const StudentDashboardNew = ({ onBack }) => {
                         type="date"
                         value={personalDetails.passportIssuedDate}
                         onChange={(e) => handlePersonalDetailsChange('passportIssuedDate', e.target.value)}
+                        disabled={!isEditMode}
                       />
                     </div>
                     <div className="space-y-2">
@@ -817,6 +851,7 @@ const StudentDashboardNew = ({ onBack }) => {
                         type="date"
                         value={personalDetails.passportExpiryDate}
                         onChange={(e) => handlePersonalDetailsChange('passportExpiryDate', e.target.value)}
+                        disabled={!isEditMode}
                       />
                     </div>
                   </div>
@@ -832,6 +867,7 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.emergencyContact}
                       onChange={(e) => handlePersonalDetailsChange('emergencyContact', e.target.value)}
                       placeholder="Emergency contact person"
+                      disabled={!isEditMode}
                     />
                   </div>
                   <div className="space-y-2">
@@ -841,25 +877,28 @@ const StudentDashboardNew = ({ onBack }) => {
                       value={personalDetails.emergencyPhone}
                       onChange={(e) => handlePersonalDetailsChange('emergencyPhone', e.target.value)}
                       placeholder="Emergency contact phone"
+                      disabled={!isEditMode}
                     />
                   </div>
                 </div>
 
-                <Button 
-                  onClick={savePersonalDetails} 
-                  className="w-full" 
-                  variant="hero"
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                      Saving...
-                    </div>
-                  ) : (
-                    'Save Personal Details'
-                  )}
-                </Button>
+                {isEditMode ? (
+                  <Button 
+                    onClick={savePersonalDetails} 
+                    className="w-full" 
+                    variant="hero"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                        Saving...
+                      </div>
+                    ) : (
+                      'Save Personal Details'
+                    )}
+                  </Button>
+                ) : null}
               </CardContent>
             </Card>
           </TabsContent>
@@ -951,8 +990,6 @@ const StudentDashboardNew = ({ onBack }) => {
                              ? 'border-red-400 bg-red-50'
                              : uploadStatus[docType.label] === 'uploading' 
                              ? 'border-blue-400 bg-blue-50' 
-                             : uploadStatus[docType.label] === 'success'
-                             ? 'border-green-400 bg-green-50'
                              : uploadStatus[docType.label] === 'error'
                              ? 'border-red-400 bg-red-50'
                              : 'border-muted-foreground/25 hover:border-primary/50'
@@ -997,8 +1034,6 @@ const StudentDashboardNew = ({ onBack }) => {
                             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
                                uploading[docType.label] || (applicationSubmitted && !isEditMode) || (applicationSubmitted && isEditMode && !selectedDocumentTypes.includes(docType.id))
                                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
-                                 : uploadStatus[docType.label] === 'success'
-                                 ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
                                  : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
                              }`}
                           >
@@ -1019,7 +1054,7 @@ const StudentDashboardNew = ({ onBack }) => {
                                </>
                              ) : uploadStatus[docType.label] === 'success' ? (
                               <>
-                                <CheckCircle className="h-4 w-4" />
+                                <Upload className="h-4 w-4" />
                                 Upload Another
                               </>
                             ) : (
@@ -1035,12 +1070,12 @@ const StudentDashboardNew = ({ onBack }) => {
                           {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
                             <div className="mt-3">
                               {documentsByType[docType.id].slice(0, 1).map((doc) => (
-                                 <div key={doc.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md group hover:bg-green-100 transition-colors animate-fade-in">
+                                 <div key={doc.id} className="flex items-center justify-between p-3 border border-green-400 bg-green-50 rounded-md group transition-colors animate-fade-in">
                                    <div className="flex-1 min-w-0">
                                      <p className="text-sm font-semibold truncate text-green-800">
                                        {doc.name}
                                      </p>
-                                     <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                     <p className="text-xs text-green-700 mt-1 flex items-center gap-1">
                                        <span>Uploaded on {doc.uploadDate}</span>
                                        <span className="text-green-500">•</span>
                                        <span>{doc.uploadTime}</span>
@@ -1102,21 +1137,21 @@ const StudentDashboardNew = ({ onBack }) => {
       {/* Application Submitted Success Popup */}
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center relative">
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none"
+              title="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <CheckCircle className="h-20 w-20 text-green-600 mx-auto mb-6" />
             <h2 className="text-2xl font-bold mb-4 text-green-700">Application Submitted Successfully! 🎉</h2>
             <p className="text-muted-foreground mb-6">
               All your documents have been uploaded successfully. Our team will review your application and get back to you soon.
             </p>
-            <div className="space-y-3">
-              <Button 
-                onClick={handleLogout}
-                className="w-full bg-red-600 hover:bg-red-700"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
           </div>
         </div>
       )}
