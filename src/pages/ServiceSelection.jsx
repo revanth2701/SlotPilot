@@ -70,31 +70,35 @@ const ServiceSelection = () => {
       {/* Animated Background Layers */}
       <div className="fixed inset-0 z-0">
         {/* Dynamic gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-400 via-teal-500 to-emerald-600 animate-gradient-shift"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 animate-gradient-shift"></div>
 
         {/* Floating particles */}
         <div className="particles-container absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(30)].map((_, i) => (
             <div
               key={i}
-              className="particle absolute rounded-full bg-white/20"
+              className="particle absolute rounded-full"
               style={{
-                width: `${Math.random() * 6 + 2}px`,
-                height: `${Math.random() * 6 + 2}px`,
+                width: `${Math.random() * 8 + 3}px`,
+                height: `${Math.random() * 8 + 3}px`,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animation: `float ${Math.random() * 10 + 15}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 5}s`
+                background: `radial-gradient(circle, ${
+                  ['rgba(139, 92, 246, 0.4)', 'rgba(236, 72, 153, 0.4)', 'rgba(251, 146, 60, 0.4)', 'rgba(34, 211, 238, 0.4)'][Math.floor(Math.random() * 4)]
+                }, transparent)`,
+                animation: `float ${Math.random() * 10 + 15}s ease-in-out infinite, glow ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+                filter: 'blur(1px)'
               }}
             />
           ))}
         </div>
 
         {/* Animated mesh gradient overlay */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-300/40 via-transparent to-transparent animate-mesh-1"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-amber-400/40 via-transparent to-transparent animate-mesh-2"></div>
-          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-cyan-300/40 via-transparent to-transparent animate-mesh-3"></div>
+        <div className="absolute inset-0 opacity-50">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-violet-500/30 via-transparent to-transparent animate-mesh-1"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-fuchsia-500/30 via-transparent to-transparent animate-mesh-2"></div>
+          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-cyan-500/30 via-transparent to-transparent animate-mesh-3"></div>
         </div>
 
         {/* Animated waves */}
@@ -128,19 +132,28 @@ const ServiceSelection = () => {
         @keyframes float {
           0%, 100% {
             transform: translateY(0) translateX(0) scale(1);
-            opacity: 0.3;
-          }
-          25% {
-            transform: translateY(-100px) translateX(50px) scale(1.2);
-            opacity: 0.6;
-          }
-          50% {
-            transform: translateY(-200px) translateX(-30px) scale(0.8);
             opacity: 0.4;
           }
-          75% {
-            transform: translateY(-100px) translateX(-80px) scale(1.1);
+          25% {
+            transform: translateY(-120px) translateX(60px) scale(1.3);
+            opacity: 0.7;
+          }
+          50% {
+            transform: translateY(-240px) translateX(-40px) scale(0.9);
             opacity: 0.5;
+          }
+          75% {
+            transform: translateY(-120px) translateX(-90px) scale(1.2);
+            opacity: 0.6;
+          }
+        }
+
+        @keyframes glow {
+          0%, 100% {
+            filter: blur(1px) brightness(1);
+          }
+          50% {
+            filter: blur(2px) brightness(1.5);
           }
         }
 
@@ -206,10 +219,49 @@ const ServiceSelection = () => {
         .animate-grid-pulse {
           animation: grid-pulse 8s ease-in-out infinite;
         }
+
+        @keyframes header-glow {
+          0%, 100% {
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+          }
+          50% {
+            box-shadow: 0 4px 30px rgba(236, 72, 153, 0.4);
+          }
+        }
+        .animate-header-glow {
+          animation: header-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes card-float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+        .animate-card-float {
+          animation: card-float 4s ease-in-out infinite;
+        }
+
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
+          opacity: 0;
+        }
       `}</style>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg">
+      <header className="relative z-10 bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 backdrop-blur-xl border-b border-white/20 shadow-lg animate-header-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* left placeholder (keeps balanced layout) */}
@@ -298,45 +350,45 @@ const ServiceSelection = () => {
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 animate-fade-in">
             Choose Your Service
           </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
             Select the service you need assistance with. Our expert consultants are here to guide you through every step of your journey.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-500 border border-white/20 bg-white/15 backdrop-blur-xl hover:bg-white/25 hover:scale-105 hover:border-cyan-400/50">
+          <Card className="group hover:shadow-2xl hover:shadow-violet-500/50 transition-all duration-500 border border-purple-300/30 bg-gradient-to-br from-white/20 to-purple-100/20 backdrop-blur-xl hover:from-white/30 hover:to-purple-100/30 hover:scale-105 hover:border-violet-400/60 animate-card-float">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <GraduationCap className="w-8 h-8 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-white">
                 Higher Education
               </CardTitle>
-              <CardDescription className="text-gray-700">
+              <CardDescription className="text-white/90">
                 Get guidance for studying abroad, university applications, and academic programs
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm text-white/60">
+              <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
-                  <span className="text-gray-800">University Selection & Applications</span>
+                  <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse"></div>
+                  <span className="text-white/90">University Selection & Applications</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
-                  <span className="text-gray-800">Document Preparation & Verification</span>
+                  <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <span className="text-white/90">Document Preparation & Verification</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
-                  <span className="text-gray-800">Scholarship Guidance</span>
+                  <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                  <span className="text-white/90">Scholarship Guidance</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
-                  <span className="text-gray-800">Student Visa Assistance</span>
+                  <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                  <span className="text-white/90">Student Visa Assistance</span>
                 </div>
               </div>
               <Button
@@ -351,35 +403,35 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 border border-white/20 bg-white/15 backdrop-blur-xl hover:bg-white/25 hover:scale-105 hover:border-amber-400/50">
+          <Card className="group hover:shadow-2xl hover:shadow-pink-500/50 transition-all duration-500 border border-pink-300/30 bg-gradient-to-br from-white/20 to-pink-100/20 backdrop-blur-xl hover:from-white/30 hover:to-pink-100/30 hover:scale-105 hover:border-pink-400/60 animate-card-float" style={{ animationDelay: '1s' }}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Plane className="w-8 h-8 text-secondary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-white">
                 Visa Services
               </CardTitle>
-              <CardDescription className="text-gray-700">
+              <CardDescription className="text-white/90">
                 Expert assistance for all types of visa applications worldwide
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                  <span className="text-gray-800">Tourist & Business Visas</span>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                  <span className="text-white/90">Tourist & Business Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                  <span className="text-gray-800">Work & Employment Visas</span>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <span className="text-white/90">Work & Employment Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                  <span className="text-gray-800">Family & Immigration Visas</span>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                  <span className="text-white/90">Family & Immigration Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                  <span className="text-gray-800">Document Support & Review</span>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                  <span className="text-white/90">Document Support & Review</span>
                 </div>
               </div>
               <Button
