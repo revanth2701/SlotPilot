@@ -67,6 +67,106 @@ const ServiceSelection = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col overflow-x-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            33% { transform: translateY(-20px) translateX(10px); }
+            66% { transform: translateY(10px) translateX(-5px); }
+          }
+          @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+          }
+          @keyframes drift {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(100vw) translateY(-100vh); }
+          }
+          .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: float 8s ease-in-out infinite;
+          }
+          .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.6), rgba(245, 158, 11, 0.6));
+            animation: drift 15s linear infinite;
+          }
+        `}</style>
+
+        {/* Floating orbs */}
+        <div
+          className="orb"
+          style={{
+            top: '10%',
+            left: '15%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.3), transparent)',
+            animationDelay: '0s',
+            animationDuration: '10s'
+          }}
+        />
+        <div
+          className="orb"
+          style={{
+            top: '60%',
+            right: '10%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25), transparent)',
+            animationDelay: '2s',
+            animationDuration: '12s'
+          }}
+        />
+        <div
+          className="orb"
+          style={{
+            bottom: '10%',
+            left: '30%',
+            width: '250px',
+            height: '250px',
+            background: 'radial-gradient(circle, rgba(251, 113, 133, 0.2), transparent)',
+            animationDelay: '4s',
+            animationDuration: '14s'
+          }}
+        />
+
+        {/* Floating particles */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${-10 + Math.random() * 20}%`,
+              animationDelay: `${i * 1.2}s`,
+              animationDuration: `${12 + Math.random() * 8}s`,
+              opacity: 0.15 + Math.random() * 0.2
+            }}
+          />
+        ))}
+
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            opacity: 0.5
+          }}
+        />
+      </div>
+
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
