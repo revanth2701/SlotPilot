@@ -12,12 +12,14 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import ResetPassword from "./pages/ResetPassword";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <AnimatedBackground />
       <Toaster />
       <Sonner />
       <BrowserRouter>
