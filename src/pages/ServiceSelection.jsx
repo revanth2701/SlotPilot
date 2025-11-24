@@ -66,9 +66,50 @@ const ServiceSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col overflow-x-hidden">
+    <div className="min-h-screen relative overflow-hidden flex flex-col overflow-x-hidden">
+      {/* Animated Background Layers */}
+      <div className="fixed inset-0 z-0">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"></div>
+
+        {/* Animated gradient orbs */}
+        <div className="absolute top-0 -left-4 w-96 h-96 bg-gradient-to-br from-orange-400/20 to-amber-300/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-cyan-300/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-300/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+        {/* Geometric pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+          backgroundSize: '32px 32px'
+        }}></div>
+
+        {/* Diagonal lines pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, currentColor 35px, currentColor 37px)`
+        }}></div>
+      </div>
+
+      {/* Add keyframes for blob animation */}
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+
       {/* Header */}
-      <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
+      <header className="relative z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* left placeholder (keeps balanced layout) */}
@@ -167,7 +208,7 @@ const ServiceSelection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/20 bg-gradient-to-br from-background to-primary/5">
+          <Card className="group hover:shadow-2xl transition-all duration-300 border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-slate-900/80">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <GraduationCap className="w-8 h-8 text-primary-foreground" />
@@ -210,7 +251,7 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-secondary/20 bg-gradient-to-br from-background to-secondary/5">
+          <Card className="group hover:shadow-2xl transition-all duration-300 border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-slate-900/80">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Plane className="w-8 h-8 text-secondary-foreground" />
