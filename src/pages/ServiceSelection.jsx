@@ -70,7 +70,7 @@ const ServiceSelection = () => {
       {/* Animated Background Layers */}
       <div className="fixed inset-0 z-0">
         {/* Dynamic gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-orange-900 animate-gradient-shift"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-400 via-teal-500 to-emerald-600 animate-gradient-shift"></div>
 
         {/* Floating particles */}
         <div className="particles-container absolute inset-0">
@@ -92,9 +92,9 @@ const ServiceSelection = () => {
 
         {/* Animated mesh gradient overlay */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan-500/30 via-transparent to-transparent animate-mesh-1"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-orange-500/30 via-transparent to-transparent animate-mesh-2"></div>
-          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-blue-500/30 via-transparent to-transparent animate-mesh-3"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-300/40 via-transparent to-transparent animate-mesh-1"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-amber-400/40 via-transparent to-transparent animate-mesh-2"></div>
+          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-cyan-300/40 via-transparent to-transparent animate-mesh-3"></div>
         </div>
 
         {/* Animated waves */}
@@ -209,7 +209,7 @@ const ServiceSelection = () => {
       `}</style>
 
       {/* Header */}
-      <header className="relative z-10 bg-slate-900/40 backdrop-blur-xl border-b border-white/10 shadow-lg">
+      <header className="relative z-10 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* left placeholder (keeps balanced layout) */}
@@ -308,35 +308,35 @@ const ServiceSelection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 border border-white/10 bg-slate-900/50 backdrop-blur-xl hover:bg-slate-900/70 hover:scale-105 hover:border-cyan-500/30">
+          <Card className="group hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-500 border border-white/20 bg-white/15 backdrop-blur-xl hover:bg-white/25 hover:scale-105 hover:border-cyan-400/50">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <GraduationCap className="w-8 h-8 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-white">
+              <CardTitle className="text-2xl font-bold text-gray-900">
                 Higher Education
               </CardTitle>
-              <CardDescription className="text-white/70">
+              <CardDescription className="text-gray-700">
                 Get guidance for studying abroad, university applications, and academic programs
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm text-white/60">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                  <span>University Selection & Applications</span>
+                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
+                  <span className="text-gray-800">University Selection & Applications</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                  <span>Document Preparation & Verification</span>
+                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
+                  <span className="text-gray-800">Document Preparation & Verification</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                  <span>Scholarship Guidance</span>
+                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
+                  <span className="text-gray-800">Scholarship Guidance</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                  <span>Student Visa Assistance</span>
+                  <div className="w-2 h-2 bg-sky-600 rounded-full"></div>
+                  <span className="text-gray-800">Student Visa Assistance</span>
                 </div>
               </div>
               <Button
@@ -351,35 +351,35 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 border border-white/10 bg-slate-900/50 backdrop-blur-xl hover:bg-slate-900/70 hover:scale-105 hover:border-orange-500/30">
+          <Card className="group hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 border border-white/20 bg-white/15 backdrop-blur-xl hover:bg-white/25 hover:scale-105 hover:border-amber-400/50">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Plane className="w-8 h-8 text-secondary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-white">
+              <CardTitle className="text-2xl font-bold text-gray-900">
                 Visa Services
               </CardTitle>
-              <CardDescription className="text-white/70">
+              <CardDescription className="text-gray-700">
                 Expert assistance for all types of visa applications worldwide
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm text-white/60">
+              <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span>Tourist & Business Visas</span>
+                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
+                  <span className="text-gray-800">Tourist & Business Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span>Work & Employment Visas</span>
+                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
+                  <span className="text-gray-800">Work & Employment Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span>Family & Immigration Visas</span>
+                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
+                  <span className="text-gray-800">Family & Immigration Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span>Document Support & Review</span>
+                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
+                  <span className="text-gray-800">Document Support & Review</span>
                 </div>
               </div>
               <Button
