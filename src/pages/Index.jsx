@@ -92,7 +92,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative page-content" style={{ background: 'transparent' }}>
+    <div className="min-h-screen bg-background page-content">
       {/* Navigation */}
       <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50 nav-height" role="navigation" aria-label="Main">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
