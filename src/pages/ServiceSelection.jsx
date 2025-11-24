@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Plane, Building2, Globe, Users } from 'lucide-react';
 
+
 // constant Earth — realistic 3D rotating globe component (uses an equirectangular world-map image at /public/images/world-map.jpg)
 const Earth = () => (
   <div className="globe-wrap" aria-hidden="false">
