@@ -69,102 +69,142 @@ const ServiceSelection = () => {
     <div className="min-h-screen relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Animated Background Layers */}
       <div className="fixed inset-0 z-0">
-        {/* Professional gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950"></div>
+        {/* Dynamic gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-orange-900 animate-gradient-shift"></div>
 
-        {/* Subtle animated gradient overlay */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-cyan-600/10 animate-gradient-slow"></div>
-          <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-slate-900/50 to-transparent"></div>
-        </div>
-
-        {/* Floating light particles - reduced and subtle */}
+        {/* Floating particles */}
         <div className="particles-container absolute inset-0">
-          {[...Array(12)].map((_, i) => (
+          {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="particle absolute rounded-full bg-white/10"
+              className="particle absolute rounded-full bg-white/20"
               style={{
-                width: `${Math.random() * 3 + 1}px`,
-                height: `${Math.random() * 3 + 1}px`,
+                width: `${Math.random() * 6 + 2}px`,
+                height: `${Math.random() * 6 + 2}px`,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animation: `float-gentle ${Math.random() * 15 + 20}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 8}s`,
-                filter: 'blur(1px)'
+                animation: `float ${Math.random() * 10 + 15}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`
               }}
             />
           ))}
         </div>
 
-        {/* Subtle mesh gradient */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-radial from-blue-500/20 to-transparent rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-radial from-cyan-500/20 to-transparent rounded-full blur-3xl animate-pulse-slow-delayed"></div>
+        {/* Animated mesh gradient overlay */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan-500/30 via-transparent to-transparent animate-mesh-1"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-orange-500/30 via-transparent to-transparent animate-mesh-2"></div>
+          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-blue-500/30 via-transparent to-transparent animate-mesh-3"></div>
         </div>
 
-        {/* Professional grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '80px 80px'
-        }}></div>
+        {/* Animated waves */}
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+          <div className="wave wave-1"></div>
+          <div className="wave wave-2"></div>
+          <div className="wave wave-3"></div>
+        </div>
 
-        {/* Subtle scanline effect */}
-        <div className="absolute inset-0 opacity-[0.02] animate-scanline" style={{
-          backgroundImage: 'linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.05) 50%)',
-          backgroundSize: '100% 4px'
+        {/* Grid pattern with animation */}
+        <div className="absolute inset-0 opacity-10 animate-grid-pulse" style={{
+          backgroundImage: `
+            linear-gradient(to right, currentColor 1px, transparent 1px),
+            linear-gradient(to bottom, currentColor 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px'
         }}></div>
       </div>
 
-      {/* Professional CSS animations */}
+      {/* Advanced CSS animations */}
       <style>{`
-        @keyframes gradient-slow {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, 20px) scale(1.05); }
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
         }
-        .animate-gradient-slow {
-          animation: gradient-slow 20s ease-in-out infinite;
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 15s ease infinite;
         }
 
-        @keyframes float-gentle {
+        @keyframes float {
           0%, 100% {
-            transform: translate(0, 0);
-            opacity: 0.1;
-          }
-          50% {
-            transform: translate(30px, -80px);
+            transform: translateY(0) translateX(0) scale(1);
             opacity: 0.3;
           }
-        }
-
-        @keyframes pulse-slow {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.2;
+          25% {
+            transform: translateY(-100px) translateX(50px) scale(1.2);
+            opacity: 0.6;
           }
           50% {
-            transform: scale(1.1);
-            opacity: 0.3;
+            transform: translateY(-200px) translateX(-30px) scale(0.8);
+            opacity: 0.4;
+          }
+          75% {
+            transform: translateY(-100px) translateX(-80px) scale(1.1);
+            opacity: 0.5;
           }
         }
-        .animate-pulse-slow {
-          animation: pulse-slow 8s ease-in-out infinite;
+
+        @keyframes mesh-1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          33% { transform: translate(50px, 100px) rotate(120deg) scale(1.2); }
+          66% { transform: translate(-50px, 50px) rotate(240deg) scale(0.9); }
+        }
+        .animate-mesh-1 { animation: mesh-1 20s ease-in-out infinite; }
+
+        @keyframes mesh-2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          33% { transform: translate(-100px, -50px) rotate(-120deg) scale(1.1); }
+          66% { transform: translate(80px, -100px) rotate(-240deg) scale(0.95); }
+        }
+        .animate-mesh-2 { animation: mesh-2 18s ease-in-out infinite; }
+
+        @keyframes mesh-3 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          33% { transform: translate(70px, -80px) rotate(90deg) scale(1.15); }
+          66% { transform: translate(-60px, 60px) rotate(180deg) scale(0.85); }
+        }
+        .animate-mesh-3 { animation: mesh-3 22s ease-in-out infinite; }
+
+        .wave {
+          position: absolute;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          );
+          border-radius: 45%;
         }
 
-        .animate-pulse-slow-delayed {
-          animation: pulse-slow 8s ease-in-out infinite;
-          animation-delay: 4s;
+        @keyframes wave-animation {
+          0% { transform: translate(-50%, -80%) rotate(0deg); }
+          100% { transform: translate(-50%, -80%) rotate(360deg); }
         }
 
-        @keyframes scanline {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100%); }
+        .wave-1 {
+          animation: wave-animation 25s linear infinite;
+          opacity: 0.3;
         }
-        .animate-scanline {
-          animation: scanline 8s linear infinite;
+
+        .wave-2 {
+          animation: wave-animation 20s linear infinite reverse;
+          opacity: 0.2;
+          animation-delay: -5s;
+        }
+
+        .wave-3 {
+          animation: wave-animation 30s linear infinite;
+          opacity: 0.15;
+          animation-delay: -10s;
+        }
+
+        @keyframes grid-pulse {
+          0%, 100% { opacity: 0.1; transform: scale(1); }
+          50% { opacity: 0.15; transform: scale(1.02); }
+        }
+        .animate-grid-pulse {
+          animation: grid-pulse 8s ease-in-out infinite;
         }
       `}</style>
 
@@ -268,10 +308,10 @@ const ServiceSelection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 border border-white/10 bg-slate-900/60 backdrop-blur-xl hover:bg-slate-900/80 hover:scale-[1.02] hover:border-blue-400/30">
+          <Card className="group hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 border border-white/10 bg-slate-900/50 backdrop-blur-xl hover:bg-slate-900/70 hover:scale-105 hover:border-cyan-500/30">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-blue-500/30">
-                <GraduationCap className="w-8 h-8 text-white" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <GraduationCap className="w-8 h-8 text-primary-foreground" />
               </div>
               <CardTitle className="text-2xl font-bold text-white">
                 Higher Education
@@ -283,25 +323,25 @@ const ServiceSelection = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm text-white/60">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full shadow-sm shadow-blue-400/50"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                   <span>University Selection & Applications</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full shadow-sm shadow-blue-400/50"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                   <span>Document Preparation & Verification</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full shadow-sm shadow-blue-400/50"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                   <span>Scholarship Guidance</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full shadow-sm shadow-blue-400/50"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                   <span>Student Visa Assistance</span>
                 </div>
               </div>
               <Button
                 onClick={() => navigate('/higher-education')}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto"
                 size="lg"
               >
                 <Building2 className="w-5 h-5 mr-2" />
@@ -311,10 +351,10 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-500 border border-white/10 bg-slate-900/60 backdrop-blur-xl hover:bg-slate-900/80 hover:scale-[1.02] hover:border-cyan-400/30">
+          <Card className="group hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 border border-white/10 bg-slate-900/50 backdrop-blur-xl hover:bg-slate-900/70 hover:scale-105 hover:border-orange-500/30">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-cyan-600 to-cyan-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-cyan-500/30">
-                <Plane className="w-8 h-8 text-white" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Plane className="w-8 h-8 text-secondary-foreground" />
               </div>
               <CardTitle className="text-2xl font-bold text-white">
                 Visa Services
@@ -326,25 +366,25 @@ const ServiceSelection = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm text-white/60">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-sm shadow-cyan-400/50"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                   <span>Tourist & Business Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-sm shadow-cyan-400/50"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                   <span>Work & Employment Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-sm shadow-cyan-400/50"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                   <span>Family & Immigration Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-sm shadow-cyan-400/50"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                   <span>Document Support & Review</span>
                 </div>
               </div>
               <Button
                 onClick={() => navigate('/visa-services')}
-                className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-white font-semibold py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-secondary-foreground font-semibold py-3 h-auto"
                 size="lg"
               >
                 <Globe className="w-5 h-5 mr-2" />
@@ -358,19 +398,19 @@ const ServiceSelection = () => {
         <div className="text-center mt-8">
           <p className="text-white/70">
             Contact our consultants for personalized guidance at
-            <a href="mailto:info@slotpilot.in" className="text-blue-400 underline hover:text-blue-300 transition-colors"> info@slotpilot.in</a>
+            <a href="mailto:info@slotpilot.in" className="text-cyan-400 underline"> info@slotpilot.in</a>
           </p>
           <div className="mt-4 text-xs text-white/50">
             © 2025 Slotpilot. All rights reserved. |
             <span
-              className="text-blue-400 underline cursor-pointer mx-1 hover:text-blue-300 transition-colors"
+              className="text-cyan-400 underline cursor-pointer mx-1"
               onClick={() => navigate('/privacy-policy')}
             >
               Privacy Policy
             </span>
             |
             <span
-              className="text-blue-400 underline cursor-pointer mx-1 hover:text-blue-300 transition-colors"
+              className="text-cyan-400 underline cursor-pointer mx-1"
               onClick={() => navigate('/terms-of-service')}
             >
               Terms of Service
