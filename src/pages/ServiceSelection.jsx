@@ -72,15 +72,31 @@ const ServiceSelection = () => {
         {/* Professional gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950"></div>
 
+        {/* Animated Globe - Centered */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-15">
+          <div className="globe-container" style={{ width: '600px', height: '600px', position: 'relative' }}>
+            <div className="globe-sphere"></div>
+            <div className="globe-overlay"></div>
+            <div className="globe-glow"></div>
+          </div>
+        </div>
+
+        {/* Orbiting rings around globe */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-20">
+          <div className="orbit-ring orbit-ring-1"></div>
+          <div className="orbit-ring orbit-ring-2"></div>
+          <div className="orbit-ring orbit-ring-3"></div>
+        </div>
+
         {/* Subtle animated gradient overlay */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-cyan-600/10 animate-gradient-slow"></div>
           <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-slate-900/50 to-transparent"></div>
         </div>
 
-        {/* Floating light particles - reduced and subtle */}
+        {/* Floating light particles */}
         <div className="particles-container absolute inset-0">
-          {[...Array(12)].map((_, i) => (
+          {[...Array(15)].map((_, i) => (
             <div
               key={i}
               className="particle absolute rounded-full bg-white/10"
@@ -92,6 +108,27 @@ const ServiceSelection = () => {
                 animation: `float-gentle ${Math.random() * 15 + 20}s ease-in-out infinite`,
                 animationDelay: `${Math.random() * 8}s`,
                 filter: 'blur(1px)'
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Connection lines animation */}
+        <div className="absolute inset-0 opacity-10">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="connection-line"
+              style={{
+                position: 'absolute',
+                width: '2px',
+                height: '150px',
+                background: 'linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.5), transparent)',
+                left: `${(i + 1) * 15}%`,
+                top: '20%',
+                animation: `line-pulse ${3 + i * 0.5}s ease-in-out infinite`,
+                animationDelay: `${i * 0.3}s`,
+                transformOrigin: 'top'
               }}
             />
           ))}
@@ -121,6 +158,130 @@ const ServiceSelection = () => {
 
       {/* Professional CSS animations */}
       <style>{`
+        /* Globe Animations */
+        .globe-sphere {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.3), rgba(14, 165, 233, 0.2) 50%, rgba(6, 78, 159, 0.1));
+          box-shadow:
+            inset -40px -40px 80px rgba(0, 0, 0, 0.4),
+            inset 20px 20px 40px rgba(59, 130, 246, 0.2),
+            0 0 100px rgba(59, 130, 246, 0.3);
+          position: relative;
+          animation: globe-rotate 40s linear infinite;
+          overflow: hidden;
+        }
+
+        .globe-sphere::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background-image:
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 29px,
+              rgba(59, 130, 246, 0.1) 29px,
+              rgba(59, 130, 246, 0.1) 30px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 29px,
+              rgba(59, 130, 246, 0.1) 29px,
+              rgba(59, 130, 246, 0.1) 30px
+            );
+          animation: globe-grid 20s linear infinite;
+        }
+
+        @keyframes globe-rotate {
+          from { transform: rotateY(0deg) rotateX(15deg); }
+          to { transform: rotateY(360deg) rotateX(15deg); }
+        }
+
+        @keyframes globe-grid {
+          from { transform: translateX(0); }
+          to { transform: translateX(30px); }
+        }
+
+        .globe-overlay {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            rgba(0, 0, 0, 0.2) 100%
+          );
+        }
+
+        .globe-glow {
+          position: absolute;
+          inset: -20px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
+          filter: blur(30px);
+          animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Orbiting Rings */
+        .orbit-ring {
+          position: absolute;
+          border: 2px solid rgba(59, 130, 246, 0.3);
+          border-radius: 50%;
+          animation: orbit-rotate 20s linear infinite;
+        }
+
+        .orbit-ring-1 {
+          width: 700px;
+          height: 700px;
+          border-width: 1px;
+          animation-duration: 25s;
+        }
+
+        .orbit-ring-2 {
+          width: 800px;
+          height: 800px;
+          border-width: 1px;
+          border-style: dashed;
+          animation-duration: 35s;
+          animation-direction: reverse;
+        }
+
+        .orbit-ring-3 {
+          width: 900px;
+          height: 900px;
+          border-width: 1px;
+          animation-duration: 45s;
+          opacity: 0.5;
+        }
+
+        @keyframes orbit-rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        /* Connection Lines Pulse */
+        @keyframes line-pulse {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scaleY(1);
+          }
+          50% {
+            opacity: 0.6;
+            transform: scaleY(1.5);
+          }
+        }
+
+        /* Gradient Animation */
         @keyframes gradient-slow {
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(20px, 20px) scale(1.05); }
@@ -129,6 +290,7 @@ const ServiceSelection = () => {
           animation: gradient-slow 20s ease-in-out infinite;
         }
 
+        /* Floating Particles */
         @keyframes float-gentle {
           0%, 100% {
             transform: translate(0, 0);
@@ -140,6 +302,7 @@ const ServiceSelection = () => {
           }
         }
 
+        /* Pulse Effects */
         @keyframes pulse-slow {
           0%, 100% {
             transform: scale(1);
@@ -159,6 +322,7 @@ const ServiceSelection = () => {
           animation-delay: 4s;
         }
 
+        /* Scanline Effect */
         @keyframes scanline {
           0% { transform: translateY(-100%); }
           100% { transform: translateY(100%); }
