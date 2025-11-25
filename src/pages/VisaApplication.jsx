@@ -217,7 +217,7 @@ const VisaApplication = () => {
 
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/5 to-secondary/5 backdrop-blur-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <Button 
               variant="ghost" 
@@ -238,12 +238,12 @@ const VisaApplication = () => {
                 {visaType}
               </p>
             </div>
-            <div className="w-24" />
+            <div className="w-0 sm:w-24" />
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-full sm:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="shadow-elegant">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

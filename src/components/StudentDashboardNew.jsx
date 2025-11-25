@@ -684,7 +684,7 @@ const StudentDashboardNew = ({ onBack }) => {
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary relative">
       {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <img src={slotpilotLogo} alt="Slotpilot Consultancy" className="h-8 w-8" />
@@ -705,7 +705,7 @@ const StudentDashboardNew = ({ onBack }) => {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-full sm:max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
             Welcome, {personalDetails.firstName || 'Student'}! 🎓
@@ -716,7 +716,7 @@ const StudentDashboardNew = ({ onBack }) => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-md">
+          <TabsList className="grid grid-cols-2 w-full max-w-full sm:max-w-md">
             <TabsTrigger value="profile">Personal Details</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
@@ -1124,7 +1124,7 @@ const StudentDashboardNew = ({ onBack }) => {
       {/* Success Message Overlay */}
       {showSuccessMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-full sm:max-w-md mx-4 text-center">
             <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Success!</h3>
             <p className="text-muted-foreground">
@@ -1137,7 +1137,7 @@ const StudentDashboardNew = ({ onBack }) => {
       {/* Application Submitted Success Popup */}
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md mx-4 text-center relative">
+          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-full sm:max-w-md mx-4 text-center relative">
             <button
               onClick={() => setShowSuccessPopup(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none"

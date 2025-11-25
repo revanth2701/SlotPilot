@@ -121,7 +121,7 @@ const VisaServices = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <Button 
               variant="outline" 
@@ -136,12 +136,12 @@ const VisaServices = () => {
                 SlotPilot Visa Services
               </h1>
             </div>
-            <div className="w-32"></div>
+            <div className="w-0 sm:w-32"></div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!selectedCountry ? (
           <div className="animate-fade-in">
             {/* Country Selection */}
@@ -149,7 +149,7 @@ const VisaServices = () => {
               <h2 className="text-4xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Discover Your Destination
               </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-muted-foreground max-w-full sm:max-w-3xl mx-auto leading-relaxed">
                 Choose from our carefully curated list of countries. Each destination offers unique opportunities 
                 and experiences tailored to your visa needs.
               </p>
@@ -239,7 +239,7 @@ const VisaServices = () => {
                 <h2 className="text-4xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {selectedCountry.name} Visa Services
                 </h2>
-                <p className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-lg text-muted-foreground mb-4 max-w-full sm:max-w-2xl mx-auto leading-relaxed">
                   {selectedCountry.description}
                 </p>
                 <div className="flex items-center justify-center gap-8 text-sm">
