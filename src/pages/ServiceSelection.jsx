@@ -242,7 +242,8 @@ const ServiceSelection = () => {
                 </div>
               </div>
               <Button
-                onClick={() => navigate('/visa-services')}
+                type="button"
+                onClick={() => navigate("/visa-start")}
                 className="w-full bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-secondary-foreground font-semibold py-3 h-auto"
                 size="lg"
               >

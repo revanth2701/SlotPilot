@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // use relative imports instead of "@/..." aliases to avoid resolution issues
 import { Button } from "../components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
-import { ArrowLeft, FileText, User, MapPin, Send } from 'lucide-react';
+import { FileText, User, MapPin, Send, Home, Globe } from 'lucide-react';
 import { supabase } from "../utils/supabaseClient";
 
 const TABLE_NAME = "Visaappointments";
@@ -15,6 +15,11 @@ const VisaApplication = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { country, visaType, flag } = location.state || {};
+
+  // ✅ Always start at top when this page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -30,8 +35,8 @@ const VisaApplication = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionSuccess, setSubmissionSuccess] = useState(false); // <-- added
-  const [notification, setNotification] = useState(null); // { type: 'success'|'error', title, message }
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const showNotification = (type, title, message, autoHide = true) => {
     setNotification({ type, title, message });
@@ -105,7 +110,7 @@ const VisaApplication = () => {
             address: ''
           });
           setIsSubmitting(false);
-          setSubmissionSuccess(true); // <-- added
+          setSubmissionSuccess(true);
           // do not auto-navigate away immediately so user sees success
           return;
         }
@@ -174,23 +179,26 @@ const VisaApplication = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-6">
               <Button
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  setSubmissionSuccess(false);
-                  navigate('/visa-services');
-                }}
-              >
-                Back to Services
-              </Button>
-
-              <Button
                 variant="ghost"
                 className="w-full sm:w-auto"
-                onClick={() => {
-                  setSubmissionSuccess(false);
-                }}
+                onClick={() => setSubmissionSuccess(false)}
               >
                 Submit another
+              </Button>
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => navigate("/visa-services", { replace: true })}
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                Visa Services
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => navigate("/", { replace: true })}
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Home
               </Button>
             </div>
 
@@ -215,30 +223,21 @@ const VisaApplication = () => {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header (centered title + proper navigation, no "Back" button) */}
       <header className="relative z-10 bg-gradient-to-r from-primary/5 to-secondary/5 backdrop-blur-sm border-b">
         <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/visa-services')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Visa Services
-            </Button>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <span className="text-3xl">{flag}</span>
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl">{flag}</span>
+              <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                   {country} Visa Application
                 </h1>
+                <p className="text-muted-foreground">
+                  {visaType}
+                </p>
               </div>
-              <p className="text-muted-foreground">
-                {visaType}
-              </p>
             </div>
-            <div className="w-0 sm:w-24" />
           </div>
         </div>
       </header>
@@ -254,6 +253,7 @@ const VisaApplication = () => {
               Please fill out all required information accurately. Our visa consultants will review your application and contact you for next steps.
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             {/* Notification (reworked — floating toast) */}
             {notification && (

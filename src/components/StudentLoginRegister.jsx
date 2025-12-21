@@ -1,15 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Mail, Lock, User, Phone, Eye, EyeOff, Check, X, AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const StudentLoginRegister = ({ onBack, onLogin }) => {
+  const [activeTab, setActiveTab] = useState("login");
+  const location = useLocation();
+
+  // NEW: show a success note after returning from email verification
+  const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(false);
+
+  // NEW: detect Supabase email-confirm redirect
+  useEffect(() => {
+    // Supabase email confirmation redirects back with tokens/errors in the URL hash or query.
+    // We treat "access_token" or "type=signup" as a successful verification signal.
+    const hash = (window.location.hash || "").toLowerCase();
+    const search = (window.location.search || "").toLowerCase();
+
+    const isLikelyVerified =
+      hash.includes("access_token=") ||
+      hash.includes("type=signup") ||
+      search.includes("type=signup") ||
+      search.includes("access_token=");
+
+    const hasError =
+      hash.includes("error=") ||
+      hash.includes("error_description=") ||
+      search.includes("error=") ||
+      search.includes("error_description=");
+
+    if (isLikelyVerified && !hasError) {
+      setShowEmailVerifiedBanner(true);
+      setActiveTab("login");
+
+      // Optional: show toast too
+      // (banner stays until user dismisses)
+      // eslint-disable-next-line no-unused-expressions
+      // toast({ title: "Email verified", description: "Your account is confirmed. Please sign in." });
+
+      // Clean up URL tokens so refresh/back doesn't re-trigger the banner
+      try {
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
+  // Listen for browser back arrow and set tab to login
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTab("login");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
@@ -23,18 +76,18 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
     password: "",
     confirmPassword: ""
   });
-  
+
   const [showPassword, setShowPassword] = useState({
     login: false,
     register: false,
     confirm: false
   });
-  
+
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     feedback: []
   });
-  
+
   const [registerLoading, setRegisterLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -48,7 +101,7 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
       { test: /\d/.test(password), message: "One number" },
       { test: /[!@#$%^&*]/.test(password), message: "One special character" }
     ];
-    
+
     const passed = checks.filter(check => check.test).length;
     return {
       score: passed,
@@ -72,7 +125,7 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Logged in", description: "Welcome back!" });
-      onLogin(); // Navigate to student dashboard
+      onLogin && onLogin(); // Navigate to student dashboard
     }
     setLoginLoading(false);
   };
@@ -84,9 +137,9 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
       return;
     }
     setRegisterLoading(true);
-    
+
     try {
-      // First create the auth user
+      // Keep redirect back to the same origin; ideally this should be the route that renders this component
       const redirectUrl = `${window.location.origin}/`;
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registerData.email,
@@ -99,7 +152,6 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
         return;
       }
 
-      // Then save student data to StudentData table
       const { error: dataError } = await supabase
         .from('StudentData')
         .insert([
@@ -108,22 +160,22 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
             'Last Name': registerData.surname,
             'Mailid': registerData.email,
             'Contact Number': parseInt(registerData.contactNumber),
-            'dtCreatedon': new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-            'Registrationid': Math.floor(Math.random() * 1000000) // Random ID within int range
+            'dtCreatedon': new Date().toISOString().split('T')[0],
+            'Registrationid': Math.floor(Math.random() * 1000000)
           }
         ]);
 
       if (dataError) {
         console.error('Error saving student data:', dataError);
-        toast({ 
-          title: "Registration successful", 
+        toast({
+          title: "Registration successful",
           description: "Check your email to confirm. Note: Some profile data may need to be re-entered.",
           variant: "default"
         });
       } else {
         toast({ title: "Registration successful", description: "Check your email to confirm your account." });
       }
-      
+
     } catch (error) {
       console.error('Registration error:', error);
       toast({ title: "Registration failed", description: "An unexpected error occurred.", variant: "destructive" });
@@ -132,15 +184,14 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
     }
   };
 
+  // Listen for location changes and reset to login tab if coming back
+  useEffect(() => {
+    setActiveTab("login");
+  }, [location.key]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to Home
-          </Button>
-        </div>
-        
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
@@ -155,6 +206,29 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
           </p>
         </div>
 
+        {/* NEW: success note after email verification */}
+        {showEmailVerifiedBanner && (
+          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-900 shadow-sm">
+            <div className="flex items-start gap-3">
+              <Check className="h-5 w-5 mt-0.5 text-green-600" />
+              <div className="flex-1">
+                <p className="font-semibold">Email verified successfully</p>
+                <p className="text-sm text-green-800/90">
+                  Your account is confirmed. Please sign in to continue.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-sm font-semibold text-green-800 hover:text-green-900"
+                onClick={() => setShowEmailVerifiedBanner(false)}
+                aria-label="Dismiss email verified message"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
         <Card className="shadow-2xl border-0 bg-card/90 backdrop-blur-sm">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
@@ -162,13 +236,9 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
               Sign in to your account or create a new one to get started
             </CardDescription>
           </CardHeader>
+
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid grid-cols-2 mb-8 h-12">
-                <TabsTrigger value="login" className="text-base font-medium">Sign In</TabsTrigger>
-                <TabsTrigger value="register" className="text-base font-medium">Register</TabsTrigger>
-              </TabsList>
-              
+            <Tabs value={activeTab} className="w-full">
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-6">
                   <div className="space-y-2">
@@ -227,6 +297,19 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
                       "Sign In"
                     )}
                   </Button>
+
+                  {/* ✅ NEW: Sign up link below Sign In button */}
+                  <div className="text-center text-sm text-muted-foreground">
+                    Don&apos;t have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("register")}
+                      className="font-semibold text-primary hover:underline underline-offset-4"
+                      aria-label="Go to sign up"
+                    >
+                      Click here to signup
+                    </button>
+                  </div>
                 </form>
               </TabsContent>
               
@@ -417,6 +500,19 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
                       "Create Account"
                     )}
                   </Button>
+
+                  {/* ✅ Optional: link back to login */}
+                  <div className="text-center text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("login")}
+                      className="font-semibold text-primary hover:underline underline-offset-4"
+                      aria-label="Go to sign in"
+                    >
+                      Sign in
+                    </button>
+                  </div>
                 </form>
               </TabsContent>
             </Tabs>

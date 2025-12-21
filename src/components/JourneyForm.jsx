@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const JourneyForm = ({ onBack }) => {
+  // ✅ Always start at top whenever this page/component is shown
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const [studentName, setStudentName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -119,10 +124,6 @@ const JourneyForm = ({ onBack }) => {
                 Slotpilot Consultancy
               </span>
             </div>
-            <Button onClick={onBack} variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
           </div>
         </div>
       </nav>
