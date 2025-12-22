@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // ✅ add useNavigate
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 const StudentLoginRegister = ({ onBack, onLogin }) => {
   const [activeTab, setActiveTab] = useState("login");
   const location = useLocation();
+  const navigate = useNavigate(); // ✅ add
 
   // NEW: show a success note after returning from email verification
   const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(false);
@@ -117,17 +118,48 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginData.email,
-      password: loginData.password,
-    });
-    if (error) {
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
-    } else {
+
+    try {
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        toast({ title: "Login failed", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      const user = signInData?.user;
+      const session = signInData?.session;
+
+      if (!user || !session) {
+        toast({
+          title: "Login failed",
+          description: "Unable to start a session. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const isEmailVerified = Boolean(user.email_confirmed_at || user.confirmed_at);
+      if (!isEmailVerified) {
+        toast({
+          title: "Email not verified",
+          description: "Please verify your email first, then sign in again.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        return;
+      }
+
       toast({ title: "Logged in", description: "Welcome back!" });
-      onLogin && onLogin(); // Navigate to student dashboard
+
+      // ✅ Navigate to the route that renders StudentDashboardNew.jsx
+      navigate("/student-dashboard-new", { replace: true });
+    } finally {
+      setLoginLoading(false);
     }
-    setLoginLoading(false);
   };
 
   const handleRegister = async (e) => {

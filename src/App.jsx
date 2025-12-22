@@ -16,6 +16,8 @@ import ResetPassword from "./pages/ResetPassword";
 import CollegesListPage from "./pages/CollegesListPage";
 import StudentLoginRegister from "@/components/StudentLoginRegister";
 import JourneyForm from "./components/JourneyForm";
+import StudentDashboard from "./components/StudentDashboard";
+import StudentDashboardNew from "./components/StudentDashboardNew";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,7 @@ const App = () => (
           <Route path="/StudentLoginRegisterPage" element={<StudentLoginRegister />} />
           <Route path="/student-login" element={<StudentLoginRoute />} />
           <Route path="/journey" element={<JourneyForm/>} />
+          <Route path="/student-dashboard-new" element={<StudentDashboardNew/>} />
 
         </Routes>
       </BrowserRouter>
