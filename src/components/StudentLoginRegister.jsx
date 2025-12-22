@@ -217,9 +217,10 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   };
 
   // Listen for location changes and reset to login tab if coming back
-  useEffect(() => {
-    setActiveTab("login");
-  }, [location.key]);
+  // Removed this useEffect as it was causing infinite reloads
+  // useEffect(() => {
+  //   setActiveTab("login");
+  // }, [location.key]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">

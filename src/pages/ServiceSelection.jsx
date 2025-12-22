@@ -15,7 +15,7 @@ const Earth = () => (
         width:100%;
         height:100%;
         border-radius:50%;
-        background-image: url('/images/world-map.jpg');
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         background-size: cover;
         background-position: 50% 50%;
         box-shadow: inset -10px -6px 24px rgba(0,0,0,0.45), 0 6px 18px rgba(10,20,40,0.25);
