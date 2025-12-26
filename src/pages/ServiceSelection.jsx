@@ -219,129 +219,106 @@ const ServiceSelection = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* left placeholder (keeps balanced layout) */}
-            <div className="w-16" />
+      <header className="relative z-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-4">
+            {/* left placeholder */}
+            <div className="w-32" />
 
             {/* center wordmark */}
             <div className="flex-1 flex justify-center">
               <div className="text-center">
-                {/* Animated wordmark styles (disabled on small screens for stability) */}
-                <style>{`
-                  .slotpilot-wordmark { display:inline-flex; gap:0.04rem; align-items:baseline; }
-                  .slotpilot-wordmark span {
-                    display:inline-block;
-                    font-weight:800;
-                    font-size:1.6rem;
-                    line-height:1;
-                    -webkit-background-clip:text;
-                    background-clip:text;
-                    color:transparent;
-                    background-image: linear-gradient(90deg, #F59E0B 0%, #F97316 45%, #FB7185 100%);
-                    transition: transform 220ms ease, letter-spacing 220ms ease;
-                  }
-                  /* subtle staggered wave on md+ only */
-                  @media (min-width: 768px) {
-                    .slotpilot-wordmark span { font-size:2.625rem; }
-                    .slotpilot-wordmark span:nth-child(1){ animation:wave 2200ms ease-in-out infinite; animation-delay:0ms; }
-                    .slotpilot-wordmark span:nth-child(2){ animation:wave 2200ms ease-in-out infinite; animation-delay:80ms; }
-                    .slotpilot-wordmark span:nth-child(3){ animation:wave 2200ms ease-in-out infinite; animation-delay:160ms; }
-                    .slotpilot-wordmark span:nth-child(4){ animation:wave 2200ms ease-in-out infinite; animation-delay:240ms; }
-                    .slotpilot-wordmark span:nth-child(5){ animation:wave 2200ms ease-in-out infinite; animation-delay:320ms; }
-                    .slotpilot-wordmark span:nth-child(6){ animation:wave 2200ms ease-in-out infinite; animation-delay:400ms; }
-                    .slotpilot-wordmark span:nth-child(7){ animation:wave 2200ms ease-in-out infinite; animation-delay:480ms; }
-                    .slotpilot-wordmark span:nth-child(8){ animation:wave 2200ms ease-in-out infinite; animation-delay:560ms; }
-                    .slotpilot-wordmark span:nth-child(9){ animation:wave 2200ms ease-in-out infinite; animation-delay:640ms; }
-                    @keyframes wave {
-                      0% { transform: translateY(0) scale(1); }
-                      40% { transform: translateY(-6px) scale(1.03); }
-                      70% { transform: translateY(-3px) scale(1.015); }
-                      100% { transform: translateY(0) scale(1); }
-                    }
-                    .slotpilot-wordmark:hover span { transform: translateY(-3px) scale(1.02); letter-spacing:0.6px; }
-                  }
-                `}</style>
-
-                <div>
-                  <h1 className="mb-0">
-                    <span className="slotpilot-wordmark" aria-label="SlotPilot">
-                      {"SlotPilot".split('').map((ch, i) => <span key={i}>{ch}</span>)}
-                    </span>
-                  </h1>
-                </div>
-
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium tracking-wide uppercase mt-1">
-                  Global Education & Visa Services
+                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                  SlotPilot
+                </h1>
+                <p className="text-sm sm:text-base text-gray-300">
+                  Your trusted hub for visa support and travel companions
                 </p>
               </div>
             </div>
 
-            {/* right: employer/student actions (responsive) */}
-            <div className="w-16 flex justify-end items-center">
-              <div className="hidden sm:block">
-                <Button
-                  variant="hero"
-                  size="sm"
-                  onClick={() => navigate('/employer-login')}
-                  className="font-semibold shadow-lg"
-                >
-                  Employer Login
-                </Button>
-              </div>
-              {/* small-screen compact action: show login icon (navigates to Employer Login) */}
-              <div className="sm:hidden">
-                <button
-                  className="p-2 rounded-md border flex items-center justify-center"
-                  aria-label="Employer Login"
-                  onClick={() => navigate('/employer-login')}
-                >
-                  <Users className="w-5 h-5" />
-                </button>
-              </div>
+            {/* right: Explore Community button */}
+            <div className="w-32 flex justify-end">
+              <Button
+                onClick={() => window.open('https://community.slotpilot.in', '_blank')}
+                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-3 sm:px-6 py-2 rounded-full shadow-lg transition-all duration-300 text-xs sm:text-base hidden sm:block"
+              >
+                Explore Community
+              </Button>
+              <Button
+                onClick={() => window.open('https://community.slotpilot.in', '_blank')}
+                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-3 py-2 rounded-full shadow-lg transition-all duration-300 text-xs sm:hidden"
+              >
+                Community
+              </Button>
             </div>
+          </div>
+
+          {/* Social media links */}
+          <div className="flex justify-center gap-4 sm:gap-6">
+            <a
+              href="https://wa.me/your-number"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-400 hover:text-green-300 transition-colors text-sm sm:text-base font-medium"
+            >
+              WhatsApp
+            </a>
+            <a
+              href="https://instagram.com/slotpilot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-400 hover:text-pink-300 transition-colors text-sm sm:text-base font-medium"
+            >
+              Instagram
+            </a>
+            <a
+              href="https://t.me/slotpilot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors text-sm sm:text-base font-medium"
+            >
+              Telegram
+            </a>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-16 sm:py-24 bg-gradient-to-br from-blue-600 via-teal-500 to-blue-600 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"
+      <section className="relative py-20 sm:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"
                style={{ transform: `translateY(${scrollY * 0.3}px)` }} />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-300 rounded-full blur-3xl animate-pulse"
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500 rounded-full blur-3xl"
                style={{ transform: `translateY(${scrollY * -0.3}px)` }} />
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-md border-white/30">
-            <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
-            Trusted by 15,000+ Clients Worldwide
-          </Badge>
-
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Choose Your Perfect Service
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            Welcome to Global Travel Hub
           </h2>
-          <p className="text-base sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-95 leading-relaxed">
-            From education to immigration, we provide comprehensive solutions for all your global aspirations
+          <p className="text-lg sm:text-xl md:text-2xl mb-12 max-w-4xl mx-auto text-gray-300 leading-relaxed">
+            Your one-stop platform for visa information, travel tips, and finding companions
           </p>
+
+          <Button
+            onClick={() => window.open('https://community.slotpilot.in', '_blank')}
+            className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+          >
+            Explore Community
+          </Button>
         </div>
       </section>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50">
 
-        <div className="text-center mb-12">
-          <Badge className="mb-4 px-4 py-2" variant="outline">
-            <Building2 className="w-4 h-4 mr-2" />
-            Our Services
-          </Badge>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
-            Select Your Service
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+            Our Features
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Expert consultants ready to guide you through every step of your journey
+          <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
+            Discover a community of travelers sharing experiences, advice, and opportunities to connect
           </p>
         </div>
 
