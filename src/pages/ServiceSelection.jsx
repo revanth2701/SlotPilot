@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle, Sun, Moon } from 'lucide-react';
 
 
 // constant Earth — realistic 3D rotating globe component (uses an equirectangular world-map image at /public/images/world-map.jpg)
@@ -18,7 +18,7 @@ const Earth = () => (
         width:100%;
         height:100%;
         border-radius:50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background: var(--gradient-primary);
         background-size: cover;
         background-position: 50% 50%;
         box-shadow: inset -10px -6px 24px rgba(0,0,0,0.45), 0 6px 18px rgba(10,20,40,0.25);
@@ -67,9 +67,39 @@ const Earth = () => (
 
 const ServiceSelection = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
   const [email, setEmail] = useState("");
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") return true;
+      if (saved === "light") return false;
+      return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      if (isDarkMode) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    } catch {
+      // ignore
+    }
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.key]);
 
   const statistics = [
     { value: 15000, suffix: "+", label: "Visas Processed", icon: Globe },
@@ -155,6 +185,7 @@ const ServiceSelection = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [testimonials.length]);
+  
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -219,115 +250,162 @@ const ServiceSelection = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="relative z-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between mb-4">
-            {/* left placeholder */}
-            <div className="w-32" />
+      <header className="relative z-10 bg-gradient-to-r from-primary/10 to-background backdrop-blur-md border-b border-border shadow-elegant">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* left placeholder (keeps balanced layout) */}
+            <div className="w-16" />
 
             {/* center wordmark */}
             <div className="flex-1 flex justify-center">
               <div className="text-center">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                  SlotPilot
-                </h1>
-                <p className="text-sm sm:text-base text-gray-300">
-                  Your trusted hub for visa support and travel companions
+                {/* Animated wordmark styles (disabled on small screens for stability) */}
+                <style>{`
+                  .slotpilot-wordmark { display:inline-flex; gap:0.04rem; align-items:baseline; }
+                  .slotpilot-wordmark span {
+                    display:inline-block;
+                    font-weight:800;
+                    font-size:1.6rem;
+                    line-height:1;
+                    -webkit-background-clip:text;
+                    background-clip:text;
+                    color:transparent;
+                    background-image: linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(var(--muted-foreground)) 50%, hsl(var(--foreground)) 100%);
+                    transition: transform 220ms ease, letter-spacing 220ms ease;
+                  }
+                  /* subtle staggered wave on md+ only */
+                  @media (min-width: 768px) {
+                    .slotpilot-wordmark span { font-size:2.625rem; }
+                    .slotpilot-wordmark span:nth-child(1){ animation:wave 2200ms ease-in-out infinite; animation-delay:0ms; }
+                    .slotpilot-wordmark span:nth-child(2){ animation:wave 2200ms ease-in-out infinite; animation-delay:80ms; }
+                    .slotpilot-wordmark span:nth-child(3){ animation:wave 2200ms ease-in-out infinite; animation-delay:160ms; }
+                    .slotpilot-wordmark span:nth-child(4){ animation:wave 2200ms ease-in-out infinite; animation-delay:240ms; }
+                    .slotpilot-wordmark span:nth-child(5){ animation:wave 2200ms ease-in-out infinite; animation-delay:320ms; }
+                    .slotpilot-wordmark span:nth-child(6){ animation:wave 2200ms ease-in-out infinite; animation-delay:400ms; }
+                    .slotpilot-wordmark span:nth-child(7){ animation:wave 2200ms ease-in-out infinite; animation-delay:480ms; }
+                    .slotpilot-wordmark span:nth-child(8){ animation:wave 2200ms ease-in-out infinite; animation-delay:560ms; }
+                    .slotpilot-wordmark span:nth-child(9){ animation:wave 2200ms ease-in-out infinite; animation-delay:640ms; }
+                    @keyframes wave {
+                      0% { transform: translateY(0) scale(1); }
+                      40% { transform: translateY(-6px) scale(1.03); }
+                      70% { transform: translateY(-3px) scale(1.015); }
+                      100% { transform: translateY(0) scale(1); }
+                    }
+                    .slotpilot-wordmark:hover span { transform: translateY(-3px) scale(1.02); letter-spacing:0.6px; }
+                  }
+                `}</style>
+
+                <div>
+                  <h1 className="mb-0">
+                    <span className="slotpilot-wordmark" aria-label="SlotPilot">
+                      {"SlotPilot".split('').map((ch, i) => <span key={i}>{ch}</span>)}
+                    </span>
+                  </h1>
+                </div>
+
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium tracking-wide uppercase mt-1">
+                  Global Education & Visa Services
                 </p>
               </div>
             </div>
 
-            {/* right: Explore Community button */}
-            <div className="w-32 flex justify-end">
-              <Button
-                onClick={() => window.open('https://community.slotpilot.in', '_blank')}
-                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-3 sm:px-6 py-2 rounded-full shadow-lg transition-all duration-300 text-xs sm:text-base hidden sm:block"
-              >
-                Explore Community
-              </Button>
-              <Button
-                onClick={() => window.open('https://community.slotpilot.in', '_blank')}
-                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-3 py-2 rounded-full shadow-lg transition-all duration-300 text-xs sm:hidden"
-              >
-                Community
-              </Button>
-            </div>
-          </div>
+            {/* right: employer/student actions (responsive) */}
+            <div className="w-16 flex justify-end items-center">
+              <div className="hidden sm:block">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsDarkMode((v) => !v)}
+                    aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    title={isDarkMode ? "Light mode" : "Dark mode"}
+                  >
+                    {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </Button>
 
-          {/* Social media links */}
-          <div className="flex justify-center gap-4 sm:gap-6">
-            <a
-              href="https://wa.me/your-number"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-400 hover:text-green-300 transition-colors text-sm sm:text-base font-medium"
-            >
-              WhatsApp
-            </a>
-            <a
-              href="https://instagram.com/slotpilot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-pink-400 hover:text-pink-300 transition-colors text-sm sm:text-base font-medium"
-            >
-              Instagram
-            </a>
-            <a
-              href="https://t.me/slotpilot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors text-sm sm:text-base font-medium"
-            >
-              Telegram
-            </a>
+                  <Button
+                    variant="hero"
+                    size="sm"
+                    onClick={() => navigate('/employer-login')}
+                    className="font-semibold shadow-lg"
+                  >
+                    Employer Login
+                  </Button>
+                </div>
+              </div>
+              {/* small-screen compact action: show login icon (navigates to Employer Login) */}
+              <div className="sm:hidden">
+                <div className="flex items-center gap-2">
+                  <button
+                    className="p-2 rounded-md border flex items-center justify-center"
+                    aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    title={isDarkMode ? "Light mode" : "Dark mode"}
+                    onClick={() => setIsDarkMode((v) => !v)}
+                  >
+                    {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+
+                  <button
+                    className="p-2 rounded-md border flex items-center justify-center bg-gradient-primary text-primary-foreground"
+                    aria-label="Employer Login"
+                    onClick={() => navigate('/employer-login')}
+                  >
+                    <Users className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 sm:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"
+      <section className="relative py-16 sm:py-24 bg-gradient-primary text-primary-foreground overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-background rounded-full blur-3xl animate-pulse"
                style={{ transform: `translateY(${scrollY * 0.3}px)` }} />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500 rounded-full blur-3xl"
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-muted rounded-full blur-3xl animate-pulse"
                style={{ transform: `translateY(${scrollY * -0.3}px)` }} />
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Welcome to Global Travel Hub
-          </h2>
-          <p className="text-lg sm:text-xl md:text-2xl mb-12 max-w-4xl mx-auto text-gray-300 leading-relaxed">
-            Your one-stop platform for visa information, travel tips, and finding companions
-          </p>
+          <Badge className="mb-4 px-4 py-2 bg-background/10 backdrop-blur-md border-background/20">
+            <Star className="w-4 h-4 mr-2 fill-primary text-primary" />
+            Trusted by 15,000+ Clients Worldwide
+          </Badge>
 
-          <Button
-            onClick={() => window.open('https://community.slotpilot.in', '_blank')}
-            className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-          >
-            Explore Community
-          </Button>
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            Choose Your Perfect Service
+          </h2>
+          <p className="text-base sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-95 leading-relaxed">
+            From education to immigration, we provide comprehensive solutions for all your global aspirations
+          </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50">
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-            Our Features
+        <div className="text-center mb-12">
+          <Badge className="mb-4 px-4 py-2" variant="outline">
+            <Building2 className="w-4 h-4 mr-2" />
+            Our Services
+          </Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            Select Your Service
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
-            Discover a community of travelers sharing experiences, advice, and opportunities to connect
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Expert consultants ready to guide you through every step of your journey
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-blue-500 bg-gradient-to-br from-background to-primary/5 transform hover:-translate-y-2">
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-foreground/30 bg-gradient-to-br from-background to-muted/30 transform hover:-translate-y-2">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-teal-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <GraduationCap className="w-8 h-8 text-white" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-foreground to-muted-foreground rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <GraduationCap className="w-8 h-8 text-background" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
                 Higher Education
@@ -357,7 +435,8 @@ const ServiceSelection = () => {
               </div>
               <Button
                 onClick={() => navigate('/higher-education')}
-                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto"
+                variant="hero"
+                className="w-full font-semibold py-3 h-auto"
                 size="lg"
               >
                 <Building2 className="w-5 h-5 mr-2" />
@@ -367,10 +446,10 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-teal-500 bg-gradient-to-br from-background to-secondary/5 transform hover:-translate-y-2">
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-foreground/30 bg-gradient-to-br from-background to-muted/30 transform hover:-translate-y-2">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-teal-600 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Plane className="w-8 h-8 text-white" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-foreground to-muted-foreground rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Plane className="w-8 h-8 text-background" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
                 Visa Services
@@ -382,26 +461,27 @@ const ServiceSelection = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <span>Tourist & Business Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <span>Work & Employment Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <span>Family & Immigration Visas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <span>Document Support & Review</span>
                 </div>
               </div>
               <Button
                 type="button"
                 onClick={() => navigate("/visa-start")}
-                className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold py-3 h-auto group-hover:shadow-xl transition-all"
+                variant="hero"
+                className="w-full font-semibold py-3 h-auto group-hover:shadow-xl transition-all"
                 size="lg"
               >
                 <Globe className="w-5 h-5 mr-2" />
@@ -410,14 +490,58 @@ const ServiceSelection = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Explore Communities Card */}
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-foreground/30 bg-gradient-to-br from-background to-muted/30 transform hover:-translate-y-2">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-foreground to-muted-foreground rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Users className="w-8 h-8 text-background" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-foreground">
+                Explore Communities
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Connect with students and professionals, ask questions, and learn from shared experiences
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Student Networks</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Country & University Groups</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Mentorship & Guidance</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Tips, Resources & Updates</span>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate('/communities')}
+                variant="hero"
+                className="w-full font-semibold py-3 h-auto"
+                size="lg"
+              >
+                <Users className="w-5 h-5 mr-2" />
+                Explore Communities
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
       {/* Statistics Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-blue-600 to-teal-500 text-white relative overflow-hidden">
+      <section className="py-16 sm:py-20 bg-gradient-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-300 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-0 w-96 h-96 bg-background rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-muted rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -450,14 +574,14 @@ const ServiceSelection = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-gradient-to-br from-secondary to-background">
+      <section className="py-20 bg-gradient-to-br from-primary/10 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="mb-4 px-4 py-2" variant="outline">
               <CheckCircle className="w-4 h-4 mr-2" />
               Why Choose Us
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
               Our Advantages
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -471,11 +595,11 @@ const ServiceSelection = () => {
               return (
                 <Card
                   key={index}
-                  className="group shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-blue-500 transform hover:-translate-y-2"
+                  className="group shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-primary transform hover:-translate-y-2"
                 >
                   <CardHeader className="pb-4">
-                    <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-600 to-teal-500 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    <div className="mx-auto mb-4 p-3 bg-gradient-primary rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                     </div>
                     <CardTitle className="text-lg">{benefit.title}</CardTitle>
                   </CardHeader>
@@ -494,10 +618,10 @@ const ServiceSelection = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="mb-4 px-4 py-2" variant="outline">
-              <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4 mr-2 fill-primary text-primary" />
               Client Success Stories
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
               What Our Clients Say
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -509,13 +633,13 @@ const ServiceSelection = () => {
             <Card className="shadow-2xl border-2">
               <CardContent className="p-8 sm:p-12">
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-teal-500 flex items-center justify-center text-white text-2xl font-bold mb-6">
+                  <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold mb-6">
                     {testimonials[currentTestimonial].image}
                   </div>
 
                   <div className="flex gap-1 mb-6">
                     {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="w-5 h-5 fill-primary text-primary" />
                     ))}
                   </div>
 
@@ -536,7 +660,7 @@ const ServiceSelection = () => {
                 variant="outline"
                 size="icon"
                 onClick={prevTestimonial}
-                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
@@ -547,7 +671,7 @@ const ServiceSelection = () => {
                     key={index}
                     onClick={() => setCurrentTestimonial(index)}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentTestimonial ? 'bg-blue-600 w-8' : 'bg-gray-300'
+                      index === currentTestimonial ? 'bg-primary w-8' : 'bg-muted-foreground/30'
                     }`}
                   />
                 ))}
@@ -557,7 +681,7 @@ const ServiceSelection = () => {
                 variant="outline"
                 size="icon"
                 onClick={nextTestimonial}
-                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -567,14 +691,14 @@ const ServiceSelection = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gradient-to-br from-secondary to-background">
+      <section className="py-20 bg-gradient-to-br from-primary/10 to-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="mb-4 px-4 py-2" variant="outline">
               <CheckCircle className="w-4 h-4 mr-2" />
               Got Questions?
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
               Frequently Asked Questions
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -585,7 +709,7 @@ const ServiceSelection = () => {
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`} className="border rounded-lg px-6 bg-card shadow-md hover:shadow-lg transition-shadow">
-                <AccordionTrigger className="text-left font-semibold hover:text-blue-600 transition-colors py-4">
+                <AccordionTrigger className="text-left font-semibold hover:text-primary transition-colors py-4">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground pb-4">
@@ -598,9 +722,9 @@ const ServiceSelection = () => {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-teal-500 text-white">
+      <section className="py-20 bg-gradient-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-md border-white/30">
+          <Badge className="mb-4 px-4 py-2 bg-background/10 backdrop-blur-md border-background/20">
             <Mail className="w-4 h-4 mr-2" />
             Stay Updated
           </Badge>
@@ -617,10 +741,10 @@ const ServiceSelection = () => {
               placeholder="Enter your email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-white text-gray-900 border-0 h-12"
+              className="flex-1 bg-background text-foreground border border-border h-12"
               required
             />
-            <Button type="submit" size="lg" className="bg-white text-blue-600 hover:bg-blue-50 h-12 px-8">
+            <Button type="submit" size="lg" variant="hero" className="h-12 px-8">
               Subscribe
             </Button>
           </form>
@@ -632,31 +756,27 @@ const ServiceSelection = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16">
+      <footer className="bg-gradient-primary text-primary-foreground py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center mb-4">
                 <span className="text-2xl font-black tracking-tight">
-                  <span className="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">
-                    SLOT
-                  </span>
-                  <span className="bg-gradient-to-r from-teal-400 to-orange-400 bg-clip-text text-transparent">
-                    PILOT
-                  </span>
+                  <span className="bg-background/10 backdrop-blur-md px-2 py-1 rounded-md">SLOT</span>
+                  <span className="bg-background/10 backdrop-blur-md px-2 py-1 rounded-md ml-1">PILOT</span>
                 </span>
               </div>
-              <p className="text-gray-400 mb-4 max-w-md">
+              <p className="text-primary-foreground/80 mb-4 max-w-md">
                 Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2005.
               </p>
               <div className="flex gap-3">
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
                   <Globe className="w-5 h-5" />
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
                   <Mail className="w-5 h-5" />
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
                   <Phone className="w-5 h-5" />
                 </Button>
               </div>
@@ -664,7 +784,7 @@ const ServiceSelection = () => {
 
             <div>
               <h3 className="font-bold text-lg mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-primary-foreground/80">
                 <li><button onClick={() => navigate('/higher-education')} className="hover:text-white transition-colors text-left">Higher Education</button></li>
                 <li><button onClick={() => navigate('/visa-start')} className="hover:text-white transition-colors text-left">Visa Services</button></li>
                 <li><a href="mailto:info@slotpilot.in" className="hover:text-white transition-colors">Contact Us</a></li>
@@ -673,19 +793,19 @@ const ServiceSelection = () => {
 
             <div>
               <h3 className="font-bold text-lg mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-primary-foreground/80">
                 <li><button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
                 <li><button onClick={() => navigate('/terms-of-service')} className="hover:text-white transition-colors text-left">Terms of Service</button></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-700 pt-8">
+          <div className="border-t border-background/20 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-gray-400 text-sm text-center md:text-left">
+              <p className="text-primary-foreground/80 text-sm text-center md:text-left">
                 © 2025 SlotPilot Consultancy. All rights reserved. Empowering dreams globally.
               </p>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="flex items-center gap-2 text-sm text-primary-foreground/80">
                 <MapPinIcon className="w-4 h-4" />
                 <span>Serving clients worldwide from our global offices</span>
               </div>

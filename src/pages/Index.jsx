@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import LoginSelection from "@/components/LoginSelection";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
@@ -17,7 +16,6 @@ const Index = () => {
   const location = useLocation();
   const [currentView, setCurrentView] = useState("landing");
   const [scrollY, setScrollY] = useState(0);
-  const [email, setEmail] = useState("");
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const countries = [
@@ -114,6 +112,10 @@ const Index = () => {
     return () => { document.documentElement.style.scrollPaddingTop = ""; };
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.key]);
+
   const [userName, setUserName] = useState(() => {
     try { return localStorage.getItem("userName") || ""; } catch { return ""; }
   });
@@ -191,14 +193,6 @@ const Index = () => {
     navigate("/journey", {
       state: { from: location.pathname + location.search },
     });
-  };
-
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (email) {
-      alert(`Thank you for subscribing! We'll send updates to ${email}`);
-      setEmail("");
-    }
   };
 
   const nextTestimonial = () => {
@@ -318,25 +312,6 @@ const Index = () => {
               Transform your academic dreams into reality with expert guidance for Masters programs
               in USA, UK, Canada, Ireland, Germany, and Australia.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                size="lg"
-                onClick={goToJourney}
-                className="bg-white text-blue-600 hover:bg-blue-50 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
-              >
-                Start Your Journey
-                <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={scrollToDestinations}
-                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 rounded-full transition-all duration-300 w-full sm:w-auto"
-              >
-                Explore Destinations
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -625,40 +600,6 @@ const Index = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-teal-500 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-md border-white/30">
-            <Mail className="w-4 h-4 mr-2" />
-            Stay Updated
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold mb-4">
-            Subscribe to Our Newsletter
-          </h2>
-          <p className="text-lg sm:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Get the latest updates on university deadlines, scholarships, and study abroad tips
-          </p>
-
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-            <Input
-              type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-white text-gray-900 border-0 h-12"
-              required
-            />
-            <Button type="submit" size="lg" className="bg-white text-blue-600 hover:bg-blue-50 h-12 px-8">
-              Subscribe
-            </Button>
-          </form>
-
-          <p className="text-sm opacity-75 mt-4">
-            We respect your privacy. Unsubscribe at any time.
-          </p>
         </div>
       </section>
 
