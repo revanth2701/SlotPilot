@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle, Sun, Moon } from 'lucide-react';
 
@@ -69,7 +68,6 @@ const ServiceSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
-  const [email, setEmail] = useState("");
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
@@ -185,15 +183,6 @@ const ServiceSelection = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [testimonials.length]);
-  
-
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (email) {
-      alert(`Thank you for subscribing! We'll send updates to ${email}`);
-      setEmail("");
-    }
-  };
 
   const nextTestimonial = () => {
     setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -392,7 +381,7 @@ const ServiceSelection = () => {
             <Building2 className="w-4 h-4 mr-2" />
             Our Services
           </Badge>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-primary bg-clip-text text-transparent">
             Select Your Service
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -486,7 +475,6 @@ const ServiceSelection = () => {
               >
                 <Globe className="w-5 h-5 mr-2" />
                 Apply for Visa
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
@@ -581,7 +569,7 @@ const ServiceSelection = () => {
               <CheckCircle className="w-4 h-4 mr-2" />
               Why Choose Us
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground supports-[background-clip:text]:bg-primary supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent">
               Our Advantages
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -621,7 +609,7 @@ const ServiceSelection = () => {
               <Star className="w-4 h-4 mr-2 fill-primary text-primary" />
               Client Success Stories
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground supports-[background-clip:text]:bg-primary supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent">
               What Our Clients Say
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -698,7 +686,7 @@ const ServiceSelection = () => {
               <CheckCircle className="w-4 h-4 mr-2" />
               Got Questions?
             </Badge>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground supports-[background-clip:text]:bg-primary supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent">
               Frequently Asked Questions
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -718,40 +706,6 @@ const ServiceSelection = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge className="mb-4 px-4 py-2 bg-background/10 backdrop-blur-md border-background/20">
-            <Mail className="w-4 h-4 mr-2" />
-            Stay Updated
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold mb-4">
-            Subscribe to Our Newsletter
-          </h2>
-          <p className="text-lg sm:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Get the latest updates on visa policies, education opportunities, and travel tips
-          </p>
-
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-            <Input
-              type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-background text-foreground border border-border h-12"
-              required
-            />
-            <Button type="submit" size="lg" variant="hero" className="h-12 px-8">
-              Subscribe
-            </Button>
-          </form>
-
-          <p className="text-sm opacity-75 mt-4">
-            We respect your privacy. Unsubscribe at any time.
-          </p>
         </div>
       </section>
 
