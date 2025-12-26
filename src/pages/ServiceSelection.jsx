@@ -1,8 +1,11 @@
-import React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Plane, Building2, Globe, Users } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 
 // constant Earth — realistic 3D rotating globe component (uses an equirectangular world-map image at /public/images/world-map.jpg)
@@ -64,9 +67,157 @@ const Earth = () => (
 
 const ServiceSelection = () => {
   const navigate = useNavigate();
+  const [scrollY, setScrollY] = useState(0);
+  const [email, setEmail] = useState("");
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  const statistics = [
+    { value: 15000, suffix: "+", label: "Visas Processed", icon: Globe },
+    { value: 98, suffix: "%", label: "Success Rate", icon: TrendingUp },
+    { value: 50, suffix: "+", label: "Countries Covered", icon: MapPinIcon },
+    { value: 20, suffix: "+", label: "Years Experience", icon: Award }
+  ];
+
+  const testimonials = [
+    {
+      name: "Priya Sharma",
+      service: "Student Visa - USA",
+      text: "SlotPilot made my F1 visa process incredibly smooth. Their expertise and guidance helped me get approval on my first attempt!",
+      rating: 5,
+      image: "PS"
+    },
+    {
+      name: "David Martinez",
+      service: "Work Visa - Canada",
+      text: "Professional and efficient service. They handled all my documentation and I received my work permit faster than expected.",
+      rating: 5,
+      image: "DM"
+    },
+    {
+      name: "Aisha Khan",
+      service: "Higher Education - UK",
+      text: "From university selection to visa approval, SlotPilot supported me at every step. Now I'm studying at my dream university!",
+      rating: 5,
+      image: "AK"
+    },
+    {
+      name: "James Wilson",
+      service: "Tourist Visa - Australia",
+      text: "Quick, reliable, and hassle-free. Got my tourist visa approved without any complications. Highly recommended!",
+      rating: 5,
+      image: "JW"
+    }
+  ];
+
+  const benefits = [
+    { icon: CheckCircle, title: "End-to-End Support", description: "Complete assistance from documentation to approval" },
+    { icon: Clock, title: "Fast Processing", description: "Quick turnaround times for all visa types" },
+    { icon: Users, title: "Expert Consultants", description: "Experienced team with in-depth knowledge" },
+    { icon: Award, title: "High Success Rate", description: "98% approval rate across all services" }
+  ];
+
+  const faqs = [
+    {
+      question: "What documents do I need for a student visa?",
+      answer: "Required documents typically include a valid passport, admission letter from university, proof of financial support, academic transcripts, language proficiency test scores, and visa application forms. Our consultants will provide a comprehensive checklist based on your destination country."
+    },
+    {
+      question: "How long does the visa process take?",
+      answer: "Processing times vary by country and visa type. Student visas typically take 2-8 weeks, tourist visas 1-4 weeks, and work visas 4-12 weeks. We'll provide accurate timelines based on your specific case."
+    },
+    {
+      question: "What is your success rate?",
+      answer: "We maintain a 98% success rate across all our services. Our experienced consultants thoroughly review applications before submission to ensure the highest chances of approval."
+    },
+    {
+      question: "Do you provide post-visa services?",
+      answer: "Yes! We offer pre-departure guidance, accommodation assistance, airport pickup arrangements, and ongoing support after you reach your destination."
+    },
+    {
+      question: "How much do your services cost?",
+      answer: "Our fees vary based on the service and destination country. We offer transparent pricing with no hidden costs. Contact us for a detailed quote tailored to your needs."
+    },
+    {
+      question: "Can you help with visa rejections?",
+      answer: "Absolutely! We specialize in reapplication cases and have successfully helped many clients who faced initial rejections. We'll analyze your case and develop a strong reapplication strategy."
+    }
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [testimonials.length]);
+
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    if (email) {
+      alert(`Thank you for subscribing! We'll send updates to ${email}`);
+      setEmail("");
+    }
+  };
+
+  const nextTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const CountUp = ({ end, duration = 2000, suffix = "" }) => {
+    const [count, setCount] = useState(0);
+    const countRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      if (countRef.current) {
+        observer.observe(countRef.current);
+      }
+
+      return () => {
+        if (countRef.current) {
+          observer.unobserve(countRef.current);
+        }
+      };
+    }, [isVisible]);
+
+    useEffect(() => {
+      if (!isVisible) return;
+
+      let startTime;
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        setCount(Math.floor(progress * end));
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      requestAnimationFrame(animate);
+    }, [isVisible, end, duration]);
+
+    return <span ref={countRef}>{count}{suffix}</span>;
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="relative z-10 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-md border-b border-primary/20 shadow-elegant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -154,23 +305,52 @@ const ServiceSelection = () => {
         </div>
       </header>
 
+      {/* Hero Section */}
+      <section className="relative py-16 sm:py-24 bg-gradient-to-br from-blue-600 via-teal-500 to-blue-600 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"
+               style={{ transform: `translateY(${scrollY * 0.3}px)` }} />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-300 rounded-full blur-3xl animate-pulse"
+               style={{ transform: `translateY(${scrollY * -0.3}px)` }} />
+        </div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Badge className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-md border-white/30">
+            <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
+            Trusted by 15,000+ Clients Worldwide
+          </Badge>
+
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            Choose Your Perfect Service
+          </h2>
+          <p className="text-base sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-95 leading-relaxed">
+            From education to immigration, we provide comprehensive solutions for all your global aspirations
+          </p>
+        </div>
+      </section>
+
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Choose Your Service
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <div className="text-center mb-12">
+          <Badge className="mb-4 px-4 py-2" variant="outline">
+            <Building2 className="w-4 h-4 mr-2" />
+            Our Services
+          </Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+            Select Your Service
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Select the service you need assistance with. Our expert consultants are here to guide you through every step of your journey.
+            Expert consultants ready to guide you through every step of your journey
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
           {/* Higher Education Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/20 bg-gradient-to-br from-background to-primary/5">
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-blue-500 bg-gradient-to-br from-background to-primary/5 transform hover:-translate-y-2">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <GraduationCap className="w-8 h-8 text-primary-foreground" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-teal-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <GraduationCap className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
                 Higher Education
@@ -210,10 +390,10 @@ const ServiceSelection = () => {
           </Card>
 
           {/* Visa Services Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-secondary/20 bg-gradient-to-br from-background to-secondary/5">
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-teal-500 bg-gradient-to-br from-background to-secondary/5 transform hover:-translate-y-2">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Plane className="w-8 h-8 text-secondary-foreground" />
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-teal-600 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Plane className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
                 Visa Services
@@ -244,40 +424,298 @@ const ServiceSelection = () => {
               <Button
                 type="button"
                 onClick={() => navigate("/visa-start")}
-                className="w-full bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-secondary-foreground font-semibold py-3 h-auto"
+                className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold py-3 h-auto group-hover:shadow-xl transition-all"
                 size="lg"
               >
                 <Globe className="w-5 h-5 mr-2" />
                 Apply for Visa
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
         </div>
+      </main>
 
-        {/* Additional Info */}
-        <div className="text-center mt-8">
-          <p className="text-muted-foreground">
-            Contact our consultants for personalized guidance at
-            <a href="mailto:info@slotpilot.in" className="text-primary underline"> info@slotpilot.in</a>
-          </p>
-          <div className="mt-4 text-xs text-muted-foreground">
-            © 2025 Slotpilot. All rights reserved. |
-            <span
-              className="text-primary underline cursor-pointer mx-1"
-              onClick={() => navigate('/privacy-policy')}
-            >
-              Privacy Policy
-            </span>
-            |
-            <span
-              className="text-primary underline cursor-pointer mx-1"
-              onClick={() => navigate('/terms-of-service')}
-            >
-              Terms of Service
-            </span>
+      {/* Statistics Section */}
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-blue-600 to-teal-500 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-300 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Track Record</h2>
+            <p className="text-lg opacity-90 max-w-2xl mx-auto">
+              Numbers that speak for our commitment to excellence
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {statistics.map((stat, index) => {
+              const StatIcon = stat.icon;
+              return (
+                <div key={index} className="text-center transform hover:scale-110 transition-all duration-300">
+                  <div className="mb-3 flex justify-center">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full">
+                      <StatIcon className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                  </div>
+                  <div className="text-3xl sm:text-5xl font-bold mb-2">
+                    <CountUp end={stat.value} suffix={stat.suffix} />
+                  </div>
+                  <div className="text-sm sm:text-base opacity-90">{stat.label}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-gradient-to-br from-secondary to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 px-4 py-2" variant="outline">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Why Choose Us
+            </Badge>
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+              Our Advantages
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Experience the difference with our comprehensive service approach
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {benefits.map((benefit, index) => {
+              const BenefitIcon = benefit.icon;
+              return (
+                <Card
+                  key={index}
+                  className="group shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-blue-500 transform hover:-translate-y-2"
+                >
+                  <CardHeader className="pb-4">
+                    <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-600 to-teal-500 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">{benefit.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm">{benefit.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-background">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 px-4 py-2" variant="outline">
+              <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
+              Client Success Stories
+            </Badge>
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+              What Our Clients Say
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Real experiences from clients who achieved their goals with SlotPilot
+            </p>
+          </div>
+
+          <div className="relative">
+            <Card className="shadow-2xl border-2">
+              <CardContent className="p-8 sm:p-12">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-teal-500 flex items-center justify-center text-white text-2xl font-bold mb-6">
+                    {testimonials[currentTestimonial].image}
+                  </div>
+
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+
+                  <p className="text-lg sm:text-xl text-muted-foreground mb-6 italic leading-relaxed max-w-2xl">
+                    "{testimonials[currentTestimonial].text}"
+                  </p>
+
+                  <div>
+                    <h4 className="text-xl font-bold">{testimonials[currentTestimonial].name}</h4>
+                    <p className="text-muted-foreground">{testimonials[currentTestimonial].service}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-center gap-4 mt-8">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={prevTestimonial}
+                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+
+              <div className="flex items-center gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonial(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentTestimonial ? 'bg-blue-600 w-8' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={nextTestimonial}
+                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-gradient-to-br from-secondary to-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 px-4 py-2" variant="outline">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Got Questions?
+            </Badge>
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Find answers to common questions about our services
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`} className="border rounded-lg px-6 bg-card shadow-md hover:shadow-lg transition-shadow">
+                <AccordionTrigger className="text-left font-semibold hover:text-blue-600 transition-colors py-4">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-teal-500 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Badge className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-md border-white/30">
+            <Mail className="w-4 h-4 mr-2" />
+            Stay Updated
+          </Badge>
+          <h2 className="text-3xl sm:text-5xl font-bold mb-4">
+            Subscribe to Our Newsletter
+          </h2>
+          <p className="text-lg sm:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Get the latest updates on visa policies, education opportunities, and travel tips
+          </p>
+
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+            <Input
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-white text-gray-900 border-0 h-12"
+              required
+            />
+            <Button type="submit" size="lg" className="bg-white text-blue-600 hover:bg-blue-50 h-12 px-8">
+              Subscribe
+            </Button>
+          </form>
+
+          <p className="text-sm opacity-75 mt-4">
+            We respect your privacy. Unsubscribe at any time.
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center mb-4">
+                <span className="text-2xl font-black tracking-tight">
+                  <span className="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">
+                    SLOT
+                  </span>
+                  <span className="bg-gradient-to-r from-teal-400 to-orange-400 bg-clip-text text-transparent">
+                    PILOT
+                  </span>
+                </span>
+              </div>
+              <p className="text-gray-400 mb-4 max-w-md">
+                Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2005.
+              </p>
+              <div className="flex gap-3">
+                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                  <Globe className="w-5 h-5" />
+                </Button>
+                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                  <Mail className="w-5 h-5" />
+                </Button>
+                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
+                  <Phone className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-4">Quick Links</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><button onClick={() => navigate('/higher-education')} className="hover:text-white transition-colors text-left">Higher Education</button></li>
+                <li><button onClick={() => navigate('/visa-start')} className="hover:text-white transition-colors text-left">Visa Services</button></li>
+                <li><a href="mailto:info@slotpilot.in" className="hover:text-white transition-colors">Contact Us</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
+                <li><button onClick={() => navigate('/terms-of-service')} className="hover:text-white transition-colors text-left">Terms of Service</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-gray-400 text-sm text-center md:text-left">
+                © 2025 SlotPilot Consultancy. All rights reserved. Empowering dreams globally.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <MapPinIcon className="w-4 h-4" />
+                <span>Serving clients worldwide from our global offices</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
