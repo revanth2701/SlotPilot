@@ -1,0 +1,139 @@
+# Slot Pilot — 4 Core Pro Features Implementation
+
+Upgrade Slot Pilot from a basic visa site to a full-service Concierge & Intelligence platform by adding Mistake Analysis, Employee Command Dashboard, Travel Net reviews, and Concierge Stays booking.
+
+## Proposed Changes
+
+### Firestore Schema Additions
+
+The `posts` collection documents will be extended with optional fields:
+
+| Field | Type | Used By |
+|---|---|---|
+| `rejectionInsights` | `{ mistakes: [{ text, explanation, proTip }] }` | Mistake Analysis |
+| `travelReview` | `{ rating, pros: [], cons: [], hiddenGems: [] }` | Travel Net |
+| `verified` | `boolean` | Verified badge |
+| `verifiedAt` | `Timestamp` | Badge timestamp |
+| `verifiedBy` | `string` | Employee who verified |
+
+New collection: **`employee_tasks`**
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | `"secure_room"` | Task type |
+| `postId` | `string` | Reference to stays post |
+| `postTitle` | `string` | Post headline |
+| `landlordContact` | `string` | From post content |
+| `userRequest` | `string` | "Secure the room" |
+| `requestedBy` | `string` | User identifier |
+| `status` | `"pending" / "in_progress" / "done"` | Task status |
+| `createdAt` | `Timestamp` | Auto timestamp |
+
+---
+
+### Feature 1: Mistake Analysis ("Red Flag" System)
+
+#### [NEW] [MistakeAnalysis.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/components/MistakeAnalysis.jsx)
+
+- Glassmorphism card with "🔴 Mistake Analysis" header
+- "Analyze Mistake" toggle button with press animation
+- When expanded: shows transcript text with mistake phrases highlighted in red, each with an explanation
+- "Pro Tip" box at the bottom with correct approach
+
+#### [MODIFY] [Communities.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx)
+
+- Import `MistakeAnalysis`
+- On experience-tab post cards that have `rejectionInsights`, render `<MistakeAnalysis>` below the content
+- Add `rejectionInsights` field to the new-post form when category is "experience"
+
+---
+
+### Feature 2: Employee Command Dashboard
+
+#### [NEW] [AdminDashboard.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/AdminDashboard.jsx)
+
+- Protected route requiring simple password gate (hardcoded `SLOTPILOT_ADMIN` for now, stored only in local state — no Firebase Auth needed since existing employer auth uses Supabase)
+- Fetches all posts from Firestore where `verified !== true`, shows in a table/card list
+- "Verify" button per post: sets `verified: true`, `verifiedAt: serverTimestamp()`, `verifiedBy: "employee"` on the post doc
+- **Stays Tasks tab**: fetches `employee_tasks` collection, shows landlord info + user request
+- Mobile-responsive with cards on small screens
+
+#### [MODIFY] [App.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/App.jsx)
+
+- Import `AdminDashboard` and add `<Route path="/admin/dashboard" element={<AdminDashboard />} />`
+
+#### [MODIFY] [Communities.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx)
+
+- For posts where `verified === true`, add:
+  - Glowing blue border (`border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]`)
+  - "Slot Pilot Verified ✓" badge with pulse animation
+
+---
+
+### Feature 3: Travel Net ("Vibe Check" & Hidden Gems)
+
+#### [NEW] [TravelReview.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/components/TravelReview.jsx)
+
+- "Mini-Trip Advisor" glassmorphism card inside travel posts
+- Star rating display (1-5 stars)
+- Categorized bullet-point sections for Pros (green), Cons (red), Hidden Gems (amber/gold)
+- Premium styling with icons per category
+
+#### [MODIFY] [Communities.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx)
+
+- Import `TravelReview`
+- On companion-tab posts with `travelReview`, render `<TravelReview>` below content
+- Extend new-post form: when category is "companion", show rating slider + Pros/Cons/Hidden Gems inputs
+
+---
+
+### Feature 4: Concierge Stays ("Secure-a-Room" Flow)
+
+#### [MODIFY] [Communities.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx)
+
+- On accommodation-tab posts, add "Arrange via SlotPilot (Paid)" button with press animation
+- Clicking writes to `employee_tasks` Firestore collection with post info and landlord contact (extracted from post content)
+- Show success toast after submission
+
+#### [MODIFY] [AdminDashboard.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/AdminDashboard.jsx)
+
+- Stays Tasks tab shows pending `employee_tasks` with landlord info and user request
+- Status can be updated (pending → in_progress → done)
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> The Employee Dashboard currently uses a simple password gate (hardcoded check) rather than Firebase Auth, since the existing employer auth system uses **Supabase**. This is intentional to keep things simple and avoid mixing two auth systems.
+
+> [!NOTE]
+> The `rejectionInsights` and `travelReview` fields won't have data initially. You'll need to manually add some test data to Firestore, or use the enhanced post creation forms.
+
+---
+
+## Verification Plan
+
+### Automated (Build Check)
+```
+cd c:\Users\manvi\OneDrive\Documents\SlotPilot && npm run build
+```
+Ensures zero compile/type errors across all new and modified files.
+
+### Browser Testing
+1. **Start dev server**: `npm run dev`
+2. **Communities page** (`/communities`):
+   - Verify 3 tabs still work (Visa Insights, Travel Buddies, Stays)
+   - Create a test post in each category
+   - Verified posts should show glowing blue border + badge
+3. **Admin Dashboard** (`/admin/dashboard`):
+   - Verify password gate blocks unauthorized access
+   - Can see pending posts and click "Verify"
+   - Can see Stays tasks tab
+4. **Stays tab**: Click "Arrange via SlotPilot" and verify the task appears in Admin Dashboard
+5. **Manual Firestore data**: Add a post with `rejectionInsights` field to test the Mistake Analysis card
+
+### User Manual Testing
+- Verify all new buttons have hover effects and press animations
+- Verify mobile responsiveness on the Admin Dashboard (resize browser < 640px)
+- Verify the glowing blue border on verified posts is visible and not too aggressive

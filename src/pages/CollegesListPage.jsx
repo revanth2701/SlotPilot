@@ -96,21 +96,21 @@ const CollegesListPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-sky-100 flex flex-col items-center py-8 px-3 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-sky-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col items-center py-8 px-3 relative overflow-hidden transition-colors duration-300">
       {/* Soft animated background circles */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-200 rounded-full opacity-40 blur-3xl animate-float-slow" />
-        <div className="absolute bottom-0 right-0 w-56 h-56 bg-sky-300 rounded-full opacity-30 blur-3xl animate-float-slower" />
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-200 dark:bg-blue-900 rounded-full opacity-40 dark:opacity-20 blur-3xl animate-float-slow" />
+        <div className="absolute bottom-0 right-0 w-56 h-56 bg-sky-300 dark:bg-indigo-900 rounded-full opacity-30 dark:opacity-20 blur-3xl animate-float-slower" />
       </div>
 
       <div className="w-full max-w-7xl mb-8">
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-full flex flex-col items-center justify-center py-7 rounded-3xl bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-500 shadow-2xl animate-fade-in-down">
+          <div className="w-full flex flex-col items-center justify-center py-7 rounded-3xl bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-500 dark:from-indigo-900 dark:via-blue-800 dark:to-indigo-950 shadow-2xl animate-fade-in-down">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 text-center tracking-tight drop-shadow-lg">
               🎓 Explore Colleges in {country}
             </h1>
-            <p className="text-base sm:text-lg text-blue-100 text-center max-w-xl font-medium drop-shadow">
+            <p className="text-base sm:text-lg text-blue-100 dark:text-slate-300 text-center max-w-xl font-medium drop-shadow">
               Discover top colleges, search by name, city, or state, and find your best fit for higher education in{" "}
               {country}.
             </p>
@@ -125,107 +125,107 @@ const CollegesListPage = () => {
               placeholder="🔍 Search colleges by name, state, or city..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-14 px-6 py-4 text-lg rounded-2xl border border-blue-300 shadow-md focus:ring-4 focus:ring-blue-300 focus:border-blue-400 transition-all duration-200 bg-white placeholder:text-blue-400 font-semibold"
+              className="w-full h-14 px-6 py-4 text-lg rounded-2xl border border-blue-300 dark:border-slate-700 shadow-md focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 bg-white dark:bg-slate-800 dark:text-white placeholder:text-blue-400 dark:placeholder:text-slate-500 font-semibold"
             />
           </div>
         </div>
 
         {/* College cards */}
         {loading ? (
-          <div className="text-center text-neutral-600 py-10 font-medium animate-pulse">
+          <div className="text-center text-neutral-600 dark:text-slate-400 py-10 font-medium animate-pulse">
             Loading colleges...
           </div>
         ) : filteredColleges.length === 0 ? (
-          <div className="text-center text-neutral-600 py-10 font-medium animate-fade-in">
+          <div className="text-center text-neutral-600 dark:text-slate-400 py-10 font-medium animate-fade-in">
             No colleges found. Try a different search!
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6 animate-fade-in-up">
             {filteredColleges.map((college, idx) => {
               const collegeName = college.NameoftheCollege;
               const imageSources = getCollegeImageSources(collegeName);
 
               return (
-                <Card
-                  key={idx}
-                  className="w-full h-full shadow-md rounded-2xl overflow-hidden flex flex-col bg-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-200"
-                >
-                  {/* Logo area that shows full image without cropping */}
-                  <div className="w-full h-52 sm:h-48 bg-blue-300 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={imageSources[0]}
-                      alt={collegeName}
-                      className="max-h-full max-w-full object-contain p-3"
-                      onError={(e) => {
-                        const current = e.target.src;
-                        const idx = imageSources.findIndex((src) => current.endsWith(src));
-                        const nextIdx = idx + 1;
-                        if (nextIdx < imageSources.length) {
-                          e.target.src = imageSources[nextIdx];
-                        } else {
-                          e.target.src = PLACEHOLDER_IMAGE;
-                        }
-                      }}
-                    />
-                  </div>
+<Card
+  key={idx}
+  className="w-full h-full shadow-md rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-slate-900 hover:shadow-2xl hover:-translate-y-1 transition-all duration-200 border border-slate-100 dark:border-slate-800"
+>
+  {/* Logo Container */}
+  <div className="w-full h-52 sm:h-48 bg-white dark:bg-white flex items-center justify-center overflow-hidden">
+    <img
+      src={imageSources[0]}
+      alt={collegeName}
+      className="w-full h-full object-contain"
+      onError={(e) => {
+        const current = e.target.src;
+        const idx = imageSources.findIndex((src) => current.endsWith(src));
+        const nextIdx = idx + 1;
+        if (nextIdx < imageSources.length) {
+          e.target.src = imageSources[nextIdx];
+        } else {
+          e.target.src = PLACEHOLDER_IMAGE;
+        }
+      }}
+    />
+  </div>
 
-                  <CardContent className="py-4 px-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="font-semibold text-lg mb-1 text-neutral-900 line-clamp-2">
-                        {collegeName}
-                      </div>
-                      <div className="text-sm text-neutral-600 mb-3">
-                        {college.CollegeState && <span>{college.CollegeState}</span>}
-                        {college.CollegeCity && (
-                          <span>{college.CollegeState ? ", " : ""}{college.CollegeCity}</span>
-                        )}
-                      </div>
+  {/* Thin Separation Line and Content Area */}
+  {/* 'border-t border-slate-100' creates that clean divider you mentioned */}
+  <CardContent className="py-5 px-4 flex-1 flex flex-col justify-between border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div>
+      <div className="font-bold text-lg mb-1 text-slate-900 dark:text-slate-100 line-clamp-2">
+        {collegeName}
+      </div>
+      <div className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+        {college.CollegeState && <span>{college.CollegeState}</span>}
+        {college.CollegeCity && (
+          <span>{college.CollegeState ? ", " : ""}{college.CollegeCity}</span>
+        )}
+      </div>
 
-                      {/* Website link and Proceed to Apply button */}
-                      <div className="mt-2 flex items-center justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          {college.CollegeWebsite && (
-                            <a
-                              href={
-                                college.CollegeWebsite.startsWith("http")
-                                  ? college.CollegeWebsite
-                                  : `https://${college.CollegeWebsite}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline truncate"
-                              title={college.CollegeWebsite}
-                            >
-                              Visit College Website
-                            </a>
-                          )}
-                        </div>
-                        <button
-                          onClick={() =>
-                            navigate("/StudentLoginRegisterPage", {
-                              state: {
-                                country,
-                                college: collegeName,
-                                // where to come back after successful login
-                                redirectTo: location.pathname + location.search,
-                              },
-                            })
-                          }
-                          className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-blue-700 transition whitespace-nowrap"
-                          aria-label={`Proceed to apply to ${collegeName}`}
-                        >
-                          Proceed to Apply
-                        </button>
-                      </div>
-                    </div>
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          {college.CollegeWebsite && (
+            <a
+              href={
+                college.CollegeWebsite.startsWith("http")
+                  ? college.CollegeWebsite
+                  : `https://${college.CollegeWebsite}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-bold uppercase tracking-wider truncate block"
+              title={college.CollegeWebsite}
+            >
+              Visit Website
+            </a>
+          )}
+        </div>
+        <button
+          onClick={() =>
+            navigate("/StudentLoginRegisterPage", {
+              state: {
+                country,
+                college: collegeName,
+                redirectTo: location.pathname + location.search,
+              },
+            })
+          }
+          className="bg-blue-600 dark:bg-blue-700 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
+        >
+          Apply Now
+        </button>
+      </div>
+    </div>
 
-                    <div className="flex justify-end mt-3">
-                      <span className="bg-neutral-200 text-neutral-700 px-3 py-1 rounded-full text-xs font-semibold">
-                        {country}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+    {/* Footer Tag */}
+    <div className="flex justify-end mt-4 pt-3 border-t border-slate-50 dark:border-slate-800">
+      <span className="text-slate-400 dark:text-slate-600 text-[10px] font-bold uppercase tracking-widest">
+        {country}
+      </span>
+    </div>
+  </CardContent>
+</Card>
               );
             })}
           </div>

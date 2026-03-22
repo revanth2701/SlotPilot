@@ -77,8 +77,15 @@ const VisaServices = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [query, setQuery] = useState("");
 
-  // from VisaStart
-  const { passportCountry } = location.state || {};
+  // from VisaStart — with sessionStorage fallback for page refreshes
+  const passportCountry = (() => {
+    const fromState = location.state?.passportCountry;
+    if (fromState) return fromState;
+    try {
+      const ctx = JSON.parse(sessionStorage.getItem("slotpilot_visa_context") || "null");
+      return ctx?.contextCountry || null;
+    } catch { return null; }
+  })();
 
   const countryCodeToFlag = (cc) => {
     if (!cc || typeof cc !== 'string' || cc.length !== 2) return '';
@@ -378,367 +385,455 @@ const VisaServices = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
+    <div className="min-h-screen" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <style>{`
-        .hero-bg {
-          background: radial-gradient(ellipse at 20% 10%, rgba(59,130,246,0.06), transparent 20%),
-                      radial-gradient(ellipse at 80% 90%, rgba(99,102,241,0.04), transparent 20%);
+        /* ── Theme-Adaptive Glassmorphism ── */
+        .vs-page-bg {
+          background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 35%, #f5f0ff 65%, #f0f4ff 100%);
+          min-height: 100vh; position: relative; overflow: hidden;
         }
-        .glass {
-          background: rgba(255,255,255,0.7);
-          backdrop-filter: blur(6px);
-          border: 1px solid rgba(255,255,255,0.5);
-          box-shadow: 0 8px 30px rgba(2,6,23,0.06);
+        .dark .vs-page-bg {
+          background: linear-gradient(135deg, #0a0e1a 0%, #0d1330 35%, #101840 65%, #0a0e1a 100%);
         }
-        .country-hero {
-          height: 160px;
-          object-fit: cover;
-          width: 100%;
-          display: block;
+        .vs-page-bg::before {
+          content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background:
+            radial-gradient(ellipse 800px 600px at 20% 10%, rgba(59,130,246,0.06), transparent),
+            radial-gradient(ellipse 600px 500px at 80% 80%, rgba(139,92,246,0.05), transparent),
+            radial-gradient(ellipse 400px 400px at 50% 50%, rgba(99,102,241,0.04), transparent);
         }
-        .card-title-overlay {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          padding: 10px 14px;
-          background: linear-gradient(180deg, transparent, rgba(0,0,0,0.45));
-          color: white;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
+        .dark .vs-page-bg::before {
+          background:
+            radial-gradient(ellipse 800px 600px at 20% 10%, rgba(59,130,246,0.08), transparent),
+            radial-gradient(ellipse 600px 500px at 80% 80%, rgba(99,102,241,0.06), transparent),
+            radial-gradient(ellipse 400px 400px at 50% 50%, rgba(139,92,246,0.04), transparent);
         }
-        .chip {
-          padding:6px 10px;
-          border-radius:999px;
-          background: rgba(15,23,42,0.04);
-          cursor:pointer;
-          transition:transform .12s ease;
+
+        /* Orbs */
+        .vs-orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
+        .vs-orb-1 { width: 500px; height: 500px; top: -120px; left: -100px;
+          background: radial-gradient(circle, rgba(59,130,246,0.10), transparent 70%);
+          animation: vs-orb-drift 12s ease-in-out infinite alternate; }
+        .vs-orb-2 { width: 400px; height: 400px; bottom: -80px; right: -60px;
+          background: radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%);
+          animation: vs-orb-drift 15s ease-in-out infinite alternate-reverse; }
+        .vs-orb-3 { width: 300px; height: 300px; top: 40%; left: 60%;
+          background: radial-gradient(circle, rgba(6,182,212,0.06), transparent 70%);
+          animation: vs-orb-drift 10s ease-in-out infinite alternate; }
+        .dark .vs-orb-1 { background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%); }
+        .dark .vs-orb-2 { background: radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%); }
+        .dark .vs-orb-3 { background: radial-gradient(circle, rgba(6,182,212,0.08), transparent 70%); }
+        @keyframes vs-orb-drift { 0% { transform: translate(0,0); } 100% { transform: translate(30px,-20px); } }
+
+        /* Glass Card */
+        .vs-glass-card {
+          background: rgba(255,255,255,0.7); backdrop-filter: blur(20px) saturate(1.4);
+          -webkit-backdrop-filter: blur(20px) saturate(1.4);
+          border: 1px solid rgba(255,255,255,0.8); border-radius: 1.25rem;
+          overflow: hidden; cursor: pointer; position: relative;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+          transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease;
         }
-        .chip:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+        .dark .vs-glass-card {
+          background: rgba(15,23,42,0.45); border-color: rgba(148,163,184,0.08); box-shadow: none;
         }
-        .country-card-bounce {
-          transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s;
+        .vs-glass-card:hover {
+          transform: translateY(-10px) scale(1.02);
+          box-shadow: 0 24px 60px rgba(59,130,246,0.10), 0 0 40px rgba(99,102,241,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
+          border-color: rgba(59,130,246,0.25);
         }
-        .country-card-bounce:hover {
-          transform: scale(1.04) translateY(-6px);
-          box-shadow: 0 16px 32px rgba(2,6,23,0.10);
+        .dark .vs-glass-card:hover {
+          box-shadow: 0 24px 60px rgba(0,0,0,0.35), 0 0 40px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+          border-color: rgba(59,130,246,0.2);
         }
-        .country-card-bounce:active {
-          transform: scale(0.98) translateY(2px);
+        .vs-glass-card:active { transform: translateY(-2px) scale(0.99); }
+
+        /* Card Hero */
+        .vs-card-hero { height: 180px; width: 100%; object-fit: cover; display: block; transition: transform 0.5s ease, filter 0.5s ease; }
+        .vs-glass-card:hover .vs-card-hero { transform: scale(1.08); filter: brightness(1.05); }
+
+        /* Badges */
+        .vs-cyber-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid; }
+        .vs-cyber-badge--blue { background: rgba(59,130,246,0.10); color: #2563eb; border-color: rgba(59,130,246,0.20); }
+        .vs-cyber-badge--green { background: rgba(34,197,94,0.10); color: #16a34a; border-color: rgba(34,197,94,0.20); }
+        .vs-cyber-badge--violet { background: rgba(139,92,246,0.10); color: #7c3aed; border-color: rgba(139,92,246,0.20); }
+        .dark .vs-cyber-badge--blue { color: #60a5fa; }
+        .dark .vs-cyber-badge--green { color: #4ade80; }
+        .dark .vs-cyber-badge--violet { color: #a78bfa; }
+
+        /* Animations */
+        @keyframes vs-card-fly-in { 0% { opacity:0; transform: translateY(40px) scale(0.95); } 100% { opacity:1; transform: translateY(0) scale(1); } }
+        .vs-stagger-in { opacity: 0; animation: vs-card-fly-in 0.6s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+        /* Command Bar */
+        .vs-command-bar {
+          position: relative; border-radius: 1rem;
+          background: rgba(255,255,255,0.85); backdrop-filter: blur(24px) saturate(1.5);
+          -webkit-backdrop-filter: blur(24px) saturate(1.5);
+          border: 1px solid rgba(148,163,184,0.20); box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+          transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
+        .dark .vs-command-bar {
+          background: rgba(15,23,42,0.6); border-color: rgba(148,163,184,0.08); box-shadow: none;
+        }
+        .vs-command-bar:focus-within { border-color: rgba(59,130,246,0.4); box-shadow: 0 0 0 4px rgba(59,130,246,0.08), 0 8px 30px rgba(59,130,246,0.10); }
+
+        /* Icon Pulse */
+        @keyframes vs-icon-pulse { 0%,100% { opacity:0.5; transform:scale(1); } 50% { opacity:1; transform:scale(1.15); } }
+        .vs-search-icon-pulse { animation: vs-icon-pulse 2.5s ease-in-out infinite; }
+
+        /* Apply Button */
+        .vs-apply-btn { background: linear-gradient(135deg,#3b82f6,#7c3aed); border:none; color:#fff; font-weight:700; border-radius:0.875rem; padding:0.875rem 1.5rem; cursor:pointer; width:100%; font-size:0.95rem; letter-spacing:0.02em; transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease; }
+        .vs-apply-btn:hover { transform:translateY(-2px); box-shadow:0 12px 24px rgba(59,130,246,0.25); filter:brightness(1.08); }
+        .vs-apply-btn:active { transform:translateY(1px); }
+
+        /* Detail Glass */
+        .vs-detail-glass {
+          background: rgba(255,255,255,0.75); backdrop-filter: blur(20px) saturate(1.3);
+          -webkit-backdrop-filter: blur(20px) saturate(1.3);
+          border: 1px solid rgba(255,255,255,0.8); border-radius: 1.25rem; overflow: hidden;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+          transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+        }
+        .dark .vs-detail-glass { background: rgba(15,23,42,0.5); border-color: rgba(148,163,184,0.08); box-shadow: none; }
+        .vs-detail-glass:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.20); }
+        .dark .vs-detail-glass:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.3), 0 0 30px rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.18); }
+
+        /* Hero Overlay */
+        .vs-hero-overlay { position: absolute; left:0; right:0; bottom:0; height:60%; background: linear-gradient(180deg, transparent 0%, rgba(15,23,42,0.75) 100%); pointer-events: none; }
+
+        /* Header */
+        .vs-header {
+          background: rgba(255,255,255,0.85); backdrop-filter: blur(16px) saturate(1.5);
+          -webkit-backdrop-filter: blur(16px) saturate(1.5);
+          border-bottom: 1px solid rgba(148,163,184,0.15);
+        }
+        .dark .vs-header { background: rgba(10,14,26,0.7); border-bottom-color: rgba(148,163,184,0.06); }
       `}</style>
 
-      {/* Header Added Below */}
-      <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative h-16 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-extrabold tracking-tight leading-none">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
-                  SlotPilot
-                </span>
+      <div className="vs-page-bg">
+        {/* Background orbs */}
+        <div className="vs-orb vs-orb-1" />
+        <div className="vs-orb vs-orb-2" />
+        <div className="vs-orb vs-orb-3" />
+
+        {/* ── Header ── */}
+        <header className="vs-header sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative h-16 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-2xl font-extrabold tracking-tight leading-none">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 dark:from-blue-400 dark:via-indigo-400 dark:to-violet-400">
+                    SlotPilot
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">
+                  Global Education & Visa Services
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">Global Education & Visa Services</div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="hero-bg">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* ── Main Content ── */}
+        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {!selectedCountry ? (
-            <div className="animate-fade-in">
-              {/* Country Selection */}
-              <div className="mb-6">
-                <div className="text-center">
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    Discover Your Destination
-                  </h2>
-                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-4">
-                    Explore countries and their visa options — quick search, filter by region and friendly previews.
+            <div>
+              {/* ── Hero Section ── */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/5 mb-6">
+                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                  <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                    {passportCountry
+                      ? `Searching visas in ${passportCountry}`
+                      : "Explore Visas Worldwide"}
+                  </span>
+                </div>
+
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 leading-[1.1] tracking-tight">
+                  Discover Your{" "}
+                  <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 dark:from-blue-400 dark:via-cyan-400 dark:to-violet-400 bg-clip-text text-transparent">
+                    Destination
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-light">
+                  Browse visa-eligible countries, compare processing times, and start your application — all in one place.
+                </p>
+              </div>
+
+              {/* ── Floating Command Bar ── */}
+              <div className="max-w-3xl mx-auto mb-12">
+                <div className="vs-command-bar flex items-center h-14 sm:h-16 px-4 sm:px-6">
+                  <Search className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 vs-search-icon-pulse" />
+                  <Input
+                    placeholder={passportCountry ? `Search destinations from ${passportCountry}…` : "Where to next?"}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-base sm:text-lg font-medium border-0
+                               focus-visible:ring-0 focus-visible:ring-offset-0
+                               placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white px-4 h-full"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  />
+                  {query && (
+                    <button
+                      onClick={() => setQuery("")}
+                      className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    >
+                      <span className="text-lg text-slate-500 font-light leading-none">×</span>
+                    </button>
+                  )}
+                  <div className="hidden sm:flex items-center gap-2 ml-3 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      ⌘ Search
+                    </span>
+                    <Plane className="w-3.5 h-3.5 text-blue-500 rotate-45" />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── States ── */}
+              {!isPassportCheckLoading && passportCountry && passportMatch === false && (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center">
+                    <MapPin className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg font-medium">
+                    No visas available for{" "}
+                    <span className="text-slate-900 dark:text-white font-semibold">{passportCountry}</span>
                   </p>
+                  <p className="text-slate-400 text-sm mt-2">
+                    Try selecting a different passport country
+                  </p>
+                </div>
+              )}
 
-                  <div className="mt-4 flex justify-center">
-                    <div className="w-full sm:w-11/12 md:w-4/5 lg:w-3/5 xl:w-2/3">
-                      <div className="relative">
-                        <style>{`
-                          .search-glass {
-                            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(250,250,255,0.85));
-                            box-shadow: 0 8px 30px rgba(12, 22, 49, 0.06), inset 0 1px 0 rgba(255,255,255,0.6);
-                            border: 1px solid rgba(15,23,42,0.06);
-                          }
-                          .search-glass:focus-within {
-                            box-shadow: 0 14px 45px rgba(59,130,246,0.09);
-                            transform: translateY(-1px);
-                          }
-                          .search-input::placeholder {
-                            color: rgba(15,23,42,0.45);
-                            font-weight: 500;
-                          }
-                          .search-clear {
-                            opacity: 0.85;
-                            transition: opacity .18s ease;
-                          }
-                          .search-clear:hover { opacity: 1; }
-                        `}</style>
+              {isPassportCheckLoading && (
+                <div className="text-center py-16">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                  <p className="text-slate-500 text-sm font-medium">Loading visa destinations…</p>
+                </div>
+              )}
 
-                        {/* --- OPTION 2: FLUID NEO-GLASS --- */}
-                        {/* --- FULL HORIZONTAL NEON SEARCH BAR --- */}
-                        {/* --- SLEEK ADAPTIVE NEON SEARCH BAR --- */}
-                        <div className="mt-8 w-full px-4 sm:px-0">
-                          <div className="relative group max-w-7xl mx-auto">
-                            
-                            {/* SINGLE COLOR NEON GLOW: Primary color, only visible in Dark Mode hover/focus */}
-                            <div className="absolute -inset-1 bg-primary rounded-xl blur-lg opacity-0 
-                                            dark:group-hover:opacity-20 dark:group-focus-within:opacity-40 
-                                            transition-opacity duration-500 pointer-events-none"></div>
-                            
-                            <div className="relative flex items-center h-16 w-full 
-                                            bg-white dark:bg-slate-950 
-                                            rounded-xl border transition-all duration-500
-                                            /* LIGHT MODE: Grey Shadow & Border */
-                                            border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.06)] 
-                                            /* DARK MODE: Neon border & transparent shadow */
-                                            dark:border-primary/30 dark:shadow-none">
-                              
-                              {/* Icon Section */}
-                              <div className="flex items-center justify-center pl-6">
-                                <Search className="h-5 w-5 text-slate-400 dark:text-primary stroke-[2.5px] transition-colors" />
-                              </div>
+              {/* ── Country Cards Grid ── */}
+              {!isPassportCheckLoading && passportMatch !== false && (
+                <>
+                  {/* Results count */}
+                  {filteredCountries.length > 0 && (
+                    <div className="flex items-center justify-between mb-6 px-1">
+                      <span className="text-sm text-slate-500 font-medium">
+                        {filteredCountries.length} destination{filteredCountries.length !== 1 ? "s" : ""} available
+                      </span>
+                      {query && (
+                        <span className="text-xs text-slate-600">
+                          Filtered by "{query}"
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-                              {/* Input Field */}
-                              <Input
-                                placeholder="Where to next?"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                className="flex-1 bg-transparent text-lg font-medium border-0 
-                                           focus-visible:ring-0 focus-visible:ring-offset-0 
-                                           placeholder:text-slate-400 dark:placeholder:text-slate-700 
-                                           text-slate-900 dark:text-white px-6 h-full transition-all"
-                              />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    {filteredCountries.map((country, index) => (
+                      <div
+                        key={country.id}
+                        className="vs-stagger-in"
+                        style={{ animationDelay: `${index * 80}ms` }}
+                      >
+                        <div
+                          className="vs-glass-card"
+                          onClick={() => handleCountrySelect(country)}
+                        >
+                          {/* Hero Image */}
+                          <div className="relative overflow-hidden">
+                            <CountryImage
+                              countryName={country.name}
+                              alt={`${country.name}`}
+                              className="vs-card-hero"
+                            />
+                            <div className="vs-hero-overlay" />
 
-                              {/* Action Area */}
-                              <div className="flex items-center pr-4 gap-3">
-                                {query && (
-                                  <button 
-                                    onClick={() => setQuery('')}
-                                    className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                  >
-                                    <span className="text-xl text-slate-400 font-light">×</span>
-                                  </button>
-                                )}
-                                
-                                {/* "Enter to Fly" Command Badge */}
-                                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg 
-                                                border border-slate-200 dark:border-primary/20 
-                                                bg-slate-50 dark:bg-primary/5 shadow-sm">
-                                  <span className="text-[10px] font-bold text-slate-400 dark:text-primary uppercase tracking-widest">
-                                    Enter to Fly
-                                  </span>
-                                  <Plane className="w-3.5 h-3.5 text-primary rotate-45" />
+                            {/* Flag + Name overlay */}
+                            <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-2xl leading-none">{country.flag}</span>
+                                  <span className="text-white font-bold text-lg tracking-tight">{country.name}</span>
+                                </div>
+                                <div className="vs-cyber-badge vs-cyber-badge--blue">
+                                  {country.region}
                                 </div>
                               </div>
                             </div>
                           </div>
+
+                          {/* Card Body */}
+                          <div className="p-5">
+                            {/* Meta Row */}
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <Clock className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+                                <span className="text-slate-500 dark:text-slate-400 font-medium text-xs">{country.processingTime}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <Star className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                                <span className="text-slate-500 dark:text-slate-400 font-medium text-xs">{country.successRate}</span>
+                              </div>
+                            </div>
+
+                            {/* Visa Type Badges */}
+                            <div className="flex flex-wrap gap-2 mb-5">
+                              {country.visaTypes.slice(0, 3).map((v, i) => (
+                                <span
+                                  key={i}
+                                  className={`vs-cyber-badge ${
+                                    i === 0 ? "vs-cyber-badge--blue" :
+                                    i === 1 ? "vs-cyber-badge--violet" :
+                                    "vs-cyber-badge--green"
+                                  }`}
+                                >
+                                  {v.type.split(" ")[0]}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* CTA */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCountrySelect(country);
+                              }}
+                              className="w-full py-3 rounded-xl text-sm font-bold
+                                         bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-600/20 dark:to-violet-600/20
+                                         border border-blue-200 dark:border-blue-500/15 text-blue-700 dark:text-blue-300
+                                         hover:from-blue-100 hover:to-violet-100 dark:hover:from-blue-600/30 dark:hover:to-violet-600/30
+                                         hover:border-blue-300 dark:hover:border-blue-500/30 hover:text-blue-800 dark:hover:text-blue-200
+                                         transition-all duration-300 tracking-wide uppercase"
+                              style={{ letterSpacing: "0.08em" }}
+                            >
+                              Explore Visas →
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                </div>
-              </div>
-
-              {/* ✅ NEW: mismatch message (no PassportCountry match) */}
-              {!isPassportCheckLoading && passportCountry && passportMatch === false && (
-                <div className="text-center text-muted-foreground py-10">
-                  No visas available at the moment for{" "}
-                  <span className="font-semibold">{passportCountry}</span>.
-                </div>
-              )}
-
-              {/* optional: loading state while checking */}
-              {isPassportCheckLoading && (
-                <div className="text-center text-muted-foreground py-10">
-                  Loading visa destinations...
-                </div>
-              )}
-
-              {/* ✅ keep existing cards logic unchanged */}
-              {!isPassportCheckLoading && passportMatch !== false && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredCountries.map((country, index) => (
-                    <Card
-                      key={country.id}
-                      className="country-card-bounce group border-2 bg-gradient-to-br from-background to-primary/5 transform-gpu rounded-2xl overflow-hidden"
-                      style={{ animationDelay: `${index * 40}ms` }}
-                      onClick={() => handleCountrySelect(country)}
-                    >
-                      <CardHeader className="relative p-0">
-                        <CountryImage
-                          countryName={country.name}
-                          alt={`${country.name} hero`}
-                          className="country-hero rounded-t-2xl"
-                        />
-                        <div className="card-title-overlay">
-                          <div className="text-sm font-semibold">{country.name}</div>
-                          <Badge variant="secondary" className="text-xs">
-                            {country.popularity || country.region}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <CardTitle className="text-xl font-bold mb-2">
-                          {country.name}
-                        </CardTitle>
-                        <CardDescription className="text-sm mb-3 text-muted-foreground">
-                          {country.description}
-                        </CardDescription>
-                        <div className="flex items-center gap-4 mb-3 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-primary" />
-                            <span>{country.processingTime}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Star className="w-4 h-4 text-accent" />
-                            <span>{country.successRate}</span>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {country.visaTypes.slice(0, 3).map((v, i) => (
-                            <Badge
-                              key={i}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {v.type.split(' ')[0]}
-                            </Badge>
-                          ))}
-                        </div>
-                        <Button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleCountrySelect(country);
-                          }}
-                          className="w-full rounded-b-2xl bg-gradient-to-r from-primary to-accent text-primary-foreground"
-                        >
-                          Explore Visas
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                </>
               )}
             </div>
           ) : (
-            <div className="animate-fade-in">
-              <div className="mb-8">
-                <div className="text-center mb-8">
+            /* ── DETAIL VIEW ── */
+            <div>
+              {/* Back */}
+              <button
+                onClick={handleBackToCountries}
+                className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-8 transition-colors font-medium min-h-[44px]"
+              >
+                <span className="text-lg">←</span> Back to destinations
+              </button>
+
+              {/* Hero */}
+              <div className="text-center mb-12">
+                <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden mb-8 border border-white/50 dark:border-slate-800/50 shadow-lg">
                   <CountryImage
                     countryName={selectedCountry.name}
-                    alt={`${selectedCountry.name} hero`}
-                    className="w-full max-w-3xl mx-auto h-72 sm:h-96 object-cover rounded-xl shadow-lg mb-6"
+                    alt={selectedCountry.name}
+                    className="w-full h-64 sm:h-80 object-cover"
                   />
-                  <h2 className="text-4xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    {selectedCountry.name} Visa Services
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto leading-relaxed">
-                    {selectedCountry.description}
-                  </p>
-                  <div className="flex items-center justify-center gap-8 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-primary" />
-                      <span className="font-medium">
-                        Processing: {selectedCountry.processingTime}
-                      </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 dark:from-[#0a0e1a] via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <span className="text-4xl">{selectedCountry.flag}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 text-accent fill-accent" />
-                      <span className="font-medium">
-                        Success Rate: {selectedCountry.successRate}
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2">
+                      {selectedCountry.name}{" "}
+                      <span className="bg-gradient-to-r from-blue-300 to-violet-300 bg-clip-text text-transparent">
+                        Visa Services
                       </span>
-                    </div>
+                    </h1>
+                  </div>
+                </div>
+
+                <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto font-light leading-relaxed">
+                  {selectedCountry.description}
+                </p>
+
+                <div className="flex items-center justify-center gap-8 mt-6">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                      Processing: <span className="text-slate-900 dark:text-white font-semibold">{selectedCountry.processingTime}</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                      Success: <span className="text-slate-900 dark:text-white font-semibold">{selectedCountry.successRate}</span>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* ── Visa Type Cards ── */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 {selectedCountry.visaTypes.map((visa, index) => {
                   const IconComponent = visa.icon;
                   return (
-                    <Card
+                    <div
                       key={index}
-                      className="hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/30 bg-gradient-to-br from-background to-primary/5 hover:scale-105 animate-fade-in hover-scale transform-gpu rounded-2xl overflow-hidden"
-                      style={{ animationDelay: `${index * 150}ms` }}
+                      className="vs-stagger-in"
+                      style={{ animationDelay: `${index * 120}ms` }}
                     >
-                      <CardHeader>
-                        <div className="flex items-start gap-4">
-                          <div className="p-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl">
-                            <IconComponent className="w-8 h-8 text-primary" />
+                      <div className="vs-detail-glass p-6 sm:p-8">
+                        {/* Header */}
+                        <div className="flex items-start gap-4 mb-6">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 dark:from-blue-600/20 dark:to-violet-600/20 border border-blue-100 dark:border-blue-500/10">
+                            <IconComponent className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div className="flex-1">
-                            <CardTitle className="text-xl mb-2">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
                               {visa.type}
-                            </CardTitle>
-                            <CardDescription className="text-base leading-relaxed">
+                            </h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                               {visa.description}
-                            </CardDescription>
+                            </p>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground">
-                                Duration of Stay
-                              </p>
-                              <p className="font-semibold text-sm">
-                                {visa.duration}
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground">
-                                Fee
-                              </p>
-                              <p className="font-semibold text-sm">
-                                {visa.fee}
-                              </p>
-                            </div>
-                          </div>
 
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3 text-sm">
-                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span>Complete document guidance & review</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm">
-                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span>Application tracking & status updates</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm">
-                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span>Interview preparation (if required)</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm">
-                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span>24/7 expert consultation support</span>
-                            </div>
+                        {/* Stats Row */}
+                        <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50 mb-6">
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold mb-1">Duration</p>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{visa.duration}</p>
                           </div>
-
-                          <Button
-                            onClick={() => handleApplyVisa(visa)}
-                            className="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold py-3 h-auto hover:shadow-lg transition-all duration-300 hover-scale transform-gpu animate-fade-in rounded-b-2xl"
-                            style={{ animationDelay: `${index * 200}ms` }}
-                            size="lg"
-                          >
-                            Apply for {visa.type}
-                          </Button>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold mb-1">Fee</p>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{visa.fee}</p>
+                          </div>
                         </div>
-                      </CardContent>
-                    </Card>
+
+                        {/* Checklist */}
+                        <div className="space-y-3 mb-6">
+                          {[
+                            "Complete document guidance & review",
+                            "Application tracking & status updates",
+                            "Interview preparation (if required)",
+                            "24/7 expert consultation support",
+                          ].map((item, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
+                              <span className="text-sm text-slate-600 dark:text-slate-300">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Apply Button */}
+                        <button
+                          onClick={() => handleApplyVisa(visa)}
+                          className="vs-apply-btn"
+                        >
+                          Apply for {visa.type}
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>

@@ -20,6 +20,7 @@ import StudentLoginRegister from "@/components/StudentLoginRegister";
 import JourneyForm from "./components/JourneyForm";
 import StudentDashboard from "./components/StudentDashboard";
 import StudentDashboardNew from "./components/StudentDashboardNew";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => (
           <Route path="/student-login" element={<StudentLoginRoute />} />
           <Route path="/journey" element={<JourneyForm/>} />
           <Route path="/student-dashboard-new" element={<StudentDashboardNew/>} />
+          <Route path="/admin/dashboard" element={<AdminDashboard/>} />
 
         </Routes>
       </BrowserRouter>

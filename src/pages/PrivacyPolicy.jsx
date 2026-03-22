@@ -1,8 +1,8 @@
 import React from "react";
 
 const PrivacyPolicy = () => (
-  <div className="max-w-3xl mx-auto px-4 py-10">
-    <h1 className="text-3xl font-bold text-primary mb-6 text-center">Privacy Policy</h1>
+  <div className="max-w-3xl mx-auto px-4 py-6 sm:py-10">
+    <h1 className="font-bold text-primary mb-4 sm:mb-6 text-center" style={{ fontSize: "clamp(1.5rem, 4vw, 1.875rem)" }}>Privacy Policy</h1>
     <section className="mb-6">
       <p className="text-lg text-muted-foreground mb-2">
         We at <span className="font-semibold text-primary">Slotpilot</span> respect your privacy and are strongly committed to securing any information we obtain from you or about you.
@@ -13,21 +13,21 @@ const PrivacyPolicy = () => (
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">Website Privacy</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>Website Privacy</h2>
       <p className="text-muted-foreground">
         This privacy policy protects any information you give to Slotpilot while using this website. We are committed to ensuring that your privacy is protected. If we ever ask you for information, it will only be used in accordance with the policy.
       </p>
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">What Do We Collect?</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>What Do We Collect?</h2>
       <p className="text-muted-foreground">
         Slotpilot will collect and store personal information about its users for different legitimate purposes. Personal information including <span className="font-semibold">Name, Address, Contact details, Financial information and Account details</span> will be kept confidential and be used only for legal purposes. This data might be used in compliance with/without your approval. We collect and store information to understand a customer’s different needs and choices and provide better service.
       </p>
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">How Do We Use Information about You?</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>How Do We Use Information about You?</h2>
       <ul className="list-disc list-inside text-muted-foreground mb-2">
         <li>To enter into various Service Agreements with you</li>
         <li>To comply with legal and regulatory obligations</li>
@@ -50,28 +50,28 @@ const PrivacyPolicy = () => (
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">Our Retention of Personal Data</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>Our Retention of Personal Data</h2>
       <p className="text-muted-foreground">
         We store personal data as long as necessary. This is done to comply with our legal obligations and enforcement of agreements.
       </p>
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">Data Transfers</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>Data Transfers</h2>
       <p className="text-muted-foreground">
         We may also transfer personal data about our users to other countries. Data protection laws vary from nation to nation. However, we protect our users’ information as per our Privacy Policy.
       </p>
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">Security</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>Security</h2>
       <p className="text-muted-foreground">
         Your information is secure with us. We have adopted various security features to safeguard your personal information collected online.
       </p>
     </section>
 
     <section className="mb-6">
-      <h2 className="text-xl font-semibold text-primary mb-2">Cookies</h2>
+      <h2 className="font-semibold text-primary mb-2" style={{ fontSize: "clamp(1.125rem, 2.5vw, 1.25rem)" }}>Cookies</h2>
       <p className="text-muted-foreground mb-2">
         Cookies are text files with small pieces of data like a Username and Password that are used to identify your computer network. Specific cookies known as HTTP cookies are used to identify specific users and improve your web browsing experience. Data stored in a cookie is created by the server upon your connection. This data is labeled with an ID unique to you and your computer. When the cookie is exchanged between your computer and the network server, the server reads the ID and knows what information to specifically serve you.
       </p>

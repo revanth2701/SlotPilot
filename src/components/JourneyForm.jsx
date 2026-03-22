@@ -65,9 +65,6 @@ const JourneyForm = ({ onBack }) => {
 
     setSubmitting(true);
 
-    // Prepare payload using exact Supabase column names you provided
-    // Columns: "Student Name", "Contact Number", "Email Id", "Study Destination",
-    // "Current Study Level", "Course of Interest", "Exams Written", "Createdon"
     const examsPayload = examScores.length ? examScores : selectedExams;
     const payload = {
       "Student Name": studentName,
@@ -115,14 +112,24 @@ const JourneyForm = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Slotpilot Consultancy
-              </span>
+   <nav className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
+        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-[120px]">
+              <div className="sm:hidden text-lg font-extrabold text-primary">SlotPilot</div>
+            </div>
+
+            <div className="min-w-[120px] flex justify-end">
+            
+            </div>
+
+            <div className="hidden sm:block sm:absolute sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 pointer-events-none text-center">
+              <div className="text-2xl font-extrabold tracking-tight leading-none">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
+                  SlotPilot
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground">Global Education & Visa Services</div>
             </div>
           </div>
         </div>
@@ -130,7 +137,8 @@ const JourneyForm = ({ onBack }) => {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          {/* FIXED GRADIENT TEXT */}
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
             Start Your Academic Journey
           </h1>
           <p className="text-xl text-muted-foreground">
@@ -262,7 +270,8 @@ const JourneyForm = ({ onBack }) => {
             <div className="pt-6">
               <Button 
                 onClick={handleSubmit}
-                className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 text-lg py-3 h-auto"
+                
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:opacity-90 text-lg py-3 h-auto"
                 size="lg"
                 disabled={!isFormValid || submitting}
               >

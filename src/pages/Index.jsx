@@ -8,7 +8,7 @@ import LoginSelection from "@/components/LoginSelection";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import StudentDashboardNew from "@/components/StudentDashboardNew";
 import EmployerDashboard from "@/components/EmployerDashboard";
-import { GraduationCap, Globe, Users, CheckCircle, MapPin, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { GraduationCap, Globe, Users, CheckCircle, MapPin, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight,Home } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 import { motion, useInView } from "framer-motion";
 
@@ -21,12 +21,12 @@ const Index = () => {
   const [scrollDirection, setScrollDirection] = useState("down");
 
   const countries = [
-    { name: "United States of America", flag: "🇺🇸", universities: "500+" },
-    { name: "United Kingdom", flag: "🇬🇧", universities: "200+" },
-    { name: "Canada", flag: "🇨🇦", universities: "300+" },
-    { name: "Australia", flag: "🇦🇺", universities: "150+" },
-    { name: "Germany", flag: "🇩🇪", universities: "400+" },
-    { name: "Ireland", flag: "🇮🇪", universities: "50+" }
+    { name: "United States", flag: "🇺🇸", universities: "500+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" },
+    { name: "United Kingdom", flag: "🇬🇧", universities: "200+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg" },
+    { name: "Canada", flag: "🇨🇦", universities: "300+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Canada.svg" },
+    { name: "Australia", flag: "🇦🇺", universities: "150+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg" },
+    { name: "Germany", flag: "🇩🇪", universities: "400+", flagImg: "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" },
+    { name: "Ireland", flag: "🇮🇪", universities: "50+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" }
   ];
 
   const features = [
@@ -79,7 +79,8 @@ const Index = () => {
     { step: 2, title: "University Selection", description: "Personalized university recommendations based on your profile", icon: GraduationCap },
     { step: 3, title: "Application Support", description: "Complete assistance with applications, essays, and documentation", icon: CheckCircle },
     { step: 4, title: "Visa Processing", description: "Expert guidance through visa applications and interview preparation", icon: Globe },
-    { step: 5, title: "Pre-Departure", description: "Comprehensive pre-departure briefing and support services", icon: Award }
+    { step: 5, title: "Pre-Departure", description: "Comprehensive pre-departure briefing and support services", icon: Award },
+    { step: 6, title: "Accommodation",description: "Assistance in finding safe, convenient, and affordable housing options", icon: Home }
   ];
 
   const faqs = [
@@ -267,7 +268,7 @@ const Index = () => {
               <Button
                 type="button"
                 onClick={goToStudentLogin}
-                className="font-semibold"
+                className="font-semibold min-h-[44px]"
               >
                 Student Login
               </Button>
@@ -303,14 +304,14 @@ const Index = () => {
               Trusted by 5000+ Students Worldwide
             </Badge>
 
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
+            <h1 className="font-bold mb-4 sm:mb-6 leading-tight" style={{ fontSize: "clamp(2rem, 6vw, 4.5rem)" }}>
               Your Gateway to
               <span className="block bg-gradient-to-r from-yellow-300 via-orange-300 to-rose-300 bg-clip-text text-transparent animate-pulse">
                 Global Education
               </span>
             </h1>
 
-            <p className="text-base sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-full sm:max-w-3xl mx-auto opacity-95 leading-relaxed">
+            <p className="mb-8 sm:mb-10 max-w-full sm:max-w-3xl mx-auto opacity-95 leading-relaxed" style={{ fontSize: "clamp(1rem, 2.5vw, 1.5rem)" }}>
               Transform your academic dreams into reality with expert guidance for Masters programs
               in USA, UK, Canada, Ireland, Germany, and Australia.
             </p>
@@ -372,36 +373,51 @@ const Index = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: -50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }} // amount: 0.2 triggers when 20% of section is visible
+            viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             {countries.map((country, index) => (
-              <Card
+              <div
                 key={index}
-                className="group shadow-card hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border-2 hover:border-blue-500 overflow-hidden"
+                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                style={{ aspectRatio: '4 / 3' }}
+                onClick={() => goToColleges(country.name)}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardContent className="p-4 sm:p-6 text-center relative z-10">
-                  <div className="text-5xl sm:text-6xl mb-4 transform group-hover:scale-110 transition-transform duration-300">{country.flag}</div>
-                  <h3 className="text-lg sm:text-xl font-semibold mb-2">{country.name}</h3>
-                  <Badge variant="secondary" className="mb-4">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    {country.universities} Universities
-                  </Badge>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Explore opportunities in top-ranked institutions
-                  </p>
+                {/* Flag Background */}
+                <img
+                  src={country.flagImg}
+                  alt={`${country.name} flag`}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
 
-                  <Button
-                    type="button"
-                    className="w-full group-hover:bg-blue-600 transition-colors duration-300"
-                    onClick={() => goToColleges(country.name)}
+                {/* Dark Glass Overlay */}
+                <div className="absolute inset-0 bg-black/45 backdrop-blur-[4px] group-hover:bg-black/30 group-hover:backdrop-blur-[2px] transition-all duration-500" />
+
+                {/* Mini Circular Flag Badge */}
+                <div className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full overflow-hidden border-2 border-white/40 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <img src={country.flagImg} alt="" className="w-full h-full object-cover" />
+                </div>
+
+                {/* Content */}
+                <div className="absolute inset-0 z-10 flex flex-col justify-end p-5 sm:p-6">
+                  <h3
+                    className="text-white font-extrabold tracking-tight mb-1 drop-shadow-lg"
+                    style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
                   >
+                    {country.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/20 text-white text-[11px] font-semibold">
+                      <MapPin className="w-3 h-3" />
+                      {country.universities} Universities
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium group-hover:text-white transition-colors duration-300">
                     Explore Universities
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </div>
+              </div>
             ))}
           </motion.div>
         </div>
@@ -426,10 +442,6 @@ const Index = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
       {features.map((feature, index) => {
         const FeatureIcon = feature.icon;
-        
-        // Calculation to move cards from their grid position back to center
-        // On a 4-col layout, this creates a single pile in the middle
-        const xOffset = [150, 50, -50, -150][index]; 
 
         return (
           <motion.div
@@ -437,36 +449,26 @@ const Index = () => {
             className="h-full"
             initial={{ 
               opacity: 0,
-              scale: 0.8,
-              x: xOffset, // Moves card from its slot to the center
-              y: 0,
-              rotate: index * 3, // Slight rotation for the deck effect
-              zIndex: 10 - index // Top card stays on top
+              y: 30
             }}
             whileInView={{ 
               opacity: 1,
-              scale: 1,
-              x: 0, // Flies to its own grid position
-              y: 0,
-              rotate: 0,
-              zIndex: 1
+              y: 0
             }}
-            // Trigger animation on cursor hover
             whileHover={{
-              scale: 1.05,
+              scale: 1.03,
               transition: { duration: 0.2 }
             }}
-            // Changed once to false so it animates every time it's viewed/hovered
-            viewport={{ once: false, margin: "-50px" }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{
               type: "spring",
               stiffness: 60,
               damping: 15,
-              delay: index * 0.2
+              delay: index * 0.1
             }}
           >
             <Card
-              className="group h-full flex flex-col shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-blue-500 transform hover:-translate-y-2 bg-card"
+              className="group h-full flex flex-col shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-blue-500 transform bg-card"
             >
               <CardHeader className="pb-4">
                 <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-600 to-teal-500 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -574,7 +576,7 @@ const Index = () => {
                 variant="outline"
                 size="icon"
                 onClick={prevTestimonial}
-                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors min-w-[44px] min-h-[44px]"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
@@ -595,7 +597,7 @@ const Index = () => {
                 variant="outline"
                 size="icon"
                 onClick={nextTestimonial}
-                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+                className="rounded-full hover:bg-blue-600 hover:text-white transition-colors min-w-[44px] min-h-[44px]"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -682,14 +684,6 @@ const Index = () => {
       >
         Schedule Free Consultation
         <ArrowRight className="ml-2 w-5 h-5" />
-      </Button>
-      <Button
-        size="lg"
-        variant="outline"
-        onClick={goToStudentLogin}
-        className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base sm:text-lg px-8 py-6 rounded-full transition-all duration-300 w-full sm:w-auto"
-      >
-        Login to Dashboard
       </Button>
     </div>
   </div>
@@ -787,9 +781,9 @@ const ProcessStepItem = ({ step, isEven, StepIcon, scrollDirection, globalScroll
     <motion.div 
       ref={ref}
       className="relative"
-      initial={{ clipPath: "inset(0 0 100% 0)", opacity: 0 }}
-      animate={hasAnimated ? { clipPath: "inset(0 0 0% 0)", opacity: 1 } : { clipPath: "inset(0 0 100% 0)", opacity: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className={`flex flex-col lg:flex-row items-center gap-8 ${isEven ? '' : 'lg:flex-row-reverse'}`}>
         <div className={`flex-1 ${isEven ? 'lg:text-right' : 'lg:text-left'}`}>

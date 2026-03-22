@@ -70,6 +70,7 @@ const ResetPassword = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="min-h-[44px]"
               />
               <Input
                 type="password"
@@ -77,9 +78,10 @@ const ResetPassword = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                className="min-h-[44px]"
               />
               {error && <div className="text-red-600 text-sm">{error}</div>}
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
                 {loading ? "Resetting..." : "Reset Password"}
               </Button>
             </form>

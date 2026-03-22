@@ -14,7 +14,15 @@ const TABLE_NAME = "Visaappointments";
 const VisaApplication = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { country, visaType, flag } = location.state || {};
+  // sessionStorage fallback so the page works on refresh
+  const stateData = location.state || {};
+  const sessionCtx = (() => {
+    try { return JSON.parse(sessionStorage.getItem("slotpilot_visa_context") || "null"); }
+    catch { return null; }
+  })();
+  const country = stateData.country || sessionCtx?.contextCountry || null;
+  const visaType = stateData.visaType || null;
+  const flag = stateData.flag || "";
 
   // ✅ Always start at top when this page loads
   useEffect(() => {
@@ -180,13 +188,13 @@ const VisaApplication = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-6">
               <Button
                 variant="ghost"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-h-[44px]"
                 onClick={() => setSubmissionSuccess(false)}
               >
                 Submit another
               </Button>
               <Button
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-h-[44px]"
                 onClick={() => navigate("/visa-services", { replace: true })}
               >
                 <Globe className="w-4 h-4 mr-2" />
@@ -194,7 +202,7 @@ const VisaApplication = () => {
               </Button>
               <Button
                 variant="outline"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-h-[44px]"
                 onClick={() => navigate("/", { replace: true })}
               >
                 <Home className="w-4 h-4 mr-2" />
@@ -287,7 +295,7 @@ const VisaApplication = () => {
                   <button
                     onClick={() => setNotification(null)}
                     aria-label="Close notification"
-                    className="ml-3 text-muted-foreground hover:text-foreground"
+                    className="ml-3 text-muted-foreground hover:text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center p-2"
                   >
                     ✕
                   </button>
@@ -312,6 +320,7 @@ const VisaApplication = () => {
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="Enter your first name"
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -322,6 +331,7 @@ const VisaApplication = () => {
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       placeholder="Enter your last name"
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -336,6 +346,7 @@ const VisaApplication = () => {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Enter your email"
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -346,6 +357,7 @@ const VisaApplication = () => {
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="Enter your phone number"
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -359,6 +371,7 @@ const VisaApplication = () => {
                       value={formData.dateOfBirth}
                       onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -369,6 +382,7 @@ const VisaApplication = () => {
                       onChange={(e) => handleInputChange('nationality', e.target.value)}
                       placeholder="Enter your nationality"
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -381,6 +395,7 @@ const VisaApplication = () => {
                     onChange={(e) => handleInputChange('passportNumber', e.target.value)}
                     placeholder="Enter your passport number"
                     required
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -392,6 +407,7 @@ const VisaApplication = () => {
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     placeholder="Enter your address"
                     required
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -402,6 +418,7 @@ const VisaApplication = () => {
                     id="country"
                     value={country || ""}
                     readOnly
+                    className="min-h-[44px]"
                     // keep the country visible to user; it's auto-filled from the selected service
                   />
                 </div>
@@ -423,6 +440,7 @@ const VisaApplication = () => {
                     placeholder="Describe the purpose of your travel"
                     rows={3}
                     required
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -434,6 +452,7 @@ const VisaApplication = () => {
                     onChange={(e) => handleInputChange('intendedStayDuration', e.target.value)}
                     placeholder="e.g., 2 weeks, 3 months, 1 year"
                     required
+                    className="min-h-[44px]"
                   />
                 </div>
               </div>

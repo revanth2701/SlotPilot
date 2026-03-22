@@ -1,0 +1,68 @@
+# Lead Capture Contact Modal for Stays Concierge Flow
+
+When a user clicks "Arrange via SlotPilot (Paid)" on an accommodation card, a contact details modal should collect their name, email, and phone before creating the Firestore task. The admin dashboard should then display this contact info.
+
+## Proposed Changes
+
+### Communities Page
+
+#### [MODIFY] [Communities.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx)
+
+**1. New state variables** (after line 200):
+- `showContactModal` — controls modal visibility
+- `contactInfo` — `{ name: "", email: "", phone: "" }`
+- `contactSubmitted` — drives the success checkmark animation
+- `selectedPost` — stores which accommodation post triggered the modal
+
+**2. Modify [handleSecureRoom](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/Communities.jsx#257-269)** (line 257):
+- Instead of directly calling `addDoc`, store the post in `selectedPost` and set `showContactModal = true`
+
+**3. New `handleContactSubmit` function**:
+- Validates all 3 fields are filled
+- Calls `addDoc("employee_tasks", { ... })` with enriched data:
+  - `userName`, `userEmail`, `userPhone`
+  - `postId`, `postTitle`
+  - `status: "pending"`, `createdAt: serverTimestamp()`
+- Sets `contactSubmitted = true` → shows success animation
+- After 2s, auto-closes modal and resets state
+
+**4. New `ContactModal` JSX** (before closing `</div>`):
+- Premium **glassmorphic** modal matching the existing Liquid Glass theme
+- Title: "Concierge Contact Details"
+- Fields: Full Name, Email Address, WhatsApp / Mobile (with country code hint)
+- Submit button disabled until all 3 fields are filled
+- **Success state**: animated checkmark with `framer-motion` scale/opacity, then auto-close after 2s
+
+**5. Add CSS keyframes** to `SPATIAL_CSS`:
+- `@keyframes sp-checkmark` for the success line-draw effect
+
+---
+
+### Admin Dashboard
+
+#### [MODIFY] [AdminDashboard.jsx](file:///c:/Users/manvi/OneDrive/Documents/SlotPilot/src/pages/AdminDashboard.jsx)
+
+**Update the Stays Tasks tab** (lines 331-350):
+- Add a new `Mail` icon import from `lucide-react`
+- After the existing "Requested by" row, add rows for:
+  - 👤 **Contact Name**: `task.userName`
+  - ✉️ **Email**: `task.userEmail`
+  - 📱 **Phone**: `task.userPhone`
+- Uses the same styling pattern as the existing detail rows
+
+## Verification Plan
+
+### Manual Verification
+
+> [!IMPORTANT]
+> No automated tests exist in this project. Verification will be done via the browser.
+
+1. Run the dev server (`npm run dev`)
+2. Navigate to **Communities** → **Stays** tab
+3. Click **"Arrange via SlotPilot (Paid)"** on any accommodation card
+4. Verify the glassmorphic contact modal appears
+5. Confirm submit button is disabled when fields are empty
+6. Fill all 3 fields → button enables → submit
+7. Verify success checkmark animation plays and modal auto-closes after ~2s
+8. Open **Admin Dashboard** → **Stays Tasks** tab
+9. Confirm the new task shows `userName`, `userEmail`, and `userPhone`

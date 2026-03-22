@@ -239,236 +239,228 @@ const ServiceSelection = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
-  <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50 transition-colors duration-500">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="relative h-16 flex items-center justify-between">
-      
-      {/* Left Column: Placeholder to maintain center alignment */}
-      <div className="hidden md:block w-40" />
+      <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50 transition-colors duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative h-16 flex items-center justify-between">
 
-      {/* Center Column: SlotPilot Logo */}
-      <div className="text-center flex-1">
-        <div className="text-2xl font-extrabold tracking-tight leading-none">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
-            SlotPilot
-          </span>
+            {/* Left Column: Placeholder to maintain center alignment */}
+            <div className="hidden md:block w-40" />
+
+            {/* Center Column: SlotPilot Logo */}
+            <div className="text-center flex-1">
+              <div className="text-2xl font-extrabold tracking-tight leading-none">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-rose-500">
+                  SlotPilot
+                </span>
+              </div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">
+                Global Education & Visa Services
+              </div>
+            </div>
+
+            {/* Right Column: Theme Toggle & Employer Login */}
+            <div className="w-auto md:w-40 flex justify-end items-center gap-2 sm:gap-4">
+              {/* Theme Switcher Button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsDarkMode((prev) => !prev)}
+                className="rounded-full hover:bg-accent transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center p-0"
+                aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                title={isDarkMode ? "Light mode" : "Dark mode"}
+              >
+                {isDarkMode ? (
+                  <Sun className="h-[1.2rem] w-[1.2rem] text-amber-500 transition-all" />
+                ) : (
+                  <Moon className="h-[1.2rem] w-[1.2rem] text-slate-700 transition-all" />
+                )}
+              </Button>
+
+              {/* Employer Login Button (Desktop) */}
+
+
+              {/* Employer Login Icon (Mobile) */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/employer-login')}
+                className="sm:hidden rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center p-0"
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            </div>
+
+          </div>
         </div>
-        <div className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">
-          Global Education & Visa Services
-        </div>
-      </div>
-
-      {/* Right Column: Theme Toggle & Employer Login */}
-      <div className="w-auto md:w-40 flex justify-end items-center gap-2 sm:gap-4">
-        {/* Theme Switcher Button */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsDarkMode((prev) => !prev)}
-          className="rounded-full hover:bg-accent transition-colors"
-          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-          title={isDarkMode ? "Light mode" : "Dark mode"}
-        >
-          {isDarkMode ? (
-            <Sun className="h-[1.2rem] w-[1.2rem] text-amber-500 transition-all" />
-          ) : (
-            <Moon className="h-[1.2rem] w-[1.2rem] text-slate-700 transition-all" />
-          )}
-        </Button>
-
-        {/* Employer Login Button (Desktop) */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate('/employer-login')}
-          className="hidden sm:flex font-semibold border-primary/20 hover:bg-primary/10"
-        >
-          <Users className="w-4 h-4 mr-2" />
-          Employer Login
-        </Button>
-
-        {/* Employer Login Icon (Mobile) */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigate('/employer-login')}
-          className="sm:hidden rounded-full"
-        >
-          <Users className="h-4 w-4" />
-        </Button>
-      </div>
-
-    </div>
-  </div>
-</header>
+      </header>
 
       {/* Hero Section */}
 
-<section className="relative w-full min-h-[500px] flex items-center justify-center py-16 sm:py-24 overflow-hidden">
+      <section className="relative w-full min-h-[500px] flex items-center justify-center py-16 sm:py-24 overflow-hidden">
 
-  {/* 1. The Video Layer */}
+        {/* 1. The Video Layer */}
 
-    <video
+        <video
 
-    autoPlay
+          autoPlay
 
-    loop
+          loop
 
-    muted
+          muted
 
-    playsInline
+          playsInline
 
-    preload="auto"
+          preload="auto"
 
-    className="absolute inset-0 w-full h-full object-cover z-0"
+          className="absolute inset-0 w-full h-full object-cover z-0"
 
-  >
+        >
 
-    {/* Ensure the filename here matches exactly what you put in the public folder */}
+          {/* Ensure the filename here matches exactly what you put in the public folder */}
 
-    <source src="/main-bg-vdo.mp4" type="video/mp4" />
+          <source src="/main-bg-vdo.mp4" type="video/mp4" />
 
-    Your browser does not support the video tag.
+          Your browser does not support the video tag.
 
-  </video>
-
-
-
-  {/* 2. The Dark Overlay (Crucial for text visibility) */}
-
-  <div className="absolute inset-0 bg-black/50 z-10" />
+        </video>
 
 
 
-  {/* 3. The Content Layer */}
+        {/* 2. The Dark Overlay (Crucial for text visibility) */}
 
-  <div className="relative z-20 max-w-6xl mx-auto px-4 text-center text-white">
-
-    <Badge className="mb-4 px-4 py-2 bg-white/10 backdrop-blur-md border-white/20 text-white">
-
-      <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
-
-      Trusted by 15,000+ Clients Worldwide
-
-    </Badge>
+        <div className="absolute inset-0 bg-black/50 z-10" />
 
 
 
-    <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        {/* 3. The Content Layer */}
 
-      Choose Your Perfect Service
+        <div className="relative z-20 max-w-6xl mx-auto px-4 text-center text-white">
 
-    </h2>
+          <Badge className="mb-4 px-4 py-2 bg-white/10 backdrop-blur-md border-white/20 text-white">
 
-    <p className="text-base sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+            <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
 
-      From education to immigration, we provide comprehensive solutions for all your global aspirations
+            Trusted by 15,000+ Clients Worldwide
 
-    </p>
+          </Badge>
 
-  </div>
 
-</section>
+
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+
+            Choose Your Perfect Service
+
+          </h2>
+
+          <p className="text-base sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+
+            From education to immigration, we provide comprehensive solutions for all your global aspirations
+
+          </p>
+
+        </div>
+
+      </section>
 
       {/* Main Content */}
-<main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div className="text-center mb-12">
-    <Badge className="mb-4 px-4 py-2 bg-primary/10 border-primary/20" variant="outline">
-      <Building2 className="w-4 h-4 mr-2 text-primary" />
-      Our Services
-    </Badge>
-    <h2 className="text-4xl sm:text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-      Select Your Service
-    </h2>
-    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-      Expert consultants ready to guide you through every step of your journey
-    </p>
-  </div>
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <Badge className="mb-4 px-4 py-2 bg-primary/10 border-primary/20" variant="outline">
+            <Building2 className="w-4 h-4 mr-2 text-primary" />
+            Our Services
+          </Badge>
+          <h2 className="text-4xl sm:text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Select Your Service
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Expert consultants ready to guide you through every step of your journey
+          </p>
+        </div>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
-    {[
-      {
-        title: "Higher Education",
-        desc: "Get guidance for studying abroad, university applications, and academic programs",
-        icon: <GraduationCap className="w-8 h-8 text-primary-foreground" />,
-        items: ["University Selection", "Document Prep", "Scholarship Guidance", "Visa Assistance"],
-        buttonText: "Apply for Higher Education",
-        buttonIcon: <Building2 className="w-5 h-5 mr-2" />,
-        route: "/higher-education"
-      },
-      {
-        title: "Visa Services",
-        desc: "Expert assistance for all types of visa applications worldwide",
-        icon: <Plane className="w-8 h-8 text-primary-foreground" />,
-        items: ["Tourist & Business Visas", "Work & Employment", "Family & Immigration", "Document Review"],
-        buttonText: "Apply for Visa",
-        buttonIcon: <Globe className="w-5 h-5 mr-2" />,
-        route: "/visa-services"
-      },
-      {
-        title: "Explore Communities",
-        desc: "Connect with students and professionals, ask questions, and learn from experiences",
-        icon: <Users className="w-8 h-8 text-primary-foreground" />,
-        items: ["Student Networks", "University Groups", "Mentorship", "Tips & Resources"],
-        buttonText: "Explore Communities",
-        buttonIcon: <Users className="w-5 h-5 mr-2" />,
-        route: "/communities"
-      }
-    ].map((service, index) => (
-      <Card 
-        key={index}
-        /* LIGHT MODE: bg-slate-100 (Slightly darker than white background)
-           DARK MODE: bg-[#0f1117] (Deep midnight dark)
-        */
-        className="group relative overflow-hidden transition-all duration-500 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+          {[
+            {
+              title: "Higher Education",
+              desc: "Get guidance for studying abroad, university applications, and academic programs",
+              icon: <GraduationCap className="w-8 h-8 text-primary-foreground" />,
+              items: ["University Selection", "Document Prep", "Scholarship Guidance", "Visa Assistance"],
+              buttonText: "Apply for Higher Education",
+              buttonIcon: <Building2 className="w-5 h-5 mr-2" />,
+              route: "/higher-education"
+            },
+            {
+              title: "Visa Services",
+              desc: "Expert assistance for all types of visa applications worldwide",
+              icon: <Plane className="w-8 h-8 text-primary-foreground" />,
+              items: ["Tourist & Business Visas", "Work & Employment", "Family & Immigration", "Document Review"],
+              buttonText: "Apply for Visa",
+              buttonIcon: <Globe className="w-5 h-5 mr-2" />,
+              route: "/visa-start"
+            },
+            {
+              title: "Explore Communities",
+              desc: "Connect with students and professionals, ask questions, and learn from experiences",
+              icon: <Users className="w-8 h-8 text-primary-foreground" />,
+              items: ["Student Networks", "University Groups", "Mentorship", "Tips & Resources"],
+              buttonText: "Explore Communities",
+              buttonIcon: <Users className="w-5 h-5 mr-2" />,
+              route: "/communities"
+            }
+          ].map((service, index) => (
+            <Card
+              key={index}
+              /* LIGHT MODE: bg-slate-100 (Slightly darker than white background)
+                 DARK MODE: bg-[#0f1117] (Deep midnight dark)
+              */
+              className="group relative overflow-hidden transition-all duration-500 
                    bg-slate-100 dark:bg-[#0f1117] 
                    border-slate-200 dark:border-white/10 
                    hover:border-primary/50 
                    hover:-translate-y-3 shadow-xl hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_50px_-12px_rgba(99,102,241,0.5)]"
-      >
-        {/* Glow Overlay - subtle Indigo for both modes */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            >
+              {/* Glow Overlay - subtle Indigo for both modes */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        
 
-        <CardHeader className="text-center pb-4 relative z-10">
-          <div className="mx-auto w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-6 
+
+              <CardHeader className="text-center pb-4 relative z-10">
+                <div className="mx-auto w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-6 
                           shadow-lg group-hover:rotate-3 transition-all duration-500">
-            {service.icon}
-          </div>
-          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            {service.title}
-          </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400 font-medium">
-            {service.desc}
-          </CardDescription>
-        </CardHeader>
+                  {service.icon}
+                </div>
+                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  {service.title}
+                </CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400 font-medium">
+                  {service.desc}
+                </CardDescription>
+              </CardHeader>
 
-        <CardContent className="space-y-6 relative z-10">
-          <div className="space-y-3 text-sm">
-            {service.items.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)]" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
+              <CardContent className="space-y-6 relative z-10">
+                <div className="space-y-3 text-sm">
+                  {service.items.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)]" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
 
-          
 
-          <Button
-            onClick={() => navigate(service.route)}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-7 rounded-xl shadow-lg transform active:scale-95 transition-all"
-          >
-            {service.buttonIcon}
-            {service.buttonText}
-          </Button>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-</main>
+
+                <Button
+                  onClick={() => navigate(service.route)}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-7 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                >
+                  {service.buttonIcon}
+                  {service.buttonText}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </main>
 
       {/* Statistics Section */}
       <section className="py-16 sm:py-20 bg-gradient-primary text-primary-foreground relative overflow-hidden">
@@ -510,105 +502,105 @@ const ServiceSelection = () => {
 
       <section className="py-20 bg-gradient-to-br from-primary/10 to-background overflow-hidden group/section">
 
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div className="text-center mb-16">
+          <div className="text-center mb-16">
 
-      <Badge className="mb-4 px-4 py-2" variant="outline">
+            <Badge className="mb-4 px-4 py-2" variant="outline">
 
-        <CheckCircle className="w-4 h-4 mr-2" />
+              <CheckCircle className="w-4 h-4 mr-2" />
 
-        Why Choose Us
+              Why Choose Us
 
-      </Badge>
+            </Badge>
 
-      <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground supports-[background-clip:text]:bg-primary supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent">
+            <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground supports-[background-clip:text]:bg-primary supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent">
 
-        Our Advantages
+              Our Advantages
 
-      </h2>
+            </h2>
 
-      <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
 
-        Experience the difference with our comprehensive service approach
+              Experience the difference with our comprehensive service approach
 
-      </p>
-
-    </div>
-
-
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
-      {benefits.map((benefit, index) => {
-
-        const BenefitIcon = benefit.icon;
-
-        return (
-
-          <div
-
-            key={index}
-
-            style={{ 
-
-              // This creates the staggered "one-by-one" slide effect
-
-              transitionDelay: `${index * 150}ms` 
-
-            }}
-
-            className="h-full transform transition-all duration-700 ease-out opacity-0 translate-y-12 group-hover/section:opacity-100 group-hover/section:translate-y-0"
-
-          >
-
-            <Card
-
-              className="group h-full flex flex-col shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-primary transform hover:-translate-y-2 bg-card"
-
-            >
-
-              <CardHeader className="pb-4">
-
-                <div className="mx-auto mb-4 p-3 bg-gradient-primary rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-
-                  <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
-
-                </div>
-
-                <CardTitle className="text-lg font-bold">{benefit.title}</CardTitle>
-
-              </CardHeader>
-
-              <CardContent className="flex-grow">
-
-                {/* flex-grow ensures the third card stretches to match the tallest card */}
-
-                <CardDescription className="text-sm">
-
-                  {benefit.description}
-
-                </CardDescription>
-
-              </CardContent>
-
-            </Card>
+            </p>
 
           </div>
 
-        );
-
-      })}
-
-    </div>
-
-  </div>
-
-</section>
 
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-          {/* Testimonials Section */}
+            {benefits.map((benefit, index) => {
+
+              const BenefitIcon = benefit.icon;
+
+              return (
+
+                <div
+
+                  key={index}
+
+                  style={{
+
+                    // This creates the staggered "one-by-one" slide effect
+
+                    transitionDelay: `${index * 150}ms`
+
+                  }}
+
+                  className="h-full transform transition-all duration-700 ease-out opacity-0 translate-y-12 group-hover/section:opacity-100 group-hover/section:translate-y-0"
+
+                >
+
+                  <Card
+
+                    className="group h-full flex flex-col shadow-card hover:shadow-2xl transition-all duration-500 text-center border-2 hover:border-primary transform hover:-translate-y-2 bg-card"
+
+                  >
+
+                    <CardHeader className="pb-4">
+
+                      <div className="mx-auto mb-4 p-3 bg-gradient-primary rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+
+                        <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
+
+                      </div>
+
+                      <CardTitle className="text-lg font-bold">{benefit.title}</CardTitle>
+
+                    </CardHeader>
+
+                    <CardContent className="flex-grow">
+
+                      {/* flex-grow ensures the third card stretches to match the tallest card */}
+
+                      <CardDescription className="text-sm">
+
+                        {benefit.description}
+
+                      </CardDescription>
+
+                    </CardContent>
+
+                  </Card>
+
+                </div>
+
+              );
+
+            })}
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      {/* Testimonials Section */}
 
       <section className="py-20 bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -656,7 +648,7 @@ const ServiceSelection = () => {
                 variant="outline"
                 size="icon"
                 onClick={prevTestimonial}
-                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center p-0"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
@@ -666,10 +658,14 @@ const ServiceSelection = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentTestimonial(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentTestimonial ? 'bg-primary w-8' : 'bg-muted-foreground/30'
-                    }`}
-                  />
+                    aria-label={`Go to slide ${index + 1}`}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentTestimonial ? 'bg-primary w-8' : 'bg-muted-foreground/30'
+                        }`}
+                    />
+                  </button>
                 ))}
               </div>
 
@@ -677,7 +673,7 @@ const ServiceSelection = () => {
                 variant="outline"
                 size="icon"
                 onClick={nextTestimonial}
-                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center p-0"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -731,13 +727,13 @@ const ServiceSelection = () => {
                 Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2005.
               </p>
               <div className="flex gap-3">
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
                   <Globe className="w-5 h-5" />
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
                   <Mail className="w-5 h-5" />
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary">
+                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
                   <Phone className="w-5 h-5" />
                 </Button>
               </div>
@@ -745,18 +741,18 @@ const ServiceSelection = () => {
 
             <div>
               <h3 className="font-bold text-lg mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><button onClick={() => navigate('/higher-education')} className="hover:text-white transition-colors text-left">Higher Education</button></li>
-                <li><button onClick={() => navigate('/visa-start')} className="hover:text-white transition-colors text-left">Visa Services</button></li>
-                <li><a href="mailto:info@slotpilot.in" className="hover:text-white transition-colors">Contact Us</a></li>
+              <ul className="space-y-4 text-primary-foreground/80">
+                <li><button onClick={() => navigate('/higher-education')} className="hover:text-white transition-colors text-left flex items-center min-h-[44px]">Higher Education</button></li>
+                <li><button onClick={() => navigate('/visa-start')} className="hover:text-white transition-colors text-left flex items-center min-h-[44px]">Visa Services</button></li>
+                <li><a href="mailto:info@slotpilot.in" className="hover:text-white transition-colors flex items-center min-h-[44px]">Contact Us</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-bold text-lg mb-4">Support</h3>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
-                <li><button onClick={() => navigate('/terms-of-service')} className="hover:text-white transition-colors text-left">Terms of Service</button></li>
+              <ul className="space-y-4 text-primary-foreground/80">
+                <li><button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left flex items-center min-h-[44px]">Privacy Policy</button></li>
+                <li><button onClick={() => navigate('/terms-of-service')} className="hover:text-white transition-colors text-left flex items-center min-h-[44px]">Terms of Service</button></li>
               </ul>
             </div>
           </div>
