@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle, Sun, Moon } from 'lucide-react';
+import { GraduationCap, Plane, Building2, Globe, Users, TrendingUp, Award, Clock, Star, ArrowRight, Mail, MapPinIcon, ChevronLeft, ChevronRight, CheckCircle, Sun, Moon, Instagram } from 'lucide-react';
 
 
 // constant Earth — realistic 3D rotating globe component (uses an equirectangular world-map image at /public/images/world-map.jpg)
@@ -69,6 +69,7 @@ const ServiceSelection = () => {
   const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("theme");
@@ -378,7 +379,7 @@ const ServiceSelection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {[
             {
               title: "Higher Education",
@@ -410,10 +411,7 @@ const ServiceSelection = () => {
           ].map((service, index) => (
             <Card
               key={index}
-              /* LIGHT MODE: bg-slate-100 (Slightly darker than white background)
-                 DARK MODE: bg-[#0f1117] (Deep midnight dark)
-              */
-              className="group relative overflow-hidden transition-all duration-500 
+              className="group relative overflow-hidden transition-all duration-500 flex flex-col h-full
                    bg-slate-100 dark:bg-[#0f1117] 
                    border-slate-200 dark:border-white/10 
                    hover:border-primary/50 
@@ -421,8 +419,6 @@ const ServiceSelection = () => {
             >
               {/* Glow Overlay - subtle Indigo for both modes */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-
 
               <CardHeader className="text-center pb-4 relative z-10">
                 <div className="mx-auto w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-6 
@@ -437,7 +433,7 @@ const ServiceSelection = () => {
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-6 relative z-10">
+              <CardContent className="flex flex-col flex-grow space-y-6 relative z-10">
                 <div className="space-y-3 text-sm">
                   {service.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
@@ -447,15 +443,15 @@ const ServiceSelection = () => {
                   ))}
                 </div>
 
-
-
-                <Button
-                  onClick={() => navigate(service.route)}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-7 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                >
-                  {service.buttonIcon}
-                  {service.buttonText}
-                </Button>
+                <div className="mt-auto">
+                  <Button
+                    onClick={() => navigate(service.route)}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-7 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                  >
+                    {service.buttonIcon}
+                    {service.buttonText}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -727,15 +723,16 @@ const ServiceSelection = () => {
                 Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2005.
               </p>
               <div className="flex gap-3">
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
-                  <Globe className="w-5 h-5" />
-                </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
-                  <Mail className="w-5 h-5" />
-                </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary min-w-[44px] min-h-[44px] flex items-center justify-center p-0">
-                  <Phone className="w-5 h-5" />
-                </Button>
+                <a href="https://www.instagram.com/slotpilot99/" target="_blank" rel="noopener noreferrer" title="Find us on Instagram">
+                  <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary hover:-translate-y-1 min-w-[44px] min-h-[44px] flex items-center justify-center p-0 transition-all duration-300">
+                    <Instagram className="w-5 h-5" />
+                  </Button>
+                </a>
+                <a href="https://mail.google.com/mail/?view=cm&to=Info@slotpilot.in" target="_blank" rel="noopener noreferrer" title="Email us at Info@slotpilot.in">
+                  <Button size="icon" variant="outline" className="rounded-full bg-background/10 border-background/20 hover:bg-background hover:text-primary hover:-translate-y-1 min-w-[44px] min-h-[44px] flex items-center justify-center p-0 transition-all duration-300">
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                </a>
               </div>
             </div>
 
@@ -770,6 +767,7 @@ const ServiceSelection = () => {
           </div>
         </div>
       </footer>
+
     </div>
   );
 };

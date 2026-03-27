@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Mail, Lock } from "lucide-react";
-import EmployerDashboard from "./EmployerDashboard";
+
 
 const EmployerLoginRegister = ({ onBack }) => {
   const navigate = useNavigate();
@@ -65,19 +65,8 @@ const EmployerLoginRegister = ({ onBack }) => {
   };
 
   if (showDashboard) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/50 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-6xl">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Employer Dashboard
-            </h1>
-            <Button variant="destructive" onClick={handleLogout} className="ml-4">Logout</Button>
-          </div>
-          <EmployerDashboard onBack={onBack} />
-        </div>
-      </div>
-    );
+    navigate("/admin/dashboard");
+    return null;
   }
 
   return (

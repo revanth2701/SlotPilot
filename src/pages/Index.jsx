@@ -7,8 +7,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import LoginSelection from "@/components/LoginSelection";
 import EmployerLoginRegister from "@/components/EmployerLoginRegister";
 import StudentDashboardNew from "@/components/StudentDashboardNew";
-import EmployerDashboard from "@/components/EmployerDashboard";
-import { GraduationCap, Globe, Users, CheckCircle, MapPin, TrendingUp, Award, Clock, Star, ArrowRight, Mail, Phone, MapPinIcon, ChevronLeft, ChevronRight,Home } from "lucide-react";
+
+import { GraduationCap, Globe, Users, CheckCircle, MapPin, TrendingUp, Award, Clock, Star, ArrowRight, Mail, MapPinIcon, ChevronLeft, ChevronRight, Home, Instagram } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 import { motion, useInView } from "framer-motion";
 
@@ -174,9 +174,7 @@ const Index = () => {
     return <StudentDashboardNew onBack={() => setCurrentView("landing")} />;
   }
 
-  if (currentView === "employer") {
-    return <EmployerDashboard onBack={() => setCurrentView("login")} />;
-  }
+
 
   const scrollToDestinations = () => {
     const el = document.getElementById("study-destinations");
@@ -708,15 +706,16 @@ const Index = () => {
                 Your trusted partner in international education. Helping students achieve their dreams of studying abroad since 2009.
               </p>
               <div className="flex gap-3">
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
-                  <Globe className="w-5 h-5" />
-                </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
-                  <Mail className="w-5 h-5" />
-                </Button>
-                <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600">
-                  <Phone className="w-5 h-5" />
-                </Button>
+                <a href="https://www.instagram.com/slotpilot99/" target="_blank" rel="noopener noreferrer" title="Find us on Instagram">
+                  <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600 hover:-translate-y-1 transition-all duration-300">
+                    <Instagram className="w-5 h-5" />
+                  </Button>
+                </a>
+                <a href="https://mail.google.com/mail/?view=cm&to=Info@slotpilot.in" target="_blank" rel="noopener noreferrer" title="Email us at Info@slotpilot.in">
+                  <Button size="icon" variant="outline" className="rounded-full bg-white/10 border-white/20 hover:bg-white hover:text-blue-600 hover:-translate-y-1 transition-all duration-300">
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                </a>
               </div>
             </div>
 
