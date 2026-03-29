@@ -178,12 +178,27 @@ const ServiceSelection = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [benefitsVisible, setBenefitsVisible] = useState(false);
+  const benefitsRef = useRef(null);
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [testimonials.length]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setBenefitsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (benefitsRef.current) {
+      observer.observe(benefitsRef.current);
+    }
+    return () => {
+      if (benefitsRef.current) {
+        observer.unobserve(benefitsRef.current);
+      }
+    };
+  }, []);
 
   const nextTestimonial = () => {
     setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -394,7 +409,7 @@ const ServiceSelection = () => {
               title: "Visa Services",
               desc: "Expert assistance for all types of visa applications worldwide",
               icon: <Plane className="w-8 h-8 text-primary-foreground" />,
-              items: ["Tourist & Business Visas", "Work & Employment", "Family & Immigration", "Document Review"],
+              items: ["Tourist & Business Visas", "Work & Employment", "Family & Immigration", "Document Review","Visa Assistance"],
               buttonText: "Apply for Visa",
               buttonIcon: <Globe className="w-5 h-5 mr-2" />,
               route: "/visa-start"
@@ -403,7 +418,7 @@ const ServiceSelection = () => {
               title: "Explore Communities",
               desc: "Connect with students and professionals, ask questions, and learn from experiences",
               icon: <Users className="w-8 h-8 text-primary-foreground" />,
-              items: ["Student Networks", "University Groups", "Mentorship", "Tips & Resources"],
+              items: ["Student Networks", "University Groups", "Accomodation", "Tips & Resources","Travel Companion"],
               buttonText: "Explore Communities",
               buttonIcon: <Users className="w-5 h-5 mr-2" />,
               route: "/communities"
@@ -496,7 +511,7 @@ const ServiceSelection = () => {
 
       {/* Benefits Section */}
 
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-background overflow-hidden group/section">
+      <section className="py-20 bg-gradient-to-br from-primary/10 to-background overflow-hidden">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -526,7 +541,7 @@ const ServiceSelection = () => {
 
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div ref={benefitsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {benefits.map((benefit, index) => {
 
@@ -546,7 +561,7 @@ const ServiceSelection = () => {
 
                   }}
 
-                  className="h-full transform transition-all duration-700 ease-out opacity-0 translate-y-12 group-hover/section:opacity-100 group-hover/section:translate-y-0"
+                  className={`h-full transform transition-all duration-700 ease-out ${benefitsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
 
                 >
 
@@ -720,7 +735,7 @@ const ServiceSelection = () => {
                 </span>
               </div>
               <p className="text-primary-foreground/80 mb-4 max-w-md">
-                Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2005.
+                Your trusted partner in education and immigration. Helping clients achieve their global dreams since 2024.
               </p>
               <div className="flex gap-3">
                 <a href="https://www.instagram.com/slotpilot99/" target="_blank" rel="noopener noreferrer" title="Find us on Instagram">
@@ -757,7 +772,7 @@ const ServiceSelection = () => {
           <div className="border-t border-background/20 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-primary-foreground/80 text-sm text-center md:text-left">
-                © 2025 SlotPilot Consultancy. All rights reserved. Empowering dreams globally.
+                © 2024 SlotPilot Consultancy. All rights reserved. Empowering dreams globally.
               </p>
               <div className="flex items-center gap-2 text-sm text-primary-foreground/80">
                 <MapPinIcon className="w-4 h-4" />
