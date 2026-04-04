@@ -9,9 +9,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, Shield, CheckCircle, Home, AlertTriangle, User,
+  Shield, CheckCircle, Home, AlertTriangle, User,
   Phone, Loader2, RefreshCw, MessageSquare, Mail, Users,
-  BookOpen, Globe, GraduationCap, Search, Download, Briefcase
+  BookOpen, Globe, GraduationCap, Search, Download, Briefcase, LogOut
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import {
   Table, TableHeader, TableRow, TableHead, TableBody, TableCell
 } from "@/components/ui/table";
 
-const ADMIN_PASSWORD = "SLOTPILOT_ADMIN";
+/* Admin password gate removed — auth is handled by EmployerLoginRegister */
 
 /* ──────────────────────────────────────────────
    Tab content transition wrapper
@@ -41,9 +41,8 @@ const TabPanel = ({ children, tabKey }) => (
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [authenticated, setAuthenticated] = useState(true);
+
   const [activeTab, setActiveTab] = useState("hq");
 
   /* ── Firebase state (HQ Command) ── */
@@ -74,11 +73,12 @@ const AdminDashboard = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  /* ──────────────── AUTH ──────────────── */
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) { setAuthenticated(true); setError(""); }
-    else { setError("Invalid password. Access denied."); }
+  /* ──────────────── LOGOUT ──────────────── */
+  const handleLogout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.error(e); }
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/employer-login", { replace: true });
   };
 
   /* ──────────────── FIREBASE FETCHES ──────────────── */
@@ -230,64 +230,7 @@ const AdminDashboard = () => {
     return Object.values(row).some(v => (v == null ? "" : String(v)).toLowerCase().includes(q));
   });
 
-  /* ════════════════════════════════════════════
-     LOGIN GATE
-     ════════════════════════════════════════════ */
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-800 dark:text-slate-200 font-sans antialiased flex items-center justify-center p-4 sm:p-6 transition-colors duration-500">
-        <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/[0.06] dark:bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-400/[0.04] dark:bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="relative w-full max-w-md bg-white/80 dark:bg-white/[0.04] backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-xl dark:shadow-2xl"
-        >
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-100 dark:bg-blue-600/15 border border-blue-200 dark:border-blue-500/20 flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h1 className="font-black text-slate-900 dark:text-white italic" style={{ fontSize: "clamp(1.5rem, 4vw, 1.875rem)" }}>
-              SLOT<span className="text-blue-600 dark:text-blue-500">PILOT</span> HQ
-            </h1>
-            <p className="text-blue-500/50 dark:text-blue-400/40 text-[10px] tracking-[0.4em] font-bold mt-2 uppercase">
-              Authorized Access Only
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="password"
-              placeholder="Enter access code"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 p-4 sm:p-5 rounded-2xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-center tracking-widest min-h-[44px] text-slate-900 dark:text-white"
-            />
-            {error && (
-              <p className="text-red-500 dark:text-red-400 text-xs text-center font-semibold">{error}</p>
-            )}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg flex items-center justify-center gap-3 transition-all shadow-lg shadow-blue-600/20 uppercase tracking-tighter min-h-[48px]"
-            >
-              <Shield size={20} />
-              Access Dashboard
-            </motion.button>
-          </form>
-
-          <button
-            onClick={() => navigate("/")}
-            className="mt-6 text-slate-400 dark:text-slate-600 text-xs hover:text-slate-700 dark:hover:text-slate-400 transition-colors w-full text-center min-h-[44px] flex items-center justify-center"
-          >
-            ← Back to Home
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
+  /* Login gate removed — authentication is handled by EmployerLoginRegister */
 
   /* ════════════════════════════════════════════
      UNIFIED DASHBOARD
@@ -299,12 +242,12 @@ const AdminDashboard = () => {
   ];
 
   const statCards = [
-    { label: "Unverified", value: unverifiedPosts.length, color: "text-amber-600 dark:text-amber-400", icon: <AlertTriangle size={16} /> },
-    { label: "Verified", value: verifiedPosts.length, color: "text-emerald-600 dark:text-emerald-400", icon: <CheckCircle size={16} /> },
-    { label: "Total Posts", value: posts.length, color: "text-blue-600 dark:text-blue-400", icon: <MessageSquare size={16} /> },
-    { label: "Stays Tasks", value: tasks.length, color: "text-violet-600 dark:text-violet-400", icon: <Home size={16} /> },
-    { label: "Students", value: studentsData.length, color: "text-cyan-600 dark:text-cyan-400", icon: <GraduationCap size={16} /> },
-    { label: "Visa Apps", value: visaData.length, color: "text-rose-600 dark:text-rose-400", icon: <Briefcase size={16} /> },
+    { label: "Unverified", value: unverifiedPosts.length, color: "text-amber-600 dark:text-amber-400", icon: <AlertTriangle size={16} />, tab: "hq" },
+    { label: "Verified", value: verifiedPosts.length, color: "text-emerald-600 dark:text-emerald-400", icon: <CheckCircle size={16} />, tab: "hq" },
+    { label: "Total Posts", value: posts.length, color: "text-blue-600 dark:text-blue-400", icon: <MessageSquare size={16} />, tab: "hq" },
+    { label: "Stays Tasks", value: tasks.length, color: "text-violet-600 dark:text-violet-400", icon: <Home size={16} />, tab: "hq" },
+    { label: "Students", value: studentsData.length, color: "text-cyan-600 dark:text-cyan-400", icon: <GraduationCap size={16} />, tab: "recruitment" },
+    { label: "Visa Apps", value: visaData.length, color: "text-rose-600 dark:text-rose-400", icon: <Briefcase size={16} />, tab: "visas" },
   ];
 
   return (
@@ -320,32 +263,35 @@ const AdminDashboard = () => {
         {/* ── Header ── */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-8 sm:mb-12">
           <div className="flex items-center gap-3 sm:gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate("/")}
-              className="p-2.5 sm:p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm dark:shadow-none min-w-[44px] min-h-[44px] flex items-center justify-center"
-            >
-              <ArrowLeft size={20} />
-            </motion.button>
             <div>
               <h1 className="font-black tracking-tighter text-slate-900 dark:text-white italic" style={{ fontSize: "clamp(1.25rem, 4vw, 2.25rem)" }}>
                 SLOT<span className="text-blue-600 dark:text-blue-500">PILOT</span> HQ
               </h1>
               <p className="text-blue-500/50 dark:text-blue-400/40 text-[10px] tracking-[0.3em] sm:tracking-[0.4em] font-bold mt-0.5 sm:mt-1 uppercase">
-                Unified Command Dashboard
+                UNIFIED COMMAND DASHBOARD
               </p>
             </div>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={refreshAll}
-            className="p-2.5 sm:p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm dark:shadow-none min-w-[44px] min-h-[44px] flex items-center justify-center"
-          >
-            <RefreshCw size={18} />
-          </motion.button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={refreshAll}
+              className="p-2.5 sm:p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm dark:shadow-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+            >
+              <RefreshCw size={18} />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-red-100 dark:hover:bg-red-500/20 transition-all shadow-sm dark:shadow-none min-h-[44px] text-red-600 dark:text-red-400 font-bold text-xs sm:text-sm uppercase tracking-wider"
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline">Logout</span>
+            </motion.button>
+          </div>
         </header>
 
         {/* ── Tab Navigation ── */}
@@ -374,20 +320,38 @@ const AdminDashboard = () => {
         </nav>
 
         {/* ── Combined Stats Row ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-10">
-          {statCards.map((s, i) => (
-            <div
-              key={i}
-              className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-sm dark:shadow-none"
-            >
-              <div className={`flex justify-center mb-1.5 sm:mb-2 ${s.color}`}>{s.icon}</div>
-              <p className="font-black text-slate-900 dark:text-white" style={{ fontSize: "clamp(1.25rem, 3vw, 1.875rem)" }}>{s.value}</p>
-              <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">
-                {s.label}
-              </p>
-            </div>
-          ))}
-        </div>
+        <motion.div
+          layout
+          className={`mb-8 sm:mb-10 ${
+            activeTab === "hq"
+              ? "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
+              : "flex justify-center"
+          }`}
+        >
+          <AnimatePresence mode="popLayout">
+            {statCards
+              .filter((s) => s.tab === activeTab)
+              .map((s) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.3 }}
+                  key={s.label}
+                  className={`bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-sm dark:shadow-none ${
+                    activeTab !== "hq" ? "w-full max-w-sm" : ""
+                  }`}
+                >
+                  <div className={`flex justify-center mb-1.5 sm:mb-2 ${s.color}`}>{s.icon}</div>
+                  <p className="font-black text-slate-900 dark:text-white" style={{ fontSize: "clamp(1.25rem, 3vw, 1.875rem)" }}>{s.value}</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">
+                    {s.label}
+                  </p>
+                </motion.div>
+              ))}
+          </AnimatePresence>
+        </motion.div>
 
         {/* ════════════════ TAB CONTENT ════════════════ */}
 

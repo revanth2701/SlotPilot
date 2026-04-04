@@ -394,13 +394,13 @@ const ServiceSelection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {[
             {
               title: "Higher Education",
               desc: "Get guidance for studying abroad, university applications, and academic programs",
               icon: <GraduationCap className="w-8 h-8 text-primary-foreground" />,
-              items: ["University Selection", "Document Prep", "Scholarship Guidance", "Visa Assistance"],
+              items: ["University Selection", "Document Prep", "Scholarship Guidance", "Application Guidance", "Visa Assistance"],
               buttonText: "Apply for Higher Education",
               buttonIcon: <Building2 className="w-5 h-5 mr-2" />,
               route: "/higher-education"

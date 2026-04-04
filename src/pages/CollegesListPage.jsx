@@ -4,10 +4,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-const PLACEHOLDER_IMAGE = "https://via.placeholder.com/400x200?text=College+Image";
+// ── Country-name aliases ───────────────────────────────────────────────
+// Maps common variations to the canonical name stored in Supabase.
+const COUNTRY_ALIASES = {
+  "usa": "United States",
+  "us": "United States",
+  "united states of america": "United States",
+  "united states": "United States",
+  "uk": "United Kingdom",
+  "great britain": "United Kingdom",
+  "united kingdom": "United Kingdom",
+};
+
+/** Return the canonical country name (case-insensitive alias lookup). */
+const resolveCountry = (raw) => {
+  if (!raw) return "United States";
+  const key = String(raw).trim().toLowerCase();
+  return COUNTRY_ALIASES[key] || String(raw).trim();
+};
+
+// ── Default placeholder (inline SVG data-URI so it never 404s) ─────────
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='none'%3E%3Crect width='400' height='200' rx='12' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='16' fill='%2394a3b8'%3ECollege Image%3C/text%3E%3C/svg%3E";
 
 const getCollegeImageSources = (collegeName) => {
-  // ✅ fix: always return an array
+  // Always return an array
   if (!collegeName) return [PLACEHOLDER_IMAGE];
 
   const raw = String(collegeName).trim();
@@ -32,17 +53,18 @@ const CollegesListPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ take country from URL first, fallback to navigation state, then default
-  const country =
+  // ✅ Resolve country from URL → nav-state → default, with alias normalization
+  const country = resolveCountry(
     query.get("country") ||
     location.state?.country ||
-    "United States of America";
+    "United States"
+  );
 
   const [search, setSearch] = useState("");
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch colleges only if Country matches selected country
+  // ✅ Fetch colleges — try canonical name first, then common alternatives
   useEffect(() => {
     let mounted = true;
 
@@ -58,23 +80,34 @@ const CollegesListPage = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("CollegesList")
-        .select("*")
-        // ✅ case-insensitive exact match (no wildcards)
-        .ilike("Country", selected);
+      // Build a list of names to try (canonical + known alternatives)
+      const namesToTry = [selected];
+      if (selected === "United States") {
+        namesToTry.push("United States of America", "USA");
+      } else if (selected === "United Kingdom") {
+        namesToTry.push("UK", "Great Britain");
+      }
+
+      let results = [];
+      for (const name of namesToTry) {
+        const { data, error } = await supabase
+          .from("CollegesList")
+          .select("*")
+          .ilike("Country", name);
+
+        if (error) {
+          console.error("CollegesList fetch error:", error);
+          continue;
+        }
+        if (data && data.length > 0) {
+          results = data;
+          break; // found matching rows, stop trying alternatives
+        }
+      }
 
       if (!mounted) return;
 
-      if (error) {
-        console.error("CollegesList fetch error:", error);
-        setColleges([]);
-        setLoading(false);
-        return;
-      }
-
-      // ✅ if no matching rows, show none (and your UI can show a "no colleges" message)
-      setColleges(Array.isArray(data) ? data : []);
+      setColleges(Array.isArray(results) ? results : []);
       setLoading(false);
     };
 

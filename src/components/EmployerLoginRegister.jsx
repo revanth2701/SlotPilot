@@ -17,8 +17,7 @@ const EmployerLoginRegister = ({ onBack }) => {
   });
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [employerEmail, setEmployerEmail] = useState("");
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -53,21 +52,10 @@ const EmployerLoginRegister = ({ onBack }) => {
 
     setLoginError("");
     setLoginLoading(false);
-    setEmployerEmail(email);
-    setShowDashboard(true);
+    navigate("/admin/dashboard", { replace: true });
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setShowDashboard(false);
-    setEmployerEmail("");
-    setLoginData({ email: "", password: "" });
-  };
 
-  if (showDashboard) {
-    navigate("/admin/dashboard");
-    return null;
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-accent/20 transition-colors duration-300">

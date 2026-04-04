@@ -9,8 +9,8 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   MessageSquare, Plane, Home, ArrowLeft, Plus, X, Globe, Zap, Send,
   Loader2, Star, CheckCircle, DollarSign, Heart, Share2, Bookmark,
-  Search, FileText, HelpCircle, Gem, AlertTriangle, TrendingUp,
-  Users, Activity, Sparkles, Mail, Phone, User, RefreshCcw
+  Search, FileText, HelpCircle, Gem, AlertTriangle, ShieldCheck,
+  Sparkles, Mail, Phone, User, RefreshCcw
 } from "lucide-react";
 
 import MistakeAnalysis from "../components/MistakeAnalysis";
@@ -75,6 +75,13 @@ const SPATIAL_CSS = `
     animation: sp-live-ring 1.5s ease-out infinite;
   }
 
+  /* ── HORIZONTAL NAV BAR ── */
+  @keyframes sp-pill-glow {
+    0%,100% { box-shadow: 0 0 12px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08); }
+    50%     { box-shadow: 0 0 24px rgba(59,130,246,0.30), inset 0 1px 0 rgba(255,255,255,0.12); }
+  }
+  .sp-pill-active { animation: sp-pill-glow 2.5s ease-in-out infinite; }
+
   /* ── RED FLAG CHIP ── */
   @keyframes sp-flag-bob {
     0%,100% { transform: translateY(0); }
@@ -115,15 +122,8 @@ const SPATIAL_CSS = `
 `;
 
 /* ─────────────────────────────────────────────────────
-   MOCK DATA: Online Users
+   (Online Users section removed — sidebar removed)
    ───────────────────────────────────────────────────── */
-const MOCK_ONLINE_USERS = [
-  { id: 1, name: "Priya S.", initials: "PS", online: true },
-  { id: 2, name: "David M.", initials: "DM", online: true },
-  { id: 3, name: "Aisha K.", initials: "AK", online: false },
-  { id: 4, name: "James W.", initials: "JW", online: true },
-  { id: 5, name: "Li Chen", initials: "LC", online: false },
-];
 
 /* ─────────────────────────────────────────────────────
    POST TYPE CONFIG
@@ -380,9 +380,9 @@ const Communities = () => {
     });
 
   const tabs = [
-    { id: "experience", label: "Visa Intel", icon: Zap },
-    { id: "companion",  label: "Travel Net", icon: Plane },
-    { id: "accommodation", label: "Stays",   icon: Home },
+    { id: "experience",    label: "Visa Experience", icon: ShieldCheck },
+    { id: "companion",     label: "Travel",          icon: Plane },
+    { id: "accommodation", label: "Stay",            icon: Home },
   ];
 
   return (
@@ -396,72 +396,15 @@ const Communities = () => {
         <div className="absolute top-[40%] left-[50%] w-[35%] h-[35%] bg-emerald-400/[0.03] dark:bg-emerald-600/[0.03] rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen">
-
-        {/* ════════════════════════════════════════════
-            LEFT SIDEBAR — COMMAND STRIP
-           ════════════════════════════════════════════ */}
-        <aside className="hidden md:flex flex-col items-center py-8 gap-6 sticky top-0 h-screen z-30 w-[72px]
-          bg-white/60 dark:bg-[#0a0f1e]/60 backdrop-blur-xl border-r border-slate-200 dark:border-white/[0.04] transition-colors duration-500">
-          {/* Logo */}
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-blue-500/20 mb-2">
-            SP
-          </div>
-
-          {/* Nav Icons */}
-          {tabs.map((tab) => {
-            const TabIcon = tab.icon;
-            return (
-              <motion.div key={tab.id} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
-                onClick={() => setActiveTab(tab.id)} title={tab.label}
-                className={`w-[44px] h-[44px] flex items-center justify-center rounded-[14px] cursor-pointer relative transition-all duration-300
-                  ${activeTab === tab.id
-                    ? "bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 dark:border-blue-500/30 shadow-md shadow-blue-500/10"
-                    : "bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04] hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:border-blue-300 dark:hover:border-blue-500/20"
-                  }`}
-              >
-                <TabIcon size={18} className={activeTab === tab.id ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"} />
-                {activeTab === tab.id && (
-                  <motion.div layoutId="sidebarIndicator"
-                    className="absolute -left-[1px] top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-blue-500" />
-                )}
-              </motion.div>
-            );
-          })}
-
-          {/* Divider */}
-          <div className="w-6 h-px bg-slate-200 dark:bg-white/[0.06] my-1" />
-
-          {/* Live Users */}
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-[8px] text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest -rotate-90 mb-2 whitespace-nowrap">Live</p>
-            {MOCK_ONLINE_USERS.slice(0, 4).map(u => (
-              <div key={u.id} className="relative" title={u.name}>
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                  {u.initials}
-                </div>
-                {u.online && (
-                  <div className="sp-live-ring absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-50 dark:border-[#030712]" />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-auto">
-            <motion.div whileHover={{ scale: 1.08 }} title="Trending"
-              className="w-[44px] h-[44px] flex items-center justify-center rounded-[14px] cursor-pointer bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04] hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all">
-              <TrendingUp size={18} className="text-slate-400 dark:text-slate-500" />
-            </motion.div>
-          </div>
-        </aside>
+      <div className="relative z-10 flex flex-col min-h-screen">
 
         {/* ════════════════════════════════════════════
             MAIN CONTENT
            ════════════════════════════════════════════ */}
-        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
           {/* ── HEADER ── */}
-          <header className="flex justify-between items-center mb-8">
+          <header className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
                 className="p-2.5 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all shadow-sm dark:shadow-none">
@@ -474,21 +417,41 @@ const Communities = () => {
                 <p className="text-[9px] text-slate-400 dark:text-slate-600 tracking-[0.3em] font-bold uppercase">Intelligence Hub</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {MOCK_ONLINE_USERS.filter(u => u.online).slice(0, 3).map(u => (
-                  <div key={u.id} className="w-7 h-7 rounded-full bg-slate-100 dark:bg-white/[0.06] border-2 border-slate-50 dark:border-[#030712] flex items-center justify-center text-[9px] font-bold text-slate-500 dark:text-slate-400">
-                    {u.initials}
-                  </div>
-                ))}
-              </div>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                <Activity size={10} />
-                {MOCK_ONLINE_USERS.filter(u => u.online).length} online
-              </span>
-            </div>
           </header>
+
+          {/* ════════════════════════════════════════════
+              HORIZONTAL CATEGORY BAR
+             ════════════════════════════════════════════ */}
+          <nav className="flex flex-row items-center justify-start gap-3 sm:gap-4 overflow-x-auto pb-1 mb-8 scrollbar-none -mx-1 px-1">
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-400 min-h-[44px]
+                    backdrop-blur-xl border
+                    ${isActive
+                      ? "sp-pill-active bg-blue-500/15 dark:bg-blue-500/20 border-blue-400/40 dark:border-blue-400/50 text-blue-600 dark:text-blue-300 shadow-lg shadow-blue-500/10"
+                      : "bg-white/60 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:bg-blue-50/80 dark:hover:bg-blue-500/[0.08] hover:border-blue-300/50 dark:hover:border-blue-400/20 hover:text-blue-600 dark:hover:text-blue-300"
+                    }`}
+                >
+                  <TabIcon size={16} />
+                  <span>{tab.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activePill"
+                      className="absolute inset-0 rounded-full border-2 border-blue-400/30 dark:border-blue-400/40 pointer-events-none"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
+          </nav>
 
           {/* ── FLOATING COMMAND BAR ── */}
           <div className="sticky top-3 z-40 mb-8">
@@ -511,26 +474,9 @@ const Communities = () => {
             </div>
           </div>
 
-          {/* ── TAB SWITCHER (Mobile) ── */}
-          <nav className="flex md:hidden justify-center p-1 bg-white/70 dark:bg-white/[0.03] backdrop-blur-2xl border border-slate-200 dark:border-white/[0.06] rounded-2xl mb-8 max-w-fit mx-auto shadow-sm dark:shadow-none">
-            {tabs.map(tab => {
-              const TabIcon = tab.icon;
-              return (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-5 py-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition-all duration-500 ${
-                    activeTab === tab.id ? "text-white" : "text-slate-500 dark:text-slate-500"
-                  }`}>
-                  {activeTab === tab.id && (
-                    <motion.div layoutId="mobileTab" className="absolute inset-0 bg-blue-600/90 rounded-xl" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
-                  )}
-                  <span className="relative z-10"><TabIcon size={14} /></span>
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* (Mobile tab switcher removed — horizontal category bar above handles all breakpoints) */}
 
-          {/* ── SECTION HEADER ── */}
+          {/* ── SECTION HEADER (STATIC — anchored outside tab animation) ── */}
           <div className="flex items-center justify-between mb-6 px-1">
             <div className="flex items-center gap-3">
               {(() => {
@@ -553,21 +499,28 @@ const Communities = () => {
             </motion.button>
           </div>
 
-          {/* ══════════════════════════════════════════
-              POSTS FEED
-             ══════════════════════════════════════════ */}
-          <div className="space-y-5">
-            <AnimatePresence mode="popLayout">
-              {loading ? (
-                [1, 2, 3].map(n => (
-                  <div key={n} className="h-48 rounded-[1.75rem] animate-pulse bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04]" />
-                ))
-              ) : filteredPosts.length === 0 ? (
-                <div className="text-center py-20">
-                  <Sparkles size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                  <p className="text-slate-500 font-semibold">No posts yet</p>
-                  <p className="text-slate-400 dark:text-slate-700 text-xs mt-1">Be the first to share intelligence</p>
-                </div>
+          {/* ── CONTENT AREA (stable height prevents footer jump) ── */}
+          <div className="min-h-[70vh]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* ── POSTS FEED ── */}
+              <div className="space-y-5">
+                {loading ? (
+                  [1, 2, 3].map(n => (
+                    <div key={n} className="h-48 rounded-[1.75rem] animate-pulse bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04]" />
+                  ))
+                ) : filteredPosts.length === 0 ? (
+                  <div className="w-full p-10 rounded-[1.75rem] bg-white/70 dark:bg-white/[0.025] backdrop-blur-[15px] border border-slate-200/80 dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center min-h-[400px]">
+                    <Sparkles size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
+                    <p className="text-slate-500 font-semibold">No posts yet</p>
+                    <p className="text-slate-400 dark:text-slate-700 text-xs mt-1">Be the first to share intelligence</p>
+                  </div>
               ) : (
                 filteredPosts.map((post, index) => {
                   const style = POST_TYPE_STYLES[post.type] || POST_TYPE_STYLES.experience;
@@ -730,7 +683,9 @@ const Communities = () => {
                   );
                 })
               )}
-            </AnimatePresence>
+              </div>
+            </motion.div>
+          </AnimatePresence>
           </div>
         </main>
       </div>
