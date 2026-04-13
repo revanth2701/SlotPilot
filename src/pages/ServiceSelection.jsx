@@ -448,8 +448,8 @@ const ServiceSelection = () => {
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="flex flex-col flex-grow space-y-6 relative z-10">
-                <div className="space-y-3 text-sm">
+              <CardContent className="flex flex-col flex-grow relative z-10">
+                <div className="space-y-3 text-sm flex-grow">
                   {service.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)]" />
@@ -458,7 +458,7 @@ const ServiceSelection = () => {
                   ))}
                 </div>
 
-                <div className="mt-auto">
+                <div className="mt-6">
                   <Button
                     onClick={() => navigate(service.route)}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-7 rounded-xl shadow-lg transform active:scale-95 transition-all"

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,26 +7,32 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import slotpilotLogo from "@/assets/slotpilot-logo.png";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  FileText, 
-  Calendar, 
-  Upload, 
+import {
+  User,
+  Mail,
+  Phone,
+  FileText,
+  Calendar,
+  Upload,
   Download,
   CheckCircle,
   Clock,
   X,
   LogOut,
   GraduationCap,
-  Pencil
+  Pencil,
+  Shield,
+  BookOpen,
+  Award,
+  ScrollText,
+  Briefcase,
+  Star
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const StudentDashboardNew = ({ onBack }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [personalDetails, setPersonalDetails] = useState({
     firstName: "",
@@ -63,6 +70,7 @@ const StudentDashboardNew = ({ onBack }) => {
   const [validationError, setValidationError] = useState(null);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
   const [selectedDocumentTypes, setSelectedDocumentTypes] = useState([]);
+  const [uploadSuccessInfo, setUploadSuccessInfo] = useState(null); // { docName, replaced }
   const { toast } = useToast();
 
   useEffect(() => {
@@ -235,8 +243,7 @@ const StudentDashboardNew = ({ onBack }) => {
         toast({ 
           title: "Documents Loaded", 
           description: `Found ${totalDocs} previously uploaded document(s).`,
-          duration: 3000,
-          className: "bg-blue-50 border-blue-200"
+          duration: 3000
         });
       }
     } catch (error) {
@@ -501,15 +508,10 @@ const StudentDashboardNew = ({ onBack }) => {
       
       // Set successful upload status
       setUploadStatus(prev => ({ ...prev, [documentType]: 'success' }));
-      
-      toast({ 
-        title: replacedExisting ? "✅ File Replaced" : "✅ Upload Successful!", 
-        description: replacedExisting 
-          ? `${documentType} replaced successfully in secure storage.` 
-          : `${documentType} uploaded successfully to secure storage!`,
-        duration: 5000,
-        className: "bg-green-50 border-green-200"
-      });
+
+      // Show dark-glass upload success notification
+      setUploadSuccessInfo({ docName: documentType, replaced: replacedExisting });
+      setTimeout(() => setUploadSuccessInfo(null), 4000);
 
       console.log(`Upload successful for ${documentType}:`, newDocument);
 
@@ -659,509 +661,546 @@ const StudentDashboardNew = ({ onBack }) => {
     toast({ 
       title: "Re-upload Mode Enabled", 
       description: `You can now re-upload: ${selectedDocumentTypes.length} document type(s).`,
-      duration: 3000,
-      className: "bg-blue-50 border-blue-200"
+      duration: 3000
     });
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    onBack();
+    if (typeof onBack === "function") {
+      onBack();
+    } else {
+      navigate("/student-login", { replace: true });
+    }
   };
+
+  // ── Computed display values ───────────────────────────────────────────────
+  const uploadedCount = Object.values(documentsByType).filter(arr => arr.length > 0).length;
+  const profileFields = ['firstName','lastName','phone','dateOfBirth','address','passportNumber'];
+  const profilePercent = Math.round(profileFields.filter(f => personalDetails[f]?.trim()).length / profileFields.length * 100);
+  const initials = [personalDetails.firstName?.[0], personalDetails.lastName?.[0]].filter(Boolean).join('').toUpperCase() || user?.email?.[0]?.toUpperCase() || '?';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%)' }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-indigo-500/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 border-r-indigo-400/60 border-b-transparent border-l-transparent animate-spin" />
+            <div className="absolute inset-3 rounded-full bg-indigo-500/10 flex items-center justify-center">
+              <GraduationCap className="w-7 h-7 text-indigo-400" />
+            </div>
+          </div>
+          <p className="text-white font-bold text-base">Loading your dashboard…</p>
+          <p className="text-slate-400 text-sm mt-1">Fetching your data securely</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary relative">
-      {/* Header */}
-      <header className="bg-card/80 backdrop-blur-sm border-b">
-        <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="sdn-root min-h-screen" style={{ background: 'linear-gradient(135deg,#06001a 0%,#130038 30%,#0d1b4b 65%,#040e28 100%)' }}>
+      <style>{`
+        @keyframes sdn-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes sdn-pop{0%{opacity:0;transform:scale(0.85)}100%{opacity:1;transform:scale(1)}}
+        @keyframes sdn-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-24px) scale(1.05)}}
+        @keyframes sdn-pulse-ring{0%{transform:scale(0.95);opacity:.7}70%{transform:scale(1.15);opacity:0}100%{opacity:0}}
+        .sdn-rise{animation:sdn-rise 0.55s cubic-bezier(0.22,1,0.36,1) both}
+        .sdn-pop{animation:sdn-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both}
+        .sdn-glass{background:rgba(255,255,255,0.055);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+        .sdn-glass-deep{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+        .sdn-root input:not([type=file]),.sdn-root input:not([type=file]):disabled{background:rgba(255,255,255,0.07)!important;border-color:rgba(255,255,255,0.13)!important;color:white!important}
+        .sdn-root input:not([type=file])::placeholder{color:rgba(148,163,184,0.45)!important}
+        .sdn-root input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.45)}
+      `}</style>
+      {/* Decorative orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute -top-48 -left-48 w-[700px] h-[700px] rounded-full" style={{background:'radial-gradient(circle,rgba(139,92,246,0.35) 0%,transparent 68%)',animation:'sdn-float 16s ease-in-out infinite'}} />
+        <div className="absolute top-1/3 -right-48 w-[580px] h-[580px] rounded-full" style={{background:'radial-gradient(circle,rgba(37,99,235,0.28) 0%,transparent 68%)',animation:'sdn-float 20s ease-in-out infinite',animationDelay:'-7s'}} />
+        <div className="absolute -bottom-48 left-1/3 w-[520px] h-[520px] rounded-full" style={{background:'radial-gradient(circle,rgba(8,145,178,0.22) 0%,transparent 68%)',animation:'sdn-float 25s ease-in-out infinite',animationDelay:'-12s'}} />
+        <div className="absolute top-2/3 left-1/4 w-[300px] h-[300px] rounded-full" style={{background:'radial-gradient(circle,rgba(236,72,153,0.15) 0%,transparent 68%)',animation:'sdn-float 19s ease-in-out infinite',animationDelay:'-4s'}} />
+      </div>
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-40 shadow-md" style={{background:'linear-gradient(90deg,#4f46e5 0%,#2563eb 55%,#0891b2 100%)'}}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <img src={slotpilotLogo} alt="Logo" className="h-10 w-auto" />
-              <span className="text-xl font-bold text-primary ml-1">
-                SlotPilot
-              </span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-0 select-none">
+                <span className="text-xl font-black tracking-tight" style={{
+                  background:'linear-gradient(135deg,#ffffff 0%,#c7d2fe 40%,#93c5fd 100%)',
+                  WebkitBackgroundClip:'text',
+                  WebkitTextFillColor:'transparent',
+                  backgroundClip:'text',
+                  letterSpacing:'-0.03em'
+                }}>Slot</span>
+                <span className="text-xl font-black tracking-tight" style={{
+                  background:'linear-gradient(135deg,#67e8f9 0%,#38bdf8 50%,#818cf8 100%)',
+                  WebkitBackgroundClip:'text',
+                  WebkitTextFillColor:'transparent',
+                  backgroundClip:'text',
+                  letterSpacing:'-0.03em'
+                }}>Pilot</span>
+                <span className="ml-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white/40 self-end mb-0.5"></span>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {personalDetails.firstName || user?.email}!
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:block text-blue-100/80 text-sm font-medium">
+                {personalDetails.firstName ? `Hey, ${personalDetails.firstName}!` : user?.email}
               </span>
-              <Button onClick={handleLogout} variant="ghost" size="sm">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+              <div className="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                {initials}
+              </div>
+              <Button onClick={handleLogout} size="sm" className="bg-white/15 hover:bg-white/25 text-white border border-white/20 rounded-xl gap-1.5 text-sm font-semibold">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-full sm:max-w-6xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            Welcome, {personalDetails.firstName || 'Student'}! 🎓
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* \u2500\u2500 Welcome \u2500\u2500 */}
+        <div className="mb-6 sdn-rise" style={{animationDelay:'0.05s'}}>
+          <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">
+            {greeting}, {personalDetails.firstName || 'Student'}!
           </h1>
-          <p className="text-red-600 dark:text-red-400 font-medium mb-2">
-            Complete your profile and upload required documents to proceed with your application.
-          </p>
+          <p className="text-slate-400 text-sm">Complete your profile and upload required documents to submit your application.</p>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-full sm:max-w-md">
-            <TabsTrigger value="profile">Personal Details</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+        {/* \u2500\u2500 Stat chips \u2500\u2500 */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-7 sdn-rise" style={{animationDelay:'0.08s'}}>
+          <div className="rounded-2xl p-4 sdn-glass border border-white/10 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Profile</span>
+              <div className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </div>
+            <p className="text-xl sm:text-2xl font-black text-white">{profilePercent}<span className="text-xs text-slate-400 font-semibold">%</span></p>
+            <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-indigo-500 transition-all duration-700" style={{width:`${profilePercent}%`}} />
+            </div>
+          </div>
+          <div className="rounded-2xl p-4 sdn-glass border border-white/10 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Docs</span>
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <p className="text-xl sm:text-2xl font-black text-white">{uploadedCount}<span className="text-xs text-slate-400 font-semibold">/9</span></p>
+            <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-emerald-500 transition-all duration-700" style={{width:`${Math.round(uploadedCount/9*100)}%`}} />
+            </div>
+          </div>
+          <div className="rounded-2xl p-4 sdn-glass border border-white/10 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${applicationSubmitted ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-amber-100 dark:bg-amber-900/40'}`}>
+                {applicationSubmitted ? <CheckCircle className="w-3.5 h-3.5 text-blue-500" /> : <Clock className="w-3.5 h-3.5 text-amber-500" />}
+              </div>
+            </div>
+            <p className={`text-sm font-black ${applicationSubmitted ? 'text-blue-300' : 'text-amber-300'}`}>
+              {applicationSubmitted ? 'Submitted' : 'In Progress'}
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">{applicationSubmitted ? 'Under review' : 'Pending docs'}</p>
+          </div>
+        </div>
+
+        {/* \u2500\u2500 Tabs \u2500\u2500 */}
+        <Tabs defaultValue="profile" className="space-y-5">
+          <TabsList className="grid grid-cols-2 w-full max-w-xs sdn-glass border border-white/10 rounded-2xl p-1 shadow-sm sdn-rise" style={{animationDelay:'0.12s'}}>
+            <TabsTrigger value="profile" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow font-semibold text-sm flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" />Profile
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow font-semibold text-sm flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5" />Documents
+            </TabsTrigger>
           </TabsList>
 
+          {/* \u2500\u2500 Profile Tab \u2500\u2500 */}
           <TabsContent value="profile">
-            <Card className="shadow-elegant overflow-hidden">
-              <CardHeader>
+            <Card className="rounded-3xl border border-white/10 shadow-lg overflow-hidden sdn-rise" style={{background:'rgba(255,255,255,0.05)',backdropFilter:'blur(24px)',animationDelay:'0.15s'}}>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Personal Information
-                  </CardTitle>
+                  <div>
+                    <CardTitle className="text-base font-black text-white">Personal Information</CardTitle>
+                    <CardDescription className="text-xs mt-0.5">Your details for the application process</CardDescription>
+                  </div>
                   {!isEditMode && personalDetailsSaved && (
-                    <Button 
-                      onClick={() => setIsEditMode(true)}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Edit
+                    <Button onClick={() => setIsEditMode(true)} variant="outline" size="sm"
+                      className="rounded-xl border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 gap-1.5 text-xs font-bold bg-transparent">
+                      <Pencil className="h-3.5 w-3.5" />Edit
                     </Button>
                   )}
                 </div>
-                <CardDescription>
-                  Please provide your personal details for the application process.
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 bg-card text-card-foreground">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={personalDetails.firstName}
-                      onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
-                      placeholder="Enter your first name"
-                      disabled={!isEditMode}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={personalDetails.lastName}
-                      onChange={(e) => handlePersonalDetailsChange('lastName', e.target.value)}
-                      placeholder="Enter your last name"
-                      disabled={!isEditMode}
-                    />
-                  </div>
-                </div>
+              <CardContent className="space-y-4 pt-0">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={personalDetails.email}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      value={personalDetails.phone}
-                      onChange={(e) => handlePersonalDetailsChange('phone', e.target.value)}
-                      placeholder="Enter your phone number"
-                      disabled={!isEditMode}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={personalDetails.dateOfBirth}
-                    onChange={(e) => handlePersonalDetailsChange('dateOfBirth', e.target.value)}
-                    disabled={!isEditMode}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={personalDetails.address}
-                    onChange={(e) => handlePersonalDetailsChange('address', e.target.value)}
-                    placeholder="Enter your full address"
-                    disabled={!isEditMode}
-                  />
-                </div>
-
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Passport Information
-                  </h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="passportNumber">Passport Number</Label>
-                    <Input
-                      id="passportNumber"
-                      value={personalDetails.passportNumber}
-                      onChange={(e) => handlePersonalDetailsChange('passportNumber', e.target.value)}
-                      placeholder="Enter your passport number"
-                      disabled={!isEditMode}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="passportIssuedDate">Passport Issued Date</Label>
-                      <Input
-                        id="passportIssuedDate"
-                        type="date"
-                        value={personalDetails.passportIssuedDate}
-                        onChange={(e) => handlePersonalDetailsChange('passportIssuedDate', e.target.value)}
-                        disabled={!isEditMode}
-                      />
+                {/* Basic Info */}
+                <div className="rounded-2xl overflow-hidden border border-white/10" style={{background:'rgba(99,102,241,0.07)'}}>
+                  <div className="px-4 py-2.5 bg-indigo-500/15 border-b border-indigo-500/20 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-500/25 flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-indigo-300" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="passportExpiryDate">Passport Expiry Date</Label>
-                      <Input
-                        id="passportExpiryDate"
-                        type="date"
-                        value={personalDetails.passportExpiryDate}
-                        onChange={(e) => handlePersonalDetailsChange('passportExpiryDate', e.target.value)}
-                        disabled={!isEditMode}
-                      />
+                    <span className="text-xs font-black text-indigo-300 uppercase tracking-wide">Basic Information</span>
+                  </div>
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="firstName" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">First Name</Label>
+                      <Input id="firstName" value={personalDetails.firstName} onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)} placeholder="First name" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="lastName" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Name</Label>
+                      <Input id="lastName" value={personalDetails.lastName} onChange={(e) => handlePersonalDetailsChange('lastName', e.target.value)} placeholder="Last name" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="email" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email</Label>
+                      <Input id="email" type="email" value={personalDetails.email} disabled className="rounded-xl h-9 text-sm bg-slate-50 dark:bg-slate-800/40" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="phone" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</Label>
+                      <Input id="phone" value={personalDetails.phone} onChange={(e) => handlePersonalDetailsChange('phone', e.target.value)} placeholder="Phone number" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="dateOfBirth" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date of Birth</Label>
+                      <Input id="dateOfBirth" type="date" value={personalDetails.dateOfBirth} onChange={(e) => handlePersonalDetailsChange('dateOfBirth', e.target.value)} disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="address" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Address</Label>
+                      <Input id="address" value={personalDetails.address} onChange={(e) => handlePersonalDetailsChange('address', e.target.value)} placeholder="Full address" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
                     </div>
                   </div>
                 </div>
 
-                <Separator />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
-                    <Input
-                      id="emergencyContact"
-                      value={personalDetails.emergencyContact}
-                      onChange={(e) => handlePersonalDetailsChange('emergencyContact', e.target.value)}
-                      placeholder="Emergency contact person"
-                      disabled={!isEditMode}
-                    />
+                {/* Passport */}
+                <div className="rounded-2xl overflow-hidden border border-white/10" style={{background:'rgba(245,158,11,0.06)'}}>
+                  <div className="px-4 py-2.5 bg-amber-500/15 border-b border-amber-500/20 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-amber-500/25 flex items-center justify-center">
+                      <Shield className="w-3.5 h-3.5 text-amber-300" />
+                    </div>
+                    <span className="text-xs font-black text-amber-300 uppercase tracking-wide">Passport Information</span>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
-                    <Input
-                      id="emergencyPhone"
-                      value={personalDetails.emergencyPhone}
-                      onChange={(e) => handlePersonalDetailsChange('emergencyPhone', e.target.value)}
-                      placeholder="Emergency contact phone"
-                      disabled={!isEditMode}
-                    />
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="md:col-span-2 space-y-1">
+                      <Label htmlFor="passportNumber" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passport Number</Label>
+                      <Input id="passportNumber" value={personalDetails.passportNumber} onChange={(e) => handlePersonalDetailsChange('passportNumber', e.target.value)} placeholder="Passport number" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="passportIssuedDate" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Issued Date</Label>
+                      <Input id="passportIssuedDate" type="date" value={personalDetails.passportIssuedDate} onChange={(e) => handlePersonalDetailsChange('passportIssuedDate', e.target.value)} disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="passportExpiryDate" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</Label>
+                      <Input id="passportExpiryDate" type="date" value={personalDetails.passportExpiryDate} onChange={(e) => handlePersonalDetailsChange('passportExpiryDate', e.target.value)} disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
                   </div>
                 </div>
 
-                {isEditMode ? (
-                  <div className="pt-4 flex justify-center overflow-hidden rounded-md">
-                    <Button 
-                      onClick={savePersonalDetails} 
-                      className="w-full transition-transform duration-200 active:scale-95" 
-                      variant="hero"
-                      disabled={saving}
-                    >
-                      {saving ? (
-                        <div className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                          Saving...
-                        </div>
-                      ) : (
-                        'Save Personal Details'
-                      )}
-                    </Button>
+                {/* Emergency Contact */}
+                <div className="rounded-2xl overflow-hidden border border-white/10" style={{background:'rgba(244,63,94,0.06)'}}>
+                  <div className="px-4 py-2.5 bg-rose-500/15 border-b border-rose-500/20 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-rose-500/25 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-rose-300" />
+                    </div>
+                    <span className="text-xs font-black text-rose-300 uppercase tracking-wide">Emergency Contact</span>
                   </div>
-                ) : null}
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="emergencyContact" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Name</Label>
+                      <Input id="emergencyContact" value={personalDetails.emergencyContact} onChange={(e) => handlePersonalDetailsChange('emergencyContact', e.target.value)} placeholder="Emergency contact name" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="emergencyPhone" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</Label>
+                      <Input id="emergencyPhone" value={personalDetails.emergencyPhone} onChange={(e) => handlePersonalDetailsChange('emergencyPhone', e.target.value)} placeholder="Emergency phone" disabled={!isEditMode} className="rounded-xl h-9 text-sm" />
+                    </div>
+                  </div>
+                </div>
+
+                {isEditMode && (
+                  <Button onClick={savePersonalDetails} disabled={saving}
+                    className="w-full h-12 rounded-2xl font-black text-base shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98]"
+                    style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
+                    {saving ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        Saving\u2026
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        Save Personal Details
+                      </div>
+                    )}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* \u2500\u2500 Documents Tab \u2500\u2500 */}
           <TabsContent value="documents">
-            <div className="space-y-6">
-              <Card className="shadow-elegant overflow-hidden">
-                 <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                     <Upload className="h-5 w-5" />
-                     Document Upload
-                   </CardTitle>
-                   <CardDescription>
-                     Upload the required documents for your application. All documents should be in PDF format.
-                   </CardDescription>
-                   
-                   {/* Show Edit Documents button when application is submitted but not in edit mode */}
-                   {applicationSubmitted && !isEditMode && (
-                     <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-lg p-4">
-                       <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-2">
-                           <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                           <span className="text-green-800 dark:text-green-300 font-medium">Application Submitted Successfully</span>
-                         </div>
-                         <Button 
-                           onClick={handleEditDocuments}
-                           variant="outline"
-                           size="sm"
-                           className="border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/20"
-                         >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Re-upload Documents
-                         </Button>
-                       </div>
-                       <p className="text-green-700 text-sm mt-2">
-                         Your documents have been successfully submitted. Click "Edit Documents" to modify them.
-                       </p>
-                     </div>
-                   )}
-                 </CardHeader>
-                 
-                 {/* Validation Error Display */}
-                 {validationError && validationError.length > 0 && (
-                   <div className="mx-6 mb-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-lg">
-                     <div className="flex items-center gap-2 mb-2">
-                       <X className="h-5 w-5 text-red-600 dark:text-red-400" />
-                       <h4 className="text-red-800 dark:text-red-300 font-semibold">Missing Required Documents</h4>
-                     </div>
-                     <p className="text-red-700 text-sm mb-3">
-                       Please upload the following documents to submit your application:
-                     </p>
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                       {validationError.map((doc, index) => (
-                         <div key={index} className="flex items-center gap-2 text-red-700 dark:text-red-400 text-sm">
-                           <div className="w-2 h-2 bg-red-600 dark:bg-red-500 rounded-full"></div>
-                           <span>{doc.label}</span>
-                         </div>
-                       ))}
-                     </div>
-                     <Button 
-                       onClick={() => setValidationError(null)}
-                       variant="ghost" 
-                       size="sm" 
-                       className="mt-3 text-red-600 hover:text-red-800 h-auto p-1"
-                     >
-                       <X className="h-4 w-4 mr-1" />
-                       Dismiss
-                     </Button>
-                   </div>
-                 )}
-                 
-                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {[
-                      { id: 'passport', label: 'Passport', icon: FileText },
-                      { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
-                      { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
-                      { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
-                      { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                      { id: 'cv', label: 'CV/Resume', icon: FileText },
-                      { id: 'lor1', label: 'Letter of Recommendation 1', icon: FileText },
-                      { id: 'lor2', label: 'Letter of Recommendation 2', icon: FileText },
-                      { id: 'lor3', label: 'Letter of Recommendation 3', icon: FileText }
-                      ].map((docType) => (
-                        <div key={docType.id} className="space-y-3">
-                          <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
-                            validationError && validationError.some(err => err.id === docType.id)
-                              ? 'border-red-400 bg-red-50 dark:bg-red-950/20'
-                              : uploadStatus[docType.label] === 'uploading' 
-                              ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
-                              : 'border-muted-foreground/25 hover:border-primary/50'
-                          }`}>
-                           <docType.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                           <h3 className="font-medium mb-2">{docType.label}</h3>
-                           
-                            <input
-                             type="file"
-                             accept=".pdf,.jpg,.png,.jpeg"
-                             onChange={(e) => handleFileUpload(e, docType.label)}
-                             className="hidden"
-                             id={`upload-${docType.id}`}
-                             disabled={uploading[docType.label] || (applicationSubmitted && !isEditMode)}
-                           />
-                            <Label
-                             htmlFor={`upload-${docType.id}`}
-                             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-all ${
-                                uploading[docType.label] || (applicationSubmitted && !isEditMode)
-                                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
-                                  : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-                               }`}
-                           >
-                              {uploading[docType.label] ? (
-                               <>
-                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                                 Uploading...
-                               </>
-                              ) : (
-                               <>
-                                 <Upload className="h-4 w-4 mr-2" />
-                                 Upload
-                               </>
-                              )}
-                           </Label>
-                         </div>
-                         
-                           {documentsByType[docType.id] && documentsByType[docType.id].length > 0 && (
-                             <div className="mt-3">
-                               {documentsByType[docType.id].slice(0, 1).map((doc) => (
-                                  <div key={doc.id} className="flex items-center justify-between p-3 border border-green-400 dark:border-green-800 bg-green-50 dark:bg-green-950/20 rounded-md">
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-semibold truncate text-green-800 dark:text-green-300">
-                                        {doc.name}
-                                      </p>
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleDownloadDocument(doc)}
-                                      className="h-8 w-8 p-0 text-green-700 dark:text-green-400"
-                                    >
-                                      <Download className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                               ))}
-                             </div>
-                           )}
-                       </div>
-                      ))}
+            <div className="space-y-4">
+
+              {/* Progress card */}
+              <div className="rounded-2xl p-5 sdn-glass border border-white/10 shadow-sm sdn-rise" style={{animationDelay:'0.15s'}}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="font-black text-sm text-white">Upload Progress</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{uploadedCount} of 9 documents ready</p>
                   </div>
-                  
-                  <Separator className="my-6" />
-                  
-                  <div className="text-center overflow-hidden rounded-md">
-                    <Button 
-                      size="lg" 
-                      className="px-8 py-3 text-lg font-semibold shadow-lg transition-transform active:scale-95"
-                      onClick={handleSubmitApplication}
-                    >
-                      <CheckCircle className="h-5 w-5 mr-2" />
-                      Submit Application
+                  <span className="text-2xl font-black" style={{color: uploadedCount === 9 ? '#10b981' : '#6366f1'}}>
+                    {Math.round(uploadedCount/9*100)}%
+                  </span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-700" style={{width:`${Math.round(uploadedCount/9*100)}%`,background:'linear-gradient(90deg,#6366f1,#2563eb,#06b6d4)'}} />
+                </div>
+                {applicationSubmitted && !isEditMode && (
+                  <div className="mt-4 flex items-center justify-between p-3 rounded-xl bg-green-500/10 border border-green-500/25">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-xs font-bold text-green-300">Application submitted successfully</span>
+                    </div>
+                    <Button onClick={handleEditDocuments} variant="outline" size="sm"
+                      className="rounded-xl text-[11px] border-green-500/40 text-green-300 hover:bg-green-500/10 h-7 px-2.5 bg-transparent">
+                      <Upload className="h-3 w-3 mr-1" />Re-upload
                     </Button>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Review all uploaded documents before final submission
-                    </p>
                   </div>
-                </CardContent>
-                </Card>
+                )}
+              </div>
+
+              {/* Validation error */}
+              {validationError && validationError.length > 0 && (
+                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/25">
+                  <div className="flex items-center gap-2 mb-2">
+                    <X className="h-4 w-4 text-red-400" />
+                    <h4 className="text-red-300 font-black text-xs uppercase tracking-wide">Missing required documents</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 mb-3">
+                    {validationError.map((doc, index) => (
+                      <div key={index} className="flex items-center gap-1.5 text-red-300 text-xs font-semibold">
+                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
+                        {doc.label}
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={() => setValidationError(null)} className="text-xs text-red-400 hover:text-red-200 font-bold flex items-center gap-0.5">
+                    <X className="h-3 w-3" />Dismiss
+                  </button>
+                </div>
+              )}
+
+              {/* Document cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sdn-rise" style={{animationDelay:'0.2s'}}>
+                {[
+                  { id: 'passport',    label: 'Passport',                       Icon: Shield,        grad: ['#4f46e5','#6366f1'], bg: 'rgba(99,102,241,0.25)' },
+                  { id: 'graduation',  label: 'Graduation Certificate',         Icon: GraduationCap, grad: ['#2563eb','#3b82f6'], bg: 'rgba(37,99,235,0.25)' },
+                  { id: 'transcripts', label: 'Academic Transcripts',           Icon: BookOpen,      grad: ['#0891b2','#06b6d4'], bg: 'rgba(8,145,178,0.25)' },
+                  { id: 'ielts',       label: 'IELTS/TOEFL Score',             Icon: Award,         grad: ['#059669','#10b981'], bg: 'rgba(5,150,105,0.25)' },
+                  { id: 'sop',         label: 'Statement of Purpose',           Icon: ScrollText,    grad: ['#7c3aed','#8b5cf6'], bg: 'rgba(124,58,237,0.25)' },
+                  { id: 'cv',          label: 'CV/Resume',                      Icon: Briefcase,     grad: ['#d97706','#f59e0b'], bg: 'rgba(217,119,6,0.25)' },
+                  { id: 'lor1',        label: 'Letter of Recommendation 1',     Icon: Star,          grad: ['#e11d48','#f43f5e'], bg: 'rgba(225,29,72,0.25)' },
+                  { id: 'lor2',        label: 'Letter of Recommendation 2',     Icon: Star,          grad: ['#e11d48','#f43f5e'], bg: 'rgba(225,29,72,0.25)' },
+                  { id: 'lor3',        label: 'Letter of Recommendation 3',     Icon: Star,          grad: ['#e11d48','#f43f5e'], bg: 'rgba(225,29,72,0.25)' },
+                ].map((docType) => {
+                  const uploaded = documentsByType[docType.id]?.length > 0;
+                  const isUploading = uploading[docType.label];
+                  const isMissing = validationError?.some(err => err.id === docType.id);
+                  const isDisabled = isUploading || (applicationSubmitted && !isEditMode);
+                  const DocIcon = docType.Icon;
+                  return (
+                    <div key={docType.id}
+                      className="flex flex-col rounded-2xl overflow-hidden transition-all duration-250 backdrop-blur-sm"
+                      style={{
+                        background: 'rgba(255,255,255,0.055)',
+                        border: isMissing ? '1.5px solid rgba(252,165,165,0.7)' : uploaded ? '1.5px solid rgba(134,239,172,0.65)' : '1.5px solid rgba(255,255,255,0.1)',
+                        boxShadow: uploaded ? '0 4px 20px rgba(16,185,129,0.15)' : '0 2px 12px rgba(0,0,0,0.25)'
+                      }}
+                    >
+                      <div className="h-[5px]" style={{background:`linear-gradient(90deg,${docType.grad[0]},${docType.grad[1]})`}} />
+                      <div className="flex items-center gap-4 p-5">
+                        <div className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center" style={{background:docType.bg}}>
+                          <DocIcon className="w-7 h-7" style={{color:docType.grad[0]}} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-black text-slate-100 leading-tight">{docType.label}</p>
+                          {uploaded ? (
+                            <div className="flex items-center gap-1 mt-1">
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                              <span className="text-xs text-emerald-400 font-semibold truncate">{documentsByType[docType.id][0].name}</span>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-1">{isMissing ? '\u26A0 Required' : 'Not uploaded'}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2 items-end flex-shrink-0">
+                          {uploaded && (
+                            <button onClick={() => handleDownloadDocument(documentsByType[docType.id][0])}
+                              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 hover:bg-emerald-500/20 transition-colors"
+                              title="Download">
+                              <Download className="w-4 h-4 text-slate-300" />
+                            </button>
+                          )}
+                          <input type="file" accept=".pdf,.jpg,.png,.jpeg"
+                            onChange={(e) => handleFileUpload(e, docType.label)}
+                            className="hidden" id={`upload-${docType.id}`} disabled={isDisabled} />
+                          <Label htmlFor={`upload-${docType.id}`}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+                              isDisabled ? 'bg-white/10 text-slate-500 cursor-not-allowed' : 'text-white cursor-pointer active:scale-95'
+                            }`}
+                            style={!isDisabled ? {background:`linear-gradient(135deg,${docType.grad[0]},${docType.grad[1]})`} : {}}
+                          >
+                            {isUploading
+                              ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />\u2026</>
+                              : <><Upload className="w-3.5 h-3.5" />{uploaded ? 'Replace' : 'Upload'}</>
+                            }
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Submit */}
+              <div className="pt-2 sdn-rise" style={{animationDelay:'0.25s'}}>
+                <Button onClick={handleSubmitApplication} size="lg"
+                  className="w-full h-16 rounded-2xl font-black text-lg shadow-2xl shadow-indigo-500/30 transition-all active:scale-[0.98]"
+                  style={{background:'linear-gradient(135deg,#4f46e5 0%,#2563eb 55%,#0891b2 100%)'}}>
+                  <CheckCircle className="h-6 w-6 mr-2.5" />
+                  Submit Application
+                </Button>
+                <p className="text-center text-xs text-slate-400 mt-2">Review all uploads before final submission</p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Success Message Overlay */}
+      {/* \u2500\u2500 Save success overlay \u2500\u2500 */}
       {showSuccessMessage && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-full sm:max-w-md mx-4 text-center">
-            <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Success!</h3>
-            <p className="text-muted-foreground">
-              Your personal details have been saved successfully.
-            </p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="sdn-pop rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-white/10" style={{background:'rgba(15,10,40,0.85)',backdropFilter:'blur(30px)'}}>
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="absolute inset-0 rounded-full bg-green-400/20" style={{animation:'sdn-pulse-ring 2s ease-out infinite'}} />
+              <div className="relative w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-green-400" />
+              </div>
+            </div>
+            <h3 className="text-lg font-black text-white mb-1">Details Saved!</h3>
+            <p className="text-slate-300 text-sm">Your personal details have been saved successfully.</p>
           </div>
         </div>
       )}
 
-      {/* Application Submitted Success Popup */}
+      {/* \u2500\u2500 Application submitted popup \u2500\u2500 */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-card p-8 rounded-lg shadow-elegant max-w-full sm:max-w-md mx-4 text-center relative">
-            <button
-              onClick={() => setShowSuccessPopup(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none"
-              title="Close"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="sdn-pop rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-white/10 relative" style={{background:'rgba(15,10,40,0.88)',backdropFilter:'blur(30px)'}}>
+            <button onClick={() => setShowSuccessPopup(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:bg-white/20 transition-colors">
+              <X className="w-4 h-4" />
             </button>
-            <CheckCircle className="h-20 w-20 text-green-600 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold mb-4 text-green-700 dark:text-green-400">Application Submitted! 🎉</h2>
-            <Button onClick={() => setShowSuccessPopup(false)} className="mt-4">Close</Button>
+            <div className="relative w-20 h-20 mx-auto mb-5">
+              <div className="absolute inset-0 rounded-full bg-green-400/20 animate-ping" />
+              <div className="relative w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-white mb-2">Application Submitted! \uD83C\uDF89</h2>
+            <p className="text-slate-300 text-sm mb-6 leading-relaxed">Your documents have been securely submitted. Our team will review your application and reach out within 24\u201348 hours.</p>
+            <Button onClick={() => setShowSuccessPopup(false)}
+              className="w-full h-11 rounded-2xl font-black"
+              style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
+              Got it!
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Document Type Selection Modal */}
+      {/* \u2500\u2500 Document upload success notification \u2500\u2500 */}
+      {uploadSuccessInfo && (
+        <div className="fixed bottom-6 right-6 z-50 sdn-rise" style={{animationDuration:'0.35s'}}>
+          <div className="flex items-start gap-3.5 rounded-2xl p-4 pr-5 shadow-2xl border border-white/10 min-w-[280px] max-w-[340px]"
+            style={{background:'rgba(10,20,50,0.92)',backdropFilter:'blur(24px)'}}>
+            <div className="relative flex-shrink-0 mt-0.5">
+              <div className="absolute inset-0 rounded-full bg-emerald-400/25 animate-ping" style={{animationDuration:'1.4s'}} />
+              <div className="relative w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-black text-white leading-tight">
+                {uploadSuccessInfo.replaced ? 'File Replaced!' : 'Upload Successful!'}
+              </p>
+              <p className="text-xs text-emerald-400 font-semibold mt-0.5 truncate">{uploadSuccessInfo.docName}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Saved securely to your profile</p>
+            </div>
+            <button onClick={() => setUploadSuccessInfo(null)}
+              className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors mt-0.5">
+              <X className="w-3 h-3 text-slate-400" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* \u2500\u2500 Document re-upload selector \u2500\u2500 */}
       {showDocumentSelector && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-card border rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b flex-shrink-0">
-              <h2 className="text-2xl font-bold text-foreground">Select Documents to Re-upload</h2>
+          <div className="sdn-pop border border-white/10 rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col" style={{background:'rgba(15,10,40,0.88)',backdropFilter:'blur(30px)'}}>
+            <div className="p-5 border-b border-white/10 flex-shrink-0">
+              <h2 className="text-lg font-black text-white">Select Documents to Re-upload</h2>
+              <p className="text-slate-400 text-xs mt-0.5">Choose which documents you want to replace</p>
             </div>
-            
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="p-4 overflow-y-auto flex-1">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
-                  { id: 'passport', label: 'Passport', icon: FileText },
-                  { id: 'graduation', label: 'Graduation Certificate', icon: GraduationCap },
-                  { id: 'transcripts', label: 'Academic Transcripts', icon: FileText },
-                  { id: 'ielts', label: 'IELTS/TOEFL Score', icon: FileText },
-                  { id: 'sop', label: 'Statement of Purpose', icon: FileText },
-                  { id: 'cv', label: 'CV/Resume', icon: FileText },
-                  { id: 'lor1', label: 'LOR 1', icon: FileText },
-                  { id: 'lor2', label: 'LOR 2', icon: FileText },
-                  { id: 'lor3', label: 'LOR 3', icon: FileText }
-                ].map((docType) => (
-                  <div 
-                    key={docType.id} 
-                    className={`group relative flex flex-col items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 min-h-[140px] hover:shadow-lg ${
-                      selectedDocumentTypes.includes(docType.id) 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-muted hover:border-primary/30 hover:bg-muted/30'
-                    }`}
-                    onClick={() => handleDocumentTypeToggle(docType)}
-                  >
-                    <div className="p-3 rounded-lg bg-primary/10 group-hover:scale-110 transition-transform duration-200">
-                      <docType.icon className="h-6 w-6 text-primary" />
+                  { id: 'passport',    label: 'Passport',             Icon: Shield },
+                  { id: 'graduation',  label: 'Graduation Cert.',     Icon: GraduationCap },
+                  { id: 'transcripts', label: 'Transcripts',          Icon: BookOpen },
+                  { id: 'ielts',       label: 'IELTS / TOEFL',        Icon: Award },
+                  { id: 'sop',         label: 'Statement of Purpose', Icon: ScrollText },
+                  { id: 'cv',          label: 'CV / Resume',          Icon: Briefcase },
+                  { id: 'lor1',        label: 'LOR 1',                Icon: Star },
+                  { id: 'lor2',        label: 'LOR 2',                Icon: Star },
+                  { id: 'lor3',        label: 'LOR 3',                Icon: Star },
+                ].map((docType) => {
+                  const selected = selectedDocumentTypes.includes(docType.id);
+                  const DocIcon = docType.Icon;
+                  return (
+                    <div key={docType.id} onClick={() => handleDocumentTypeToggle(docType)}
+                      className={`relative flex flex-col items-center gap-2 p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        selected ? 'border-indigo-500 bg-indigo-500/15' : 'border-white/10 hover:border-indigo-400/50 hover:bg-white/5'
+                      }`}
+                    >
+                      <DocIcon className={`h-5 w-5 ${selected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+                      <span className="text-[10px] font-bold text-center leading-tight text-slate-200">{docType.label}</span>
+                      {selected && (
+                        <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
+                          <CheckCircle className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
                     </div>
-                    <span className="font-medium text-center text-sm leading-tight px-2">{docType.label}</span>
-                    <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
-                      selectedDocumentTypes.includes(docType.id) ? 'border-primary bg-primary' : 'border-muted-foreground'
-                    }`}>
-                      {selectedDocumentTypes.includes(docType.id) && <div className="w-2 h-2 bg-white rounded-full" />}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
-            <div className="p-6 border-t bg-muted/10 rounded-b-xl flex-shrink-0">
-              <div className="flex gap-4">
-                <Button onClick={() => setShowDocumentSelector(false)} variant="outline" className="flex-1">Cancel</Button>
-                <Button 
-                  onClick={handleConfirmReupload} 
-                  className="flex-1 bg-primary text-primary-foreground font-semibold"
-                  disabled={selectedDocumentTypes.length === 0}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Enable Re-upload ({selectedDocumentTypes.length})
-                </Button>
-              </div>
+            <div className="p-4 border-t border-white/10 flex gap-3 flex-shrink-0">
+              <Button onClick={() => setShowDocumentSelector(false)} variant="outline" className="flex-1 rounded-2xl font-bold">Cancel</Button>
+              <Button onClick={handleConfirmReupload} disabled={selectedDocumentTypes.length === 0}
+                className="flex-1 rounded-2xl font-black"
+                style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
+                <Upload className="h-4 w-4 mr-1.5" />
+                Enable Re-upload ({selectedDocumentTypes.length})
+              </Button>
             </div>
           </div>
         </div>

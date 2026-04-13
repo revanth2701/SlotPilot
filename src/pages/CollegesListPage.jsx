@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { MapPin, ExternalLink, GraduationCap, ArrowRight } from "lucide-react";
 
 // ── Country-name aliases ───────────────────────────────────────────────
 // Maps common variations to the canonical name stored in Supabase.
@@ -28,20 +28,34 @@ const PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='none'%3E%3Crect width='400' height='200' rx='12' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='16' fill='%2394a3b8'%3ECollege Image%3C/text%3E%3C/svg%3E";
 
 const getCollegeImageSources = (collegeName) => {
-  // Always return an array
   if (!collegeName) return [PLACEHOLDER_IMAGE];
-
   const raw = String(collegeName).trim();
   const enc = encodeURIComponent(raw);
-
   return [
     `/images/colleges/${enc}.jpg`,
     `/images/colleges/${enc}.jpeg`,
     `/images/colleges/${enc}.png`,
     `/images/colleges/${enc}.webp`,
-    `/images/colleges/${raw}.jpg`, // browser will encode spaces
+    `/images/colleges/${raw}.jpg`,
     PLACEHOLDER_IMAGE,
   ];
+};
+
+// Module-level so React never remounts it on parent re-renders
+const CollegeImage = ({ collegeName, className = "" }) => {
+  const candidates = useMemo(() => getCollegeImageSources(collegeName), [collegeName]);
+  const [idx, setIdx] = useState(0);
+  useEffect(() => { setIdx(0); }, [collegeName]);
+  const src = candidates[Math.min(idx, candidates.length - 1)];
+  return (
+    <img
+      src={src}
+      alt={collegeName}
+      className={className}
+      decoding="async"
+      onError={() => setIdx(i => Math.min(i + 1, candidates.length - 1))}
+    />
+  );
 };
 
 function useQuery() {
@@ -96,7 +110,7 @@ const CollegesListPage = () => {
           .ilike("Country", name);
 
         if (error) {
-          console.error("CollegesList fetch error:", error);
+          console.error("Failed to load college data.");
           continue;
         }
         if (data && data.length > 0) {
@@ -165,100 +179,101 @@ const CollegesListPage = () => {
 
         {/* College cards */}
         {loading ? (
-          <div className="text-center text-neutral-600 dark:text-slate-400 py-10 font-medium animate-pulse">
-            Loading colleges...
+          <div className="flex flex-col items-center gap-4 py-16">
+            <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-500 animate-spin" />
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Loading colleges…</p>
           </div>
         ) : filteredColleges.length === 0 ? (
           <div className="text-center text-neutral-600 dark:text-slate-400 py-10 font-medium animate-fade-in">
             No colleges found. Try a different search!
           </div>
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6 animate-fade-in-up">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in-up">
             {filteredColleges.map((college, idx) => {
               const collegeName = college.NameoftheCollege;
-              const imageSources = getCollegeImageSources(collegeName);
+              const hasWebsite = !!college.CollegeWebsite;
+              const websiteHref = hasWebsite
+                ? college.CollegeWebsite.startsWith("https://")
+                  ? college.CollegeWebsite
+                  : `https://${college.CollegeWebsite.replace(/^https?:\/\//i, "")}`
+                : null;
+              const location2 = [college.CollegeCity, college.CollegeState].filter(Boolean).join(", ");
 
               return (
-<Card
-  key={idx}
-  className="w-full h-full shadow-md rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-slate-900 hover:shadow-2xl hover:-translate-y-1 transition-all duration-200 border border-slate-100 dark:border-slate-800"
->
-  {/* Logo Container */}
-  <div className="w-full h-52 sm:h-48 bg-white dark:bg-white flex items-center justify-center overflow-hidden">
-    <img
-      src={imageSources[0]}
-      alt={collegeName}
-      className="w-full h-full object-contain"
-      onError={(e) => {
-        const current = e.target.src;
-        const idx = imageSources.findIndex((src) => current.endsWith(src));
-        const nextIdx = idx + 1;
-        if (nextIdx < imageSources.length) {
-          e.target.src = imageSources[nextIdx];
-        } else {
-          e.target.src = PLACEHOLDER_IMAGE;
-        }
-      }}
-    />
-  </div>
+                <div
+                  key={idx}
+                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 cursor-default"
+                  style={{ animationDelay: `${idx * 40}ms` }}
+                >
+                  {/* ── Image area ── */}
+                  <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                    <CollegeImage
+                      collegeName={collegeName}
+                      className="absolute inset-0 w-full h-full object-contain bg-white dark:bg-slate-800 transition-transform duration-600 group-hover:scale-105"
+                    />
+                    {/* bottom fade */}
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white dark:from-slate-900 to-transparent" />
 
-  {/* Thin Separation Line and Content Area */}
-  {/* 'border-t border-slate-100' creates that clean divider you mentioned */}
-  <CardContent className="py-5 px-4 flex-1 flex flex-col justify-between border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-    <div>
-      <div className="font-bold text-lg mb-1 text-slate-900 dark:text-slate-100 line-clamp-2">
-        {collegeName}
-      </div>
-      <div className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        {college.CollegeState && <span>{college.CollegeState}</span>}
-        {college.CollegeCity && (
-          <span>{college.CollegeState ? ", " : ""}{college.CollegeCity}</span>
-        )}
-      </div>
+                    {/* country chip — top right */}
+                    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/60 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                      {country}
+                    </div>
+                  </div>
 
-      <div className="mt-2 flex items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          {college.CollegeWebsite && (
-            <a
-              href={
-                college.CollegeWebsite.startsWith("http")
-                  ? college.CollegeWebsite
-                  : `https://${college.CollegeWebsite}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-bold uppercase tracking-wider truncate block"
-              title={college.CollegeWebsite}
-            >
-              Visit Website
-            </a>
-          )}
-        </div>
-        <button
-          onClick={() =>
-            navigate("/StudentLoginRegisterPage", {
-              state: {
-                country,
-                college: collegeName,
-                redirectTo: location.pathname + location.search,
-              },
-            })
-          }
-          className="bg-blue-600 dark:bg-blue-700 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
-        >
-          Apply Now
-        </button>
-      </div>
-    </div>
+                  {/* ── Content area ── */}
+                  <div className="flex flex-col flex-1 px-4 pt-3 pb-4 gap-2">
+                    {/* College name */}
+                    <h3 className="font-black text-[0.95rem] leading-snug text-slate-900 dark:text-white line-clamp-2">
+                      {collegeName}
+                    </h3>
 
-    {/* Footer Tag */}
-    <div className="flex justify-end mt-4 pt-3 border-t border-slate-50 dark:border-slate-800">
-      <span className="text-slate-400 dark:text-slate-600 text-[10px] font-bold uppercase tracking-widest">
-        {country}
-      </span>
-    </div>
-  </CardContent>
-</Card>
+                    {/* Location */}
+                    {location2 && (
+                      <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 text-[11px] font-medium">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{location2}</span>
+                      </div>
+                    )}
+
+                    {/* Spacer */}
+                    <div className="flex-1" />
+
+                    {/* Action row */}
+                    <div className="flex items-center gap-2 mt-2">
+                      {websiteHref && (
+                        <a
+                          href={websiteHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1 flex-1 h-9 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors truncate px-3"
+                        >
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                          Website
+                        </a>
+                      )}
+                      <button
+                        onClick={() =>
+                          navigate("/StudentLoginRegisterPage", {
+                            state: {
+                              country,
+                              college: collegeName,
+                              redirectTo: location.pathname + location.search,
+                            },
+                          })
+                        }
+                        className="flex items-center justify-center gap-1.5 flex-1 h-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all duration-300 group-hover:shadow-blue-500/40 px-3"
+                      >
+                        Apply
+                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-300" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Shine sweep */}
+                  <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-2xl">
+                    <div className="absolute top-0 left-[-65%] h-full w-[35%] bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 group-hover:left-[130%] transition-all duration-700 ease-out" />
+                  </div>
+                </div>
               );
             })}
           </div>

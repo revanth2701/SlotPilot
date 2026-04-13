@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const JourneyForm = ({ onBack }) => {
   // ✅ Always start at top whenever this page/component is shown
@@ -26,6 +27,7 @@ const JourneyForm = ({ onBack }) => {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const exams = [
     "IELTS", "TOEFL", "GRE", "GMAT", "SAT", "ACT", "PTE", "Duolingo"
@@ -81,12 +83,12 @@ const JourneyForm = ({ onBack }) => {
     try {
       const { data, error } = await supabase.from("PersonalisedGuidance").insert([payload]);
       if (error) {
-        console.error("Supabase insert error:", error);
-        alert("Failed to save — try again.");
+        console.error("Failed to save personalised guidance data.");
+        toast({ title: "Failed to save", description: "Something went wrong. Please try again.", variant: "destructive" });
       } else {
-        // success
-        alert("Details saved. We'll contact you soon.");
-        // optional: reset form
+        void data;
+        toast({ title: "Details saved", description: "We’ll contact you soon." });
+        // reset form
         setStudentName("");
         setPhone("");
         setEmail("");
@@ -98,9 +100,9 @@ const JourneyForm = ({ onBack }) => {
         setErrors({});
         setSubmitted(false);
       }
-    } catch (err) {
-      console.error("Unexpected error saving personalised guidance:", err);
-      alert("An unexpected error occurred.");
+    } catch {
+      console.error("An unexpected error occurred while saving personalised guidance.");
+      toast({ title: "An error occurred", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

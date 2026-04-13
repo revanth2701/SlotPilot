@@ -436,15 +436,15 @@ const VisaStart = () => {
                   <div className="flex-1">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 transition-colors duration-500">
                       <Globe2 className="w-4 h-4" />
-                      <span className="text-xs font-medium">Select applicant's location</span>
+                      <span className="text-xs font-medium">Select applicant's Passport Issued Country</span>
                     </div>
                   </div>
                 </div>
                 <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
-                  Where is the applicant located?
+                  Passport Issued Country.
                 </CardTitle>
                 <CardDescription className="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Choose the country of the person applying for the visa.
+                  Choose the passport issued country of the person applying for the visa.
                 </CardDescription>
               </CardHeader>
 
