@@ -236,8 +236,8 @@ const AdminDashboard = () => {
      UNIFIED DASHBOARD
      ════════════════════════════════════════════ */
   const tabs = [
-    { id: "hq", label: "HQ Command", icon: <Shield size={16} /> },
-    { id: "recruitment", label: "Recruitment", icon: <Users size={16} /> },
+    { id: "hq", label: "Communities", icon: <Shield size={16} /> },
+    { id: "recruitment", label: "Students", icon: <Users size={16} /> },
     { id: "visas", label: "Visas", icon: <Globe size={16} /> },
   ];
 
@@ -251,25 +251,33 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-800 dark:text-slate-200 font-sans antialiased overflow-x-hidden transition-colors duration-500">
+    <div className="dark">
+    <div className="min-h-screen text-slate-200 font-sans antialiased overflow-x-hidden" style={{background:'linear-gradient(135deg,#06001a 0%,#130038 30%,#0d1b4b 65%,#040e28 100%)'}}>
       <style>{`
         @keyframes sp-flag-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        @keyframes ad-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-22px) scale(1.04)}}
         .sp-redflag-chip { animation: sp-flag-bob 2s ease-in-out infinite; }
+        .ad-root table th { color: rgba(148,163,184,0.8) !important; }
+        .ad-root .force-light-text { color: white !important; }
       `}</style>
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/[0.06] dark:bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-400/[0.04] dark:bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute -top-56 -left-56 w-[750px] h-[750px] rounded-full" style={{background:'radial-gradient(circle,rgba(139,92,246,0.38) 0%,transparent 65%)',animation:'ad-float 18s ease-in-out infinite'}} />
+        <div className="absolute top-1/3 -right-56 w-[600px] h-[600px] rounded-full" style={{background:'radial-gradient(circle,rgba(37,99,235,0.30) 0%,transparent 65%)',animation:'ad-float 22s ease-in-out infinite',animationDelay:'-8s'}} />
+        <div className="absolute -bottom-56 left-1/3 w-[550px] h-[550px] rounded-full" style={{background:'radial-gradient(circle,rgba(8,145,178,0.24) 0%,transparent 65%)',animation:'ad-float 26s ease-in-out infinite',animationDelay:'-14s'}} />
+        <div className="absolute top-2/3 left-1/5 w-[350px] h-[350px] rounded-full" style={{background:'radial-gradient(circle,rgba(236,72,153,0.16) 0%,transparent 65%)',animation:'ad-float 20s ease-in-out infinite',animationDelay:'-5s'}} />
+      </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-12 ad-root">
         {/* ── Header ── */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-8 sm:mb-12">
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
             <div>
-              <h1 className="font-black tracking-tighter text-slate-900 dark:text-white italic" style={{ fontSize: "clamp(1.25rem, 4vw, 2.25rem)" }}>
-                SLOT<span className="text-blue-600 dark:text-blue-500">PILOT</span> HQ
-              </h1>
-              <p className="text-blue-500/50 dark:text-blue-400/40 text-[10px] tracking-[0.3em] sm:tracking-[0.4em] font-bold mt-0.5 sm:mt-1 uppercase">
-                UNIFIED COMMAND DASHBOARD
-              </p>
+              <div className="flex items-center gap-0 select-none">
+                <span className="font-black tracking-tight" style={{fontSize:'clamp(1.4rem,4vw,2.1rem)',background:'linear-gradient(135deg,#ffffff 0%,#c7d2fe 40%,#93c5fd 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',letterSpacing:'-0.03em'}}>Slot</span>
+                <span className="font-black tracking-tight" style={{fontSize:'clamp(1.4rem,4vw,2.1rem)',background:'linear-gradient(135deg,#67e8f9 0%,#38bdf8 50%,#818cf8 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',letterSpacing:'-0.03em'}}>Pilot</span>
+                <span className="ml-2 self-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border" style={{background:'rgba(99,102,241,0.2)',borderColor:'rgba(99,102,241,0.35)',color:'#a5b4fc'}}>Admin</span>
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{color:'rgba(148,163,184,0.5)'}}>Management Console</p>
             </div>
           </div>
 
@@ -278,7 +286,8 @@ const AdminDashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={refreshAll}
-              className="p-2.5 sm:p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm dark:shadow-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-2.5 sm:p-3 border border-white/10 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-white/10 transition-all shadow-sm min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300"
+            style={{background:'rgba(255,255,255,0.06)'}}
             >
               <RefreshCw size={18} />
             </motion.button>
@@ -286,7 +295,8 @@ const AdminDashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleLogout}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-red-100 dark:hover:bg-red-500/20 transition-all shadow-sm dark:shadow-none min-h-[44px] text-red-600 dark:text-red-400 font-bold text-xs sm:text-sm uppercase tracking-wider"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-red-500/25 rounded-xl sm:rounded-2xl backdrop-blur-md hover:bg-red-500/20 transition-all min-h-[44px] text-red-400 font-bold text-xs sm:text-sm uppercase tracking-wider"
+            style={{background:'rgba(239,68,68,0.10)'}}
             >
               <LogOut size={16} />
               <span className="hidden sm:inline">Logout</span>
@@ -295,7 +305,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* ── Tab Navigation ── */}
-        <nav className="flex justify-center p-1 sm:p-1.5 bg-white/70 dark:bg-white/5 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-2xl sm:rounded-[2rem] mb-8 sm:mb-10 max-w-fit mx-auto shadow-md dark:shadow-2xl">
+        <nav className="flex justify-center p-1 sm:p-1.5 border border-white/10 rounded-2xl sm:rounded-[2rem] mb-8 sm:mb-10 max-w-fit mx-auto shadow-2xl" style={{background:'rgba(255,255,255,0.05)',backdropFilter:'blur(24px)'}}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -303,13 +313,14 @@ const AdminDashboard = () => {
               className={`relative px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-[1.5rem] flex items-center gap-2 text-xs sm:text-sm font-bold transition-all duration-500 min-h-[44px] ${
                 activeTab === tab.id
                   ? "text-white"
-                  : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="hqTab"
-                  className="absolute inset-0 bg-blue-600 rounded-xl sm:rounded-[1.5rem] shadow-[0_0_20px_rgba(37,99,235,0.3)] sm:shadow-[0_0_30px_rgba(37,99,235,0.4)]"
+                  className="absolute inset-0 rounded-xl sm:rounded-[1.5rem] shadow-[0_0_24px_rgba(99,102,241,0.45)]"
+                  style={{background:'linear-gradient(135deg,#4f46e5 0%,#2563eb 55%,#0891b2 100%)'}}
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -339,15 +350,14 @@ const AdminDashboard = () => {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
                   key={s.label}
-                  className={`bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-sm dark:shadow-none ${
+                  className={`border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-sm backdrop-blur-sm ${
                     activeTab !== "hq" ? "w-full max-w-sm" : ""
                   }`}
+                  style={{background:'rgba(255,255,255,0.05)'}}
                 >
                   <div className={`flex justify-center mb-1.5 sm:mb-2 ${s.color}`}>{s.icon}</div>
-                  <p className="font-black text-slate-900 dark:text-white" style={{ fontSize: "clamp(1.25rem, 3vw, 1.875rem)" }}>{s.value}</p>
-                  <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">
-                    {s.label}
-                  </p>
+                  <p className="font-black text-white" style={{ fontSize: "clamp(1.25rem, 3vw, 1.875rem)" }}>{s.value}</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">{s.label}</p>
                 </motion.div>
               ))}
           </AnimatePresence>
@@ -408,6 +418,7 @@ const AdminDashboard = () => {
         )}
       </div>
     </div>
+    </div>
   );
 };
 
@@ -424,20 +435,15 @@ const HqCommandTab = ({
     <div>
       {/* Sub-nav */}
       <div className="flex gap-2 mb-6">
-        {[
-          { id: "verify", label: "Verify Posts", icon: <CheckCircle size={14} /> },
-          { id: "tasks", label: "Stays Tasks", icon: <Home size={14} /> },
-        ].map((sub) => (
-          <button
-            key={sub.id}
-            onClick={() => setHqView(sub.id)}
+        {[{id:"verify",label:"Verify Posts",icon:<CheckCircle size={14}/>},{id:"tasks",label:"Stays Tasks",icon:<Home size={14}/>}].map((sub)=>(
+          <button key={sub.id} onClick={()=>setHqView(sub.id)}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all min-h-[44px] border ${
-              hqView === sub.id
-                ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20"
-                : "bg-white/70 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10"
+              hqView===sub.id
+                ?"text-white border-indigo-500/60 shadow-lg shadow-indigo-500/25"
+                :"text-slate-400 border-white/10 hover:bg-white/5 hover:text-white"
             }`}
-          >
-            {sub.icon} {sub.label}
+            style={hqView===sub.id?{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}:{background:'rgba(255,255,255,0.05)'}}>
+            {sub.icon}{sub.label}
           </button>
         ))}
       </div>
@@ -463,7 +469,8 @@ const HqCommandTab = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: idx * 0.04 }}
-                  className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/90 dark:hover:bg-white/[0.06] transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 shadow-sm dark:shadow-none"
+                  className="border border-white/10 p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/5 transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 shadow-sm backdrop-blur-sm"
+                  style={{background:'rgba(255,255,255,0.04)'}}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
@@ -487,7 +494,8 @@ const HqCommandTab = ({
                     whileTap={{ scale: 0.92 }}
                     disabled={verifying === post.id}
                     onClick={() => handleVerify(post.id)}
-                    className="flex-shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 min-h-[44px] min-w-[44px] w-full sm:w-auto"
+                    className="flex-shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 min-h-[44px] min-w-[44px] w-full sm:w-auto"
+                    style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
                   >
                     {verifying === post.id ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -530,7 +538,8 @@ const HqCommandTab = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.04 }}
-                  className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/90 dark:hover:bg-white/[0.06] transition-all duration-300 shadow-sm dark:shadow-none"
+                  className="border border-white/10 p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/5 transition-all duration-300 shadow-sm backdrop-blur-sm"
+                  style={{background:'rgba(255,255,255,0.04)'}}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
@@ -556,46 +565,44 @@ const HqCommandTab = ({
                         </span>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2">
-                        {task.postTitle || "Room Request"}
-                      </h3>
+                      <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 sm:mb-2">{task.postTitle||"Room Request"}</h3>
 
                       <div className="space-y-1.5 sm:space-y-2">
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <User size={14} className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Contact Name: <span className="text-slate-800 dark:text-white font-semibold">{task.userName || "Not provided"}</span>
+                            Contact Name: <span className="text-white font-semibold">{task.userName||"Not provided"}</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <Mail size={14} className="text-rose-500 dark:text-rose-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Email: <span className="text-slate-800 dark:text-white font-semibold">{task.userEmail || "Not provided"}</span>
+                            Email: <span className="text-white font-semibold">{task.userEmail||"Not provided"}</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <Phone size={14} className="text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Phone: <span className="text-slate-800 dark:text-white font-semibold">{task.userPhone || "Not provided"}</span>
+                            Phone: <span className="text-white font-semibold">{task.userPhone||"Not provided"}</span>
                           </span>
                         </div>
                         <div className="h-px bg-slate-100 dark:bg-white/[0.04] my-1" />
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <User size={14} className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Requested by: <span className="text-slate-800 dark:text-white font-semibold">{task.requestedBy || "Anonymous"}</span>
+                            Requested by: <span className="text-white font-semibold">{task.requestedBy||"Anonymous"}</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <Home size={14} className="text-violet-500 dark:text-violet-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Landlord: <span className="text-slate-800 dark:text-white font-semibold">{task.landlordContact || "Contact in post"}</span>
+                            Landlord: <span className="text-white font-semibold">{task.landlordContact||"Contact in post"}</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           <MessageSquare size={14} className="text-violet-500 dark:text-violet-400 flex-shrink-0" />
                           <span className="text-slate-500 dark:text-slate-400">
-                            Request: <span className="text-slate-800 dark:text-white font-semibold">{task.userRequest || "Secure the room"}</span>
+                            Request: <span className="text-white font-semibold">{task.userRequest||"Secure the room"}</span>
                           </span>
                         </div>
 
@@ -661,22 +668,19 @@ const RecruitmentTab = ({
     {/* Search */}
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
       <div>
-        <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Student Applications</h2>
+        <h2 className="text-lg sm:text-xl font-black text-white">Student Applications</h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Manage and review student applications for international studies</p>
       </div>
       <div className="relative w-full sm:w-64">
         <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-        <Input
-          placeholder="Search students..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl"
-        />
+        <Input placeholder="Search students..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)}
+          className="pl-10 w-full border-white/10 rounded-xl text-white placeholder:text-slate-500"
+          style={{background:'rgba(255,255,255,0.07)'}} />
       </div>
     </div>
 
     {/* Table */}
-    <div className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
+      <div className="border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm backdrop-blur-sm" style={{background:'rgba(255,255,255,0.04)'}}>
       {studentsLoading ? (
         <div className="flex items-center justify-center py-16 sm:py-20">
           <Loader2 className="animate-spin text-blue-500" size={32} />
@@ -696,30 +700,31 @@ const RecruitmentTab = ({
             </TableHeader>
             <TableBody>
               {filteredStudents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-slate-500">No students found.</TableCell>
+                <TableRow className="border-white/5">
+                  <TableCell colSpan={6} className="text-center py-12 text-slate-400">No students found.</TableCell>
                 </TableRow>
               ) : filteredStudents.map((student, idx) => (
-                <TableRow key={(student.Email || "") + idx} className="border-slate-100 dark:border-white/[0.04] hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                <TableRow key={(student.Email||"") + idx} className="border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                   <TableCell>
-                    <p className="font-bold text-slate-900 dark:text-white">{student["First Name"]} {student["Last Name"]}</p>
+                    <p className="font-bold text-white">{student["First Name"]} {student["Last Name"]}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{student.Email}</p>
                   </TableCell>
-                  <TableCell className="text-slate-600 dark:text-slate-300">{student["contact Number"]}</TableCell>
-                  <TableCell className="font-mono text-sm text-slate-700 dark:text-slate-300">{student["Passport Number"]}</TableCell>
+                  <TableCell className="text-slate-300">{student["contact Number"]}</TableCell>
+                  <TableCell className="font-mono text-sm text-slate-200">{student["Passport Number"]}</TableCell>
                   <TableCell>
                     <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-bold border border-blue-200 dark:border-blue-500/20">
                       {student["Expiry Date"]}
                     </span>
                   </TableCell>
-                  <TableCell className="text-slate-600 dark:text-slate-300">{student["Issued Date"]}</TableCell>
+                  <TableCell className="text-slate-300">{student["Issued Date"]}</TableCell>
                   <TableCell>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => downloadStudentDocuments(student)}
                       disabled={docLoading && selectedStudent?.Email === student.Email}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-blue-600/20 transition-all disabled:opacity-50 min-h-[36px]"
+                      className="px-3 py-1.5 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-indigo-500/20 transition-all disabled:opacity-50 min-h-[36px]"
+                      style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
                     >
                       <Download size={12} />
                       {docLoading && selectedStudent?.Email === student.Email ? "..." : "Docs"}
@@ -736,17 +741,18 @@ const RecruitmentTab = ({
           {filteredStudents.length === 0 ? (
             <div className="text-center py-12 text-slate-500 text-sm">No students found.</div>
           ) : filteredStudents.map((student, idx) => (
-            <div key={(student.Email || "") + idx} className="bg-white dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/[0.06] shadow-sm">
-              <p className="font-bold text-slate-900 dark:text-white">{student["First Name"]} {student["Last Name"]}</p>
+          <div key={(student.Email||"") + idx} className="rounded-xl p-4 border border-white/10" style={{background:'rgba(255,255,255,0.05)'}}>
+              <p className="font-bold text-white">{student["First Name"]} {student["Last Name"]}</p>
               <p className="text-xs text-slate-500 mb-2">{student.Email}</p>
-              <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400 mb-3">
+              <div className="grid grid-cols-2 gap-2 text-xs text-slate-400 mb-3">
                 <span>📞 {student["contact Number"] || "—"}</span>
                 <span>🛂 {student["Passport Number"] || "—"}</span>
               </div>
               <button
                 onClick={() => downloadStudentDocuments(student)}
                 disabled={docLoading && selectedStudent?.Email === student.Email}
-                className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] disabled:opacity-50"
+              className="w-full px-3 py-2 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] disabled:opacity-50"
+                style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
               >
                 <Download size={12} />
                 {docLoading && selectedStudent?.Email === student.Email ? "Downloading..." : "Download Docs"}
@@ -770,24 +776,22 @@ const VisasTab = ({
     {/* Header */}
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
       <div>
-        <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Visa Applications</h2>
+        <h2 className="text-lg sm:text-xl font-black text-white">Visa Applications</h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Live list of applications submitted by users</p>
       </div>
       <div className="flex items-center gap-2 w-full sm:w-auto">
         <div className="relative flex-1 sm:w-64">
           <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Search visas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl"
-          />
+          <Input placeholder="Search visas..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)}
+            className="pl-10 w-full border-white/10 rounded-xl text-white placeholder:text-slate-500"
+            style={{background:'rgba(255,255,255,0.07)'}}/>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.92 }}
           onClick={fetchVisas}
-          className="p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+          className="p-2.5 border border-white/10 rounded-xl hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-300"
+          style={{background:'rgba(255,255,255,0.06)'}}
         >
           <RefreshCw size={16} />
         </motion.button>
@@ -796,10 +800,8 @@ const VisasTab = ({
 
     {/* Summary chips + Export */}
     <div className="flex flex-wrap items-center gap-3 mb-6">
-      <span className="px-3 py-1.5 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400 backdrop-blur-sm">
-        Total: {visaData.length}
-      </span>
-      <span className="px-3 py-1.5 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400 backdrop-blur-sm">
+      <span className="px-3 py-1.5 border border-white/10 rounded-xl text-sm font-bold text-blue-300 backdrop-blur-sm" style={{background:'rgba(255,255,255,0.05)'}}>Total: {visaData.length}</span>
+      <span className="px-3 py-1.5 border border-white/10 rounded-xl text-sm font-bold text-emerald-300 backdrop-blur-sm" style={{background:'rgba(255,255,255,0.05)'}}>
         Countries: {Array.from(new Set(visaData.map(r => String(r["Country"] || r.country || "").trim()).filter(Boolean))).length || 0}
       </span>
       <motion.button
@@ -807,7 +809,8 @@ const VisasTab = ({
         whileTap={{ scale: 0.97 }}
         onClick={exportVisasAsCSV}
         disabled={visaLoading || visaData.length === 0}
-        className="ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 min-h-[40px]"
+        className="ml-auto px-4 py-2 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 min-h-[40px]"
+        style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
       >
         <Download size={14} />
         Export CSV
@@ -823,7 +826,7 @@ const VisasTab = ({
       ) : !isMobile ? (
         <div className="overflow-auto">
           <table className="min-w-full table-auto border-collapse">
-            <thead className="sticky top-0 z-20 bg-slate-50/95 dark:bg-[#0a0a0a]/95 backdrop-blur-sm">
+            <thead className="sticky top-0 z-20 backdrop-blur-sm" style={{background:'rgba(10,5,35,0.92)'}}>
               <tr>
                 {visaCols.length === 0 ? (
                   <th className="px-4 py-3 text-left text-sm text-slate-400">No Columns</th>
@@ -848,7 +851,7 @@ const VisasTab = ({
                 filteredVisa.map((row, i) => (
                   <tr key={i} className="border-t border-slate-100 dark:border-white/[0.04] hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
                     {visaCols.map(col => (
-                      <td key={col} className="px-4 py-3 align-top text-sm text-slate-700 dark:text-slate-300 break-words max-w-[220px]">
+                      <td key={col} className="px-4 py-3 align-top text-sm text-slate-300 break-words max-w-[220px]">
                         {formatCell(row[col])}
                       </td>
                     ))}

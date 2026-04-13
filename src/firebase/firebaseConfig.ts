@@ -3,15 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection } from "firebase/firestore";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
-// Your Firebase configuration
+// Firebase configuration — values are loaded from .env (VITE_FIREBASE_*)
 const firebaseConfig = {
-  apiKey: "AIzaSyAhqK6NVe98OuOs_hfqfTqm3l83teykE",
-  authDomain: "messages-ddd2c.firebaseapp.com",
-  projectId: "messages-ddd2c",
-  storageBucket: "messages-ddd2c.appspot.com",
-  messagingSenderId: "1015630686257",
-  appId: "1:1015630686257:web:92aa305964d9b9d77c4d10",
-  measurementId: "G-55DSEF4WRP"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID as string,
 };
 
 // Initialize Firebase

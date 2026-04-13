@@ -70,6 +70,36 @@ const VisaApplication = () => {
       }
     }
 
+    // ── Format validation ────────────────────────────────────────────────
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      showNotification('error', 'Invalid email', 'Please enter a valid email address.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!/^[\d\s+\-()\.]{6,20}$/.test(formData.phone.trim())) {
+      showNotification('error', 'Invalid phone number', 'Please enter a valid phone number (6–20 digits).');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!/^[A-Z0-9\-]{5,20}$/i.test(formData.passportNumber.trim())) {
+      showNotification('error', 'Invalid passport number', 'Passport number must be 5–20 alphanumeric characters.');
+      setIsSubmitting(false);
+      return;
+    }
+    const dob = new Date(formData.dateOfBirth);
+    const today = new Date();
+    if (isNaN(dob.getTime()) || dob >= today) {
+      showNotification('error', 'Invalid date of birth', 'Please enter a valid past date for date of birth.');
+      setIsSubmitting(false);
+      return;
+    }
+    if ((today - dob) / (1000 * 60 * 60 * 24 * 365.25) < 16) {
+      showNotification('error', 'Age requirement', 'Applicant must be at least 16 years old.');
+      setIsSubmitting(false);
+      return;
+    }
+    // ────────────────────────────────────────────────────────────────────
+
     try {
       if (!supabase || typeof supabase.from !== 'function') {
         showNotification('error', 'Configuration error', 'Database client is not configured. Contact admin.');
@@ -100,7 +130,7 @@ const VisaApplication = () => {
         const res = await supabase.from(TABLE_NAME).insert([insertPayload]);
         const error = res?.error || (res instanceof Error ? res : null);
         const data = res?.data ?? null;
-        console.info("Supabase insert attempt", attempt + 1, { data, error });
+        void data; // suppress unused lint warning
 
         if (!error) {
           // show notification and set success state so UI displays the success message
@@ -138,19 +168,18 @@ const VisaApplication = () => {
           if (camel in insertPayload) delete insertPayload[camel];
           const snake = col.replace(/([A-Z])/g, m => `_${m.toLowerCase()}`);
           if (snake in insertPayload) delete insertPayload[snake];
-          console.warn(`Dropped unknown column from payload: ${col}`);
+          console.warn("Removed an unsupported field from the payload.");
         });
 
         attempt += 1;
       }
 
-      const message = lastError?.message || 'Unable to save your application. Please try again later.';
-      showNotification('error', 'Submission failed', message);
+      showNotification('error', 'Submission failed', 'Unable to save your application. Please try again later.');
       setIsSubmitting(false);
       return;
-    } catch (err) {
-      console.error("Unexpected error while submitting visa application:", err);
-      showNotification('error', 'An error occurred', String(err?.message || err));
+    } catch {
+      console.error('An unexpected error occurred while submitting the visa application.');
+      showNotification('error', 'An error occurred', 'An unexpected error occurred. Please try again.');
       setIsSubmitting(false);
     }
   };

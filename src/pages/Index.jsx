@@ -21,12 +21,12 @@ const Index = () => {
   const [scrollDirection, setScrollDirection] = useState("down");
 
   const countries = [
-    { name: "United States", flag: "🇺🇸", universities: "500+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" },
-    { name: "United Kingdom", flag: "🇬🇧", universities: "200+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg" },
-    { name: "Canada", flag: "🇨🇦", universities: "300+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Canada.svg" },
-    { name: "Australia", flag: "🇦🇺", universities: "150+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg" },
-    { name: "Germany", flag: "🇩🇪", universities: "400+", flagImg: "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" },
-    { name: "Ireland", flag: "🇮🇪", universities: "50+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" }
+    { name: "United States", flag: "🇺🇸", universities: "500+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg", tag: "Most Popular", tagColor: "bg-blue-500", desc: "MIT, Stanford & Ivy League", glowColor: "rgba(59,130,246,0.55)" },
+    { name: "United Kingdom", flag: "🇬🇧", universities: "200+", flagImg: "https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg", tag: "Top Ranked", tagColor: "bg-rose-600", desc: "Oxford, Cambridge & Russell Group", glowColor: "rgba(225,29,72,0.55)" },
+    { name: "Canada", flag: "🇨🇦", universities: "300+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Canada.svg", tag: "Study Friendly", tagColor: "bg-red-500", desc: "World-class research universities", glowColor: "rgba(239,68,68,0.55)" },
+    { name: "Australia", flag: "🇦🇺", universities: "150+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg", tag: "Work & Study", tagColor: "bg-amber-500", desc: "G8 universities & sunny lifestyle", glowColor: "rgba(245,158,11,0.55)" },
+    { name: "Germany", flag: "🇩🇪", universities: "400+", flagImg: "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg", tag: "Tuition-Free", tagColor: "bg-yellow-600", desc: "TU Munich, Heidelberg & more", glowColor: "rgba(202,138,4,0.55)" },
+    { name: "Ireland", flag: "🇮🇪", universities: "50+", flagImg: "https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg", tag: "Tech Hub", tagColor: "bg-emerald-600", desc: "Google, Meta & EU tech gateway", glowColor: "rgba(5,150,105,0.55)" },
   ];
 
   const features = [
@@ -367,57 +367,83 @@ const Index = () => {
             </p>
           </div>
 
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0, y: -50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {countries.map((country, index) => (
-              <div
+              <motion.div
                 key={index}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                style={{ aspectRatio: '4 / 3' }}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
+                className="group cursor-pointer"
                 onClick={() => goToColleges(country.name)}
               >
-                {/* Flag Background */}
-                <img
-                  src={country.flagImg}
-                  alt={`${country.name} flag`}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                />
+                {/* Explorer card */}
+                <div
+                  className="relative h-60 rounded-2xl overflow-hidden shadow-xl transition-all duration-500 group-hover:-translate-y-2"
+                  style={{
+                    boxShadow: '0 10px 30px -8px rgba(0,0,0,0.25)',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.boxShadow = `0 24px 50px -8px ${country.glowColor}`}
+                  onMouseLeave={e => e.currentTarget.style.boxShadow = '0 10px 30px -8px rgba(0,0,0,0.25)'}
+                >
 
-                {/* Dark Glass Overlay */}
-                <div className="absolute inset-0 bg-black/45 backdrop-blur-[4px] group-hover:bg-black/30 group-hover:backdrop-blur-[2px] transition-all duration-500" />
+                  {/* Flag image */}
+                  <img
+                    src={country.flagImg}
+                    alt={`${country.name} flag`}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  />
 
-                {/* Mini Circular Flag Badge */}
-                <div className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full overflow-hidden border-2 border-white/40 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <img src={country.flagImg} alt="" className="w-full h-full object-cover" />
-                </div>
+                  {/* Ambient gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/25" />
 
-                {/* Content */}
-                <div className="absolute inset-0 z-10 flex flex-col justify-end p-5 sm:p-6">
-                  <h3
-                    className="text-white font-extrabold tracking-tight mb-1 drop-shadow-lg"
-                    style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
-                  >
-                    {country.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/20 text-white text-[11px] font-semibold">
-                      <MapPin className="w-3 h-3" />
-                      {country.universities} Universities
+                  {/* Tag pill — top left */}
+                  <div className="absolute top-3.5 left-3.5 z-10">
+                    <span className={`${country.tagColor} text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md`}>
+                      {country.tag}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium group-hover:text-white transition-colors duration-300">
-                    Explore Universities
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+
+                  {/* University count — top right */}
+                  <div className="absolute top-3.5 right-3.5 z-10 text-right">
+                    <div className="text-white text-base font-black leading-none">{country.universities}</div>
+                    <div className="text-white/55 text-[9px] font-semibold uppercase tracking-wider">unis</div>
+                  </div>
+
+                  {/* Centred emoji — rises on hover */}
+                  <div className="absolute inset-0 flex items-center justify-center z-10" style={{ paddingBottom: '4.5rem' }}>
+                    <span
+                      className="text-6xl transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-2 inline-block"
+                      style={{ filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.6))' }}
+                    >
+                      {country.flag}
+                    </span>
+                  </div>
+
+                  {/* Angled frosted glass bottom panel */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 z-10 bg-black/45 backdrop-blur-xl border-t border-white/10 px-4 pb-4 pt-7"
+                    style={{ clipPath: 'polygon(0 28%, 100% 0%, 100% 100%, 0% 100%)' }}
+                  >
+                    <h3 className="text-white font-black text-[1.05rem] leading-tight tracking-tight">{country.name}</h3>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <p className="text-white/60 text-[11px] font-medium">{country.desc}</p>
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-white/90 group-hover:text-white group-hover:gap-1.5 transition-all duration-300 flex-shrink-0 ml-2">
+                        Explore
+                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-300" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Shine sweep */}
+                  <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-2xl">
+                    <div className="absolute top-0 left-[-65%] h-full w-[40%] bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 group-hover:left-[130%] transition-all duration-700 ease-out" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 

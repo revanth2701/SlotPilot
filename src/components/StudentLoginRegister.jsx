@@ -18,41 +18,30 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   // NEW: show a success note after returning from email verification
   const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(false);
 
-  // NEW: detect Supabase email-confirm redirect
   useEffect(() => {
-    // Supabase email confirmation redirects back with tokens/errors in the URL hash or query.
-    // We treat "access_token" or "type=signup" as a successful verification signal.
-    const hash = (window.location.hash || "").toLowerCase();
-    const search = (window.location.search || "").toLowerCase();
+    // Use Supabase's auth state listener to detect email confirmation redirects.
+    // This avoids directly reading access_token from the URL (which can be leaked
+    // via browser history and Referer headers).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        const params = new URLSearchParams(window.location.search);
+        const isEmailConfirmation =
+          params.get("type") === "signup" ||
+          window.location.hash.includes("type=signup");
 
-    const isLikelyVerified =
-      hash.includes("access_token=") ||
-      hash.includes("type=signup") ||
-      search.includes("type=signup") ||
-      search.includes("access_token=");
-
-    const hasError =
-      hash.includes("error=") ||
-      hash.includes("error_description=") ||
-      search.includes("error=") ||
-      search.includes("error_description=");
-
-    if (isLikelyVerified && !hasError) {
-      setShowEmailVerifiedBanner(true);
-      setActiveTab("login");
-
-      // Optional: show toast too
-      // (banner stays until user dismisses)
-      // eslint-disable-next-line no-unused-expressions
-      // toast({ title: "Email verified", description: "Your account is confirmed. Please sign in." });
-
-      // Clean up URL tokens so refresh/back doesn't re-trigger the banner
-      try {
-        window.history.replaceState({}, "", window.location.pathname);
-      } catch {
-        // ignore
+        if (isEmailConfirmation) {
+          setShowEmailVerifiedBanner(true);
+          setActiveTab("login");
+          // Immediately sign out so the user must re-authenticate with credentials
+          supabase.auth.signOut();
+          // Clear tokens from URL to prevent leaking via browser history / Referer
+          try {
+            window.history.replaceState({}, "", window.location.pathname);
+          } catch { /* ignore */ }
+        }
       }
-    }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   // Listen for browser back arrow and set tab to login
@@ -184,6 +173,22 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
         return;
       }
 
+      // Supabase silently returns success (no error) for duplicate emails
+      // but sets identities to an empty array. Detect and inform the user.
+      if (!authData?.user || authData.user.identities?.length === 0) {
+        toast({
+          title: "Email already registered",
+          description: "This email is already in use. Please log in or reset your password.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If Supabase auto-confirmed (e.g. email confirmations disabled in dashboard)
+      const alreadyConfirmed = Boolean(
+        authData.user.email_confirmed_at || authData.user.confirmed_at
+      );
+
       const { error: dataError } = await supabase
         .from('StudentData')
         .insert([
@@ -193,23 +198,39 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
             'Mailid': registerData.email,
             'Contact Number': parseInt(registerData.contactNumber),
             'dtCreatedon': new Date().toISOString().split('T')[0],
-            'Registrationid': Math.floor(Math.random() * 1000000)
+            'Registrationid': (() => {
+              try {
+                // getRandomValues works on HTTP (unlike randomUUID which needs HTTPS)
+                const buf = new Uint32Array(1);
+                crypto.getRandomValues(buf);
+                return buf[0];
+              } catch {
+                return Math.floor(Math.random() * 2147483647);
+              }
+            })(),
           }
         ]);
 
       if (dataError) {
-        console.error('Error saving student data:', dataError);
+        console.error('Failed to persist student profile data.');
         toast({
           title: "Registration successful",
-          description: "Check your email to confirm. Note: Some profile data may need to be re-entered.",
+          description: alreadyConfirmed
+            ? "Your account is ready. You can log in now."
+            : "A confirmation email has been sent. Please check your inbox (and spam folder).",
           variant: "default"
         });
       } else {
-        toast({ title: "Registration successful", description: "Check your email to confirm your account." });
+        toast({
+          title: "Registration successful",
+          description: alreadyConfirmed
+            ? "Your account is ready. You can log in now."
+            : "A confirmation email has been sent. Please check your inbox (and spam folder).",
+        });
       }
 
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('An unexpected error occurred during registration.');
       toast({ title: "Registration failed", description: "An unexpected error occurred.", variant: "destructive" });
     } finally {
       setRegisterLoading(false);

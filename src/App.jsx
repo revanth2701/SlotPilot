@@ -21,6 +21,7 @@ import JourneyForm from "./components/JourneyForm";
 import StudentDashboard from "./components/StudentDashboard";
 import StudentDashboardNew from "./components/StudentDashboardNew";
 import AdminDashboard from "./pages/AdminDashboard";
+import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -80,8 +81,8 @@ const App = () => (
           <Route path="/StudentLoginRegisterPage" element={<StudentLoginRegister />} />
           <Route path="/student-login" element={<StudentLoginRoute />} />
           <Route path="/journey" element={<JourneyForm/>} />
-          <Route path="/student-dashboard-new" element={<StudentDashboardNew/>} />
-          <Route path="/admin/dashboard" element={<AdminDashboard/>} />
+          <Route path="/student-dashboard-new" element={<ProtectedRoute><StudentDashboardNew/></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard/></AdminRoute>} />
 
         </Routes>
       </BrowserRouter>

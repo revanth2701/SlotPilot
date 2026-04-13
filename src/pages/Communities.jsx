@@ -10,7 +10,8 @@ import {
   MessageSquare, Plane, Home, ArrowLeft, Plus, X, Globe, Zap, Send,
   Loader2, Star, CheckCircle, DollarSign, Heart, Share2, Bookmark,
   Search, FileText, HelpCircle, Gem, AlertTriangle, ShieldCheck,
-  Sparkles, Mail, Phone, User, RefreshCcw
+  Sparkles, Mail, Phone, User, RefreshCcw, Calendar, Users, MapPin,
+  Compass, Wallet, Clock
 } from "lucide-react";
 
 import MistakeAnalysis from "../components/MistakeAnalysis";
@@ -119,6 +120,17 @@ const SPATIAL_CSS = `
     50%     { box-shadow: 0 0 20px rgba(34,197,94,0.35); border-color: rgba(34,197,94,0.55); }
   }
   .sp-status-glow { animation: sp-status-glow 2.5s ease-in-out infinite; }
+
+  /* ── SHIMMER LOADING ── */
+  @keyframes sp-shimmer {
+    0%   { background-position: -400% 0; }
+    100% { background-position:  400% 0; }
+  }
+  .sp-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+    background-size: 400% 100%;
+    animation: sp-shimmer 2s ease-in-out infinite;
+  }
 `;
 
 /* ─────────────────────────────────────────────────────
@@ -132,16 +144,21 @@ const POST_TYPE_STYLES = {
   experience: {
     icon: FileText, label: "Visa Experience",
     badgeBg: "bg-emerald-500/10", badgeText: "text-emerald-600 dark:text-emerald-400", badgeBorder: "border-emerald-500/20",
+    accentGradient: "bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500",
+    avatarBg: "bg-gradient-to-br from-emerald-500/20 to-teal-500/10",
   },
   companion: {
-    icon: HelpCircle, label: "Question / Travel",
+    icon: Plane, label: "Travel Companion",
     badgeBg: "bg-amber-500/10", badgeText: "text-amber-600 dark:text-amber-400", badgeBorder: "border-amber-500/20",
-    pulse: true,
+    accentGradient: "bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500",
+    avatarBg: "bg-gradient-to-br from-amber-500/20 to-orange-500/10",
   },
   accommodation: {
     icon: Gem, label: "Hidden Gem / Stay",
     badgeBg: "bg-violet-500/10", badgeText: "text-violet-600 dark:text-violet-400", badgeBorder: "border-violet-500/20",
     glow: true,
+    accentGradient: "bg-gradient-to-r from-violet-500 via-purple-400 to-violet-500",
+    avatarBg: "bg-gradient-to-br from-violet-500/20 to-purple-500/10",
   },
 };
 
@@ -253,6 +270,20 @@ const Communities = () => {
   const [travelCons, setTravelCons] = useState("");
   const [travelGems, setTravelGems] = useState("");
 
+  // Companion-specific form state
+  const [companionError, setCompanionError] = useState("");
+  const [companionData, setCompanionData] = useState({
+    departureFrom: "",
+    destination: "",
+    dateOfJourney: "",
+    dateOfReturn: "",
+    airlinesName: "",
+    gender: "",
+    email: "",
+    languagePreferred: "",
+    message: "",
+  });
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
@@ -308,23 +339,46 @@ const Communities = () => {
     setFormData({ title: "", content: "", country: "" });
     setMistakes([]); setMistakeText(""); setMistakeExplanation(""); setMistakeProTip("");
     setTravelRating(0); setTravelPros(""); setTravelCons(""); setTravelGems("");
+    setCompanionData({ departureFrom: "", destination: "", dateOfJourney: "", dateOfReturn: "", airlinesName: "", gender: "", email: "", languagePreferred: "", message: "" });
+    setCompanionError("");
   };
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.content) return;
+    if (activeTab === "companion") {
+      const missing = [];
+      if (!companionData.departureFrom.trim()) missing.push("Departure From");
+      if (!companionData.destination.trim()) missing.push("Destination");
+      if (!companionData.dateOfJourney) missing.push("Date of Journey");
+      if (!companionData.airlinesName.trim()) missing.push("Airlines Name");
+      if (!companionData.gender) missing.push("Gender");
+      if (!companionData.email.trim()) missing.push("Email Address");
+      if (!companionData.languagePreferred.trim()) missing.push("Language Preferred");
+      if (!companionData.message.trim()) missing.push("Message");
+      if (missing.length > 0) {
+        setCompanionError(`Please fill in: ${missing.join(", ")}`);
+        return;
+      }
+      setCompanionError("");
+    } else {
+      if (!formData.title || !formData.content) return;
+    }
     setIsSubmitting(true);
     try {
-      const postData = { ...formData, type: activeTab, createdAt: serverTimestamp() };
-      if (activeTab === "experience" && mistakes.length > 0) postData.rejectionInsights = { mistakes };
-      if (activeTab === "companion" && travelRating > 0) {
-        postData.travelReview = {
-          rating: travelRating,
-          pros: travelPros.split("\n").map(s => s.trim()).filter(Boolean),
-          cons: travelCons.split("\n").map(s => s.trim()).filter(Boolean),
-          hiddenGems: travelGems.split("\n").map(s => s.trim()).filter(Boolean),
+      let postData;
+      if (activeTab === "companion") {
+        postData = {
+          title: `Looking for travel companion to ${companionData.destination}`,
+          content: `Flying ${companionData.airlinesName}${companionData.departureFrom ? ` from ${companionData.departureFrom}` : ""} to ${companionData.destination} on ${companionData.dateOfJourney}${companionData.dateOfReturn ? `, returning ${companionData.dateOfReturn}` : ""}`,
+          country: companionData.destination,
+          type: activeTab,
+          companionDetails: { ...companionData },
+          createdAt: serverTimestamp(),
         };
+      } else {
+        postData = { ...formData, type: activeTab, createdAt: serverTimestamp() };
       }
+      if (activeTab === "experience" && mistakes.length > 0) postData.rejectionInsights = { mistakes };
       await addDoc(collection(db, "posts"), postData);
       resetForm(); setShowModal(false); fetchPosts();
     } finally { setIsSubmitting(false); }
@@ -381,8 +435,8 @@ const Communities = () => {
 
   const tabs = [
     { id: "experience",    label: "Visa Experience", icon: ShieldCheck },
-    { id: "companion",     label: "Travel",          icon: Plane },
-    { id: "accommodation", label: "Stay",            icon: Home },
+    { id: "companion",     label: "Travel Companion",          icon: Plane },
+    { id: "accommodation", label: "Accommodation",            icon: Home },
   ];
 
   return (
@@ -406,10 +460,6 @@ const Communities = () => {
           {/* ── HEADER ── */}
           <header className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
-              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
-                className="p-2.5 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl backdrop-blur-md hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all shadow-sm dark:shadow-none">
-                <ArrowLeft size={18} className="text-slate-600 dark:text-slate-300" />
-              </motion.button>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-slate-900 dark:text-white">
                   SLOT<span className="bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent">PILOT</span>
@@ -513,14 +563,47 @@ const Communities = () => {
               <div className="space-y-5">
                 {loading ? (
                   [1, 2, 3].map(n => (
-                    <div key={n} className="h-48 rounded-[1.75rem] animate-pulse bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04]" />
+                    <div key={n} className="relative rounded-[1.75rem] overflow-hidden bg-white/70 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] p-6 sm:p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-none">
+                      <div className="absolute inset-0 sp-shimmer pointer-events-none" />
+                      <div className="flex items-start gap-3 mb-5">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-200/80 dark:bg-white/[0.05] animate-pulse flex-shrink-0" />
+                        <div className="flex-1 space-y-2.5 pt-1">
+                          <div className="flex gap-2">
+                            <div className="h-[22px] w-28 bg-slate-200/80 dark:bg-white/[0.05] rounded-full animate-pulse" />
+                            <div className="h-[22px] w-20 bg-slate-100 dark:bg-white/[0.03] rounded-full animate-pulse" />
+                          </div>
+                          <div className="h-5 w-3/4 bg-slate-200/60 dark:bg-white/[0.04] rounded-lg animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="ml-[52px] space-y-2">
+                        <div className="h-3.5 w-full bg-slate-100 dark:bg-white/[0.03] rounded-lg animate-pulse" />
+                        <div className="h-3.5 w-5/6 bg-slate-100 dark:bg-white/[0.03] rounded-lg animate-pulse" />
+                        <div className="h-3.5 w-2/3 bg-slate-100/80 dark:bg-white/[0.025] rounded-lg animate-pulse" />
+                      </div>
+                      <div className="ml-[52px] mt-5 flex gap-2">
+                        <div className="h-7 w-20 bg-slate-100 dark:bg-white/[0.03] rounded-lg animate-pulse" />
+                        <div className="h-7 w-28 bg-slate-100 dark:bg-white/[0.03] rounded-lg animate-pulse" />
+                        <div className="h-7 w-16 bg-slate-100/80 dark:bg-white/[0.025] rounded-lg animate-pulse" />
+                      </div>
+                    </div>
                   ))
                 ) : filteredPosts.length === 0 ? (
-                  <div className="w-full p-10 rounded-[1.75rem] bg-white/70 dark:bg-white/[0.025] backdrop-blur-[15px] border border-slate-200/80 dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center min-h-[400px]">
-                    <Sparkles size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                    <p className="text-slate-500 font-semibold">No posts yet</p>
-                    <p className="text-slate-400 dark:text-slate-700 text-xs mt-1">Be the first to share intelligence</p>
-                  </div>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                    className="w-full p-12 rounded-[1.75rem] bg-white/70 dark:bg-white/[0.025] backdrop-blur-[15px] border border-slate-200/80 dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center min-h-[400px] relative overflow-hidden">
+                    <div className="absolute -top-16 -right-16 w-56 h-56 bg-blue-400/[0.06] dark:bg-blue-500/[0.07] rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-400/[0.05] dark:bg-violet-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+                    <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }} className="relative mb-6">
+                      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500/10 to-violet-500/10 border border-blue-200/50 dark:border-blue-500/10 flex items-center justify-center">
+                        <Sparkles size={36} className="text-blue-500/60 dark:text-blue-400/60" />
+                      </div>
+                    </motion.div>
+                    <p className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">No posts yet</p>
+                    <p className="text-slate-400 dark:text-slate-600 text-sm mb-8 text-center max-w-xs">Be the first to share your experience with the community</p>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowModal(true)}
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600/90 to-violet-600/90 text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-violet-600 transition-all">
+                      <Plus size={16} /> Create First Post
+                    </motion.button>
+                  </motion.div>
               ) : (
                 filteredPosts.map((post, index) => {
                   const style = POST_TYPE_STYLES[post.type] || POST_TYPE_STYLES.experience;
@@ -544,14 +627,17 @@ const Communities = () => {
                       `}>
                         {/* Inner glow gradient overlay */}
                         <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-gradient-to-br from-white/30 dark:from-white/[0.03] via-transparent to-transparent" />
+                        {/* Type accent bar */}
+                        <div className={`absolute top-0 left-0 right-0 h-[3px] pointer-events-none rounded-t-[1.75rem] ${style.accentGradient} opacity-80 dark:opacity-50`} />
 
                         {/* Red Flag Chip */}
                         {isRejectionStory && <RedFlagChip rejectionInsights={post.rejectionInsights} />}
 
                         {/* ── POST HEADER ── */}
                         <div className="relative flex items-start gap-3 mb-4">
-                          <div className={`p-2 rounded-xl ${style.badgeBg} border ${style.badgeBorder} flex-shrink-0`}>
-                            <TypeIcon size={16} className={`${style.badgeText} ${style.pulse ? "sp-help-pulse" : ""} ${style.glow ? "sp-gem-glow" : ""}`} />
+                          <div className={`relative w-10 h-10 rounded-2xl ${style.avatarBg} border ${style.badgeBorder} flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm`}>
+                            <TypeIcon size={18} className={`${style.badgeText} relative z-10 ${style.glow ? "sp-gem-glow" : ""}`} />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/[0.06] to-transparent pointer-events-none" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -568,16 +654,63 @@ const Communities = () => {
                                 </motion.span>
                               )}
                             </div>
-                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug pr-16">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug pr-16 flex items-center flex-wrap gap-2">
                               {post.title}
+                              {post.type === "companion" && post.companionDetails?.dateOfJourney &&
+                                new Date(post.companionDetails.dateOfJourney) < new Date(new Date().toDateString()) && (
+                                <motion.span
+                                  initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-500/20 flex-shrink-0">
+                                  <CheckCircle size={9} /> Trip Completed
+                                </motion.span>
+                              )}
                             </h3>
                           </div>
                         </div>
 
                         {/* ── CONTENT ── */}
-                        <p className="relative text-slate-600 dark:text-slate-400 leading-relaxed text-sm mb-4 line-clamp-4 ml-[52px]">
-                          {post.content}
-                        </p>
+                        {!(post.type === "companion" && post.companionDetails) && (
+                          <p className="relative text-slate-600 dark:text-slate-400 leading-relaxed text-sm mb-4 line-clamp-4 ml-[52px]">
+                            {post.content}
+                          </p>
+                        )}
+
+                        {/* ── COMPANION ROUTE VISUALIZATION ── */}
+                        {post.type === "companion" && post.companionDetails && (
+                          <div className="ml-[52px] mb-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50/80 to-orange-50/50 dark:from-amber-500/[0.07] dark:to-orange-500/[0.04] border border-amber-200/60 dark:border-amber-500/10 relative overflow-hidden">
+                            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/50 dark:from-white/[0.03] to-transparent" />
+                            <div className="relative flex items-center gap-3">
+                              <div className="text-center flex-shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-500/10 border border-rose-200/60 dark:border-rose-500/15 flex items-center justify-center mb-1.5 mx-auto">
+                                  <MapPin size={15} className="text-rose-500 dark:text-rose-400" />
+                                </div>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">FROM</p>
+                                <p className="text-xs font-bold text-slate-700 dark:text-white mt-0.5 max-w-[90px] leading-tight text-center">{post.companionDetails.departureFrom || "—"}</p>
+                              </div>
+                              <div className="flex-1 flex flex-col items-center gap-1.5">
+                                <div className="flex items-center w-full gap-1">
+                                  <div className="flex-1 h-[1.5px] bg-gradient-to-r from-amber-200 to-amber-300/80 dark:from-amber-500/20 dark:to-orange-400/20" />
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 flex-shrink-0">
+                                    <Plane size={13} className="text-white" />
+                                  </div>
+                                  <div className="flex-1 h-[1.5px] bg-gradient-to-r from-amber-300/80 to-amber-200 dark:from-orange-400/20 dark:to-amber-500/20" />
+                                </div>
+                                {post.companionDetails.dateOfJourney && (
+                                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold tracking-wide">
+                                    {post.companionDetails.dateOfJourney}{post.companionDetails.dateOfReturn ? ` → ${post.companionDetails.dateOfReturn}` : ""}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-center flex-shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/15 flex items-center justify-center mb-1.5 mx-auto">
+                                  <Globe size={15} className="text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">TO</p>
+                                <p className="text-xs font-bold text-slate-700 dark:text-white mt-0.5 max-w-[90px] leading-tight text-center">{post.companionDetails.destination || "—"}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* ── PRO FEATURES ── */}
                         {post.type === "experience" && post.rejectionInsights && (
@@ -585,6 +718,45 @@ const Communities = () => {
                         )}
                         {post.type === "companion" && post.travelReview && (
                           <div className="ml-[52px]"><TravelReview travelReview={post.travelReview} /></div>
+                        )}
+                        {post.type === "companion" && post.companionDetails && (
+                          <div className="ml-[52px] mt-3 flex flex-wrap gap-2">
+                            {post.companionDetails.airlinesName && (
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/[0.06] border border-emerald-200 dark:border-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                                <Plane size={10} /> {post.companionDetails.airlinesName}
+                              </span>
+                            )}
+                            {post.companionDetails.gender && (
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-500/[0.06] border border-violet-200 dark:border-violet-500/15 text-violet-600 dark:text-violet-400 text-[10px] font-bold capitalize">
+                                <User size={10} /> {post.companionDetails.gender}
+                              </span>
+                            )}
+                            {post.companionDetails.languagePreferred && (
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-500/[0.06] border border-sky-200 dark:border-sky-500/15 text-sky-600 dark:text-sky-400 text-[10px] font-bold">
+                                <Globe size={10} /> {post.companionDetails.languagePreferred}
+                              </span>
+                            )}
+                            {post.companionDetails.email && (
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-500/[0.06] border border-pink-200 dark:border-pink-500/15 text-pink-600 dark:text-pink-400 text-[10px] font-bold">
+                                <Mail size={10} /> {post.companionDetails.email}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {post.type === "companion" && post.companionDetails?.message && (
+                          <div className="ml-[52px] mt-3 p-3.5 rounded-xl bg-amber-50/60 dark:bg-amber-500/[0.04] border border-amber-200/60 dark:border-amber-500/10">
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{post.companionDetails.message}"</p>
+                          </div>
+                        )}
+                        {post.type === "companion" && post.companionDetails?.email && (
+                          <div className="ml-[52px] mt-3.5">
+                            <a
+                              href={`mailto:${post.companionDetails.email}?subject=Travel Companion - ${post.companionDetails.destination || "your destination"}&body=Hi%2C%20I%20saw%20your%20post%20on%20SlotPilot%20looking%20for%20a%20travel%20companion.%20I%27d%20love%20to%20connect!`}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-orange-400 transition-all hover:-translate-y-0.5 active:scale-95"
+                            >
+                              <Mail size={13} /> Connect with this Traveler <span className="text-amber-100/80 text-[11px]">→</span>
+                            </a>
+                          </div>
                         )}
                         {post.type === "accommodation" && (() => {
                           const pStatus = taskStatusMap[post.id];
@@ -655,29 +827,12 @@ const Communities = () => {
                           );
                         })()}
 
-                        {/* ── REACTION BAR ── */}
-                        <div className="relative flex items-center justify-between mt-5 ml-[52px]">
-                          <div className="flex items-center gap-2">
-                            <ReactionBubble icon={Heart} count={post.likes || 0} color="text-rose-500 dark:text-rose-400" />
-                            <ReactionBubble icon={MessageSquare} count={post.comments || 0} color="text-blue-500 dark:text-blue-400" />
-                            <ReactionBubble icon={Bookmark} count={0} color="text-amber-500 dark:text-amber-400" />
-                            <ReactionBubble icon={Share2} count={0} color="text-emerald-500 dark:text-emerald-400" />
-                          </div>
+                        {/* ── TIMESTAMP ── */}
+                        <div className="relative mt-4 ml-[52px] flex justify-end">
                           <span className="text-[10px] text-slate-400 dark:text-slate-600 font-semibold">
-                            {post.createdAt?.toDate?.()?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            {post.createdAt?.toDate?.()?.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
-
-                        {/* ── NESTED COMMENT PREVIEW ── */}
-                        {(post.comments || 0) > 0 && (
-                          <div className="relative ml-[52px] mt-4 p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.015] backdrop-blur-lg border border-slate-200/60 dark:border-white/[0.04]">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-5 h-5 rounded-md bg-slate-200 dark:bg-white/[0.04] border border-slate-300 dark:border-white/[0.06] flex items-center justify-center text-[8px] font-bold text-slate-500">SP</div>
-                              <span className="text-[10px] text-slate-500 font-semibold">SlotPilot Team</span>
-                            </div>
-                            <p className="text-xs text-slate-500 leading-relaxed">Thanks for sharing! This is valuable intel for the community. 🙌</p>
-                          </div>
-                        )}
                       </div>
                     </RevealCard>
                   );
@@ -707,72 +862,247 @@ const Communities = () => {
               onClick={() => { setShowModal(false); resetForm(); }}
               className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-2xl" />
 
-            <motion.div initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 30 }}
-              className="relative w-full max-w-lg bg-white/95 dark:bg-[#0a0f1e]/95 backdrop-blur-2xl border border-slate-200 dark:border-white/[0.06] rounded-3xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.88, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.88, y: 40 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-lg overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto
+                bg-white/90 dark:bg-[#0a0f1e]/90
+                backdrop-blur-2xl saturate-[1.4]
+                border border-slate-200/60 dark:border-white/[0.08]
+                shadow-[0_32px_80px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.6)]
+                dark:shadow-[0_32px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]">
 
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="absolute top-6 right-6 text-slate-400 dark:text-slate-600 hover:text-slate-800 dark:hover:text-white transition-colors">
-                <X size={20} />
+              {/* ── Decorative gradient blobs ── */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-400/20 dark:bg-amber-600/15 rounded-full blur-[80px] pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-orange-400/15 dark:bg-orange-600/10 rounded-full blur-[70px] pointer-events-none" />
+              <div className="absolute top-1/2 right-0 w-32 h-32 bg-violet-400/10 dark:bg-violet-600/10 rounded-full blur-[60px] pointer-events-none" />
+
+              {/* ── Close button ── */}
+              <button onClick={() => { setShowModal(false); resetForm(); }}
+                className="absolute top-5 right-5 z-20 p-2 rounded-xl text-slate-400 dark:text-slate-600 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all">
+                <X size={18} />
               </button>
 
-              <div className="flex items-center gap-3 mb-6">
-                {(() => { const s = POST_TYPE_STYLES[activeTab]; const I = s.icon; return (
-                  <div className={`p-2 rounded-xl ${s.badgeBg} border ${s.badgeBorder}`}><I size={18} className={s.badgeText} /></div>
-                ); })()}
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">New Intel</h2>
-                  <p className="text-[9px] text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold">{POST_TYPE_STYLES[activeTab].label}</p>
+              {/* ── Modal Header ── */}
+              <div className="relative px-8 pt-8 pb-5">
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    initial={{ rotate: -10, scale: 0.8 }}
+                    animate={{ rotate: 0, scale: 1 }}
+                    transition={{ delay: 0.15, type: "spring", bounce: 0.5 }}
+                    className={`p-3 rounded-2xl shadow-lg ${activeTab === "companion"
+                      ? "bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/25"
+                      : activeTab === "accommodation"
+                        ? "bg-gradient-to-br from-violet-400 to-purple-600 shadow-violet-500/25"
+                        : "bg-gradient-to-br from-emerald-400 to-teal-600 shadow-emerald-500/25"
+                    }`}>
+                    {(() => { const I = POST_TYPE_STYLES[activeTab].icon; return <I size={22} className="text-white" />; })()}
+                  </motion.div>
+                  <div>
+                    <motion.h2
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {activeTab === "companion" ? "Find a Travel Companion" : activeTab === "accommodation" ? "Share a Hidden Gem" : "Share Visa Experience"}
+                    </motion.h2>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-[10px] text-slate-400 dark:text-slate-600 uppercase tracking-[0.25em] font-bold mt-0.5">
+                      {activeTab === "companion" ? "Connect with fellow travelers" : POST_TYPE_STYLES[activeTab].label}
+                    </motion.p>
+                  </div>
                 </div>
               </div>
 
-              <form onSubmit={handlePostSubmit} className="space-y-3">
-                <input placeholder="Headline"
-                  className="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-sm text-slate-900 dark:text-white"
-                  value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                <input placeholder="Country / Region"
-                  className="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
-                  value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} />
-                <textarea placeholder="Share your intelligence..." rows={3}
-                  className="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-sm text-slate-900 dark:text-white"
-                  value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+              {/* ── Decorative divider ── */}
+              <div className="mx-8 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-white/[0.06] to-transparent" />
 
-                {/* ── EXPERIENCE: Mistake Analysis ── */}
-                {activeTab === "experience" && (
-                  <div className="border border-red-200 dark:border-red-500/10 rounded-xl p-4 space-y-2.5 bg-red-50/50 dark:bg-red-500/[0.02]">
-                    <p className="text-[9px] text-red-500/70 dark:text-red-400/70 font-black uppercase tracking-widest">🔴 Mistake Analysis (Optional)</p>
-                    <input placeholder="Mistake phrase" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeText} onChange={e => setMistakeText(e.target.value)} />
-                    <input placeholder="Why it's wrong" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeExplanation} onChange={e => setMistakeExplanation(e.target.value)} />
-                    <input placeholder="Pro Tip: correct approach" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeProTip} onChange={e => setMistakeProTip(e.target.value)} />
-                    <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={addMistake} disabled={!mistakeText}
-                      className="px-4 py-2 bg-red-100 dark:bg-red-600/15 text-red-600 dark:text-red-300 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-red-200 dark:border-red-500/15 disabled:opacity-20 transition-all">
-                      + Add ({mistakes.length})
-                    </motion.button>
-                  </div>
-                )}
+              {/* ── Form content ── */}
+              <div className="px-8 pt-5 pb-8">
+                <form onSubmit={handlePostSubmit} className="space-y-4">
 
-                {/* ── COMPANION: Travel Review ── */}
-                {activeTab === "companion" && (
-                  <div className="border border-amber-200 dark:border-amber-500/10 rounded-xl p-4 space-y-2.5 bg-amber-50/50 dark:bg-amber-500/[0.02]">
-                    <p className="text-[9px] text-amber-600/70 dark:text-amber-400/70 font-black uppercase tracking-widest">⭐ Review (Optional)</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-600 font-bold mr-1">Rate:</span>
-                      {[1,2,3,4,5].map(n => (
-                        <motion.button key={n} type="button" whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} onClick={() => setTravelRating(n)}>
-                          <Star size={16} className={`cursor-pointer ${n <= travelRating ? "text-amber-400 fill-amber-400" : "text-slate-200 dark:text-white/[0.06]"}`} />
-                        </motion.button>
-                      ))}
-                      {travelRating > 0 && <span className="text-amber-500 dark:text-amber-400 text-[10px] font-bold ml-1">{travelRating}/5</span>}
+                  {/* ═══ COMPANION-SPECIFIC FORM ═══ */}
+                  {activeTab === "companion" ? (
+                    <div className="space-y-4">
+
+                      {/* ── Route Section ── */}
+                      <div>
+                        <p className="text-[9px] text-amber-500/70 dark:text-amber-400/60 font-black uppercase tracking-[0.2em] mb-2.5 ml-1 flex items-center gap-1.5">
+                          <Globe size={10} /> Route
+                        </p>
+                        <div className="relative space-y-2.5">
+                          {/* Vertical connector line */}
+                          <div className="absolute left-[22px] top-[18px] bottom-[18px] w-px bg-gradient-to-b from-amber-400/40 via-amber-400/20 to-amber-400/40 dark:from-amber-400/30 dark:via-amber-400/10 dark:to-amber-400/30" />
+
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                              <div className="w-[11px] h-[11px] rounded-full bg-amber-400 border-2 border-white dark:border-[#0a0f1e] shadow-sm shadow-amber-400/40" />
+                            </div>
+                            <input placeholder="Departure From (City) *" autoFocus
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-12 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
+                              value={companionData.departureFrom} onChange={e => setCompanionData({ ...companionData, departureFrom: e.target.value })} />
+                          </div>
+
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                              <div className="w-[11px] h-[11px] rounded-full bg-orange-500 border-2 border-white dark:border-[#0a0f1e] shadow-sm shadow-orange-500/40" />
+                            </div>
+                            <input placeholder="Destination *"
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-12 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-sm text-slate-900 dark:text-white"
+                              value={companionData.destination} onChange={e => setCompanionData({ ...companionData, destination: e.target.value })} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Dates Section ── */}
+                      <div>
+                        <p className="text-[9px] text-amber-500/70 dark:text-amber-400/60 font-black uppercase tracking-[0.2em] mb-2.5 ml-1 flex items-center gap-1.5">
+                          <Calendar size={10} /> Travel Dates
+                        </p>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <div>
+                            <label className="block text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1.5 ml-1">Date of Journey <span className="text-red-500">*</span></label>
+                            <div className="relative">
+                              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 dark:text-amber-400"><Calendar size={14} /></div>
+                              <input type="date"
+                                className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-10 pr-3 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all text-xs text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                                value={companionData.dateOfJourney} onChange={e => setCompanionData({ ...companionData, dateOfJourney: e.target.value })} />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1.5 ml-1">Date of Return <span className="text-slate-300 dark:text-slate-700">(optional)</span></label>
+                            <div className="relative">
+                              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-600"><Calendar size={14} /></div>
+                              <input type="date"
+                                className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-10 pr-3 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all text-xs text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                                value={companionData.dateOfReturn} onChange={e => setCompanionData({ ...companionData, dateOfReturn: e.target.value })} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Flight & Traveler Section ── */}
+                      <div>
+                        <p className="text-[9px] text-amber-500/70 dark:text-amber-400/60 font-black uppercase tracking-[0.2em] mb-2.5 ml-1 flex items-center gap-1.5">
+                          <Plane size={10} /> Flight & Traveler
+                        </p>
+                        <div className="space-y-2.5">
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 dark:text-amber-400"><Plane size={15} /></div>
+                            <input placeholder="Airlines Name *"
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
+                              value={companionData.airlinesName} onChange={e => setCompanionData({ ...companionData, airlinesName: e.target.value })} />
+                          </div>
+                          <div className="relative">
+                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 dark:text-amber-400"><User size={14} /></div>
+                            <select
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-10 pr-4 py-3.5 rounded-xl outline-none text-xs font-medium text-slate-900 dark:text-white appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 transition-all"
+                              value={companionData.gender} onChange={e => setCompanionData({ ...companionData, gender: e.target.value })}
+                            >
+                              <option value="">Select Gender *</option>
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                              <option value="other">Other</option>
+                              <option value="prefer-not">Prefer not to say</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Contact & Preferences Section ── */}
+                      <div>
+                        <p className="text-[9px] text-amber-500/70 dark:text-amber-400/60 font-black uppercase tracking-[0.2em] mb-2.5 ml-1 flex items-center gap-1.5">
+                          <Mail size={10} /> Contact & Preferences
+                        </p>
+                        <div className="space-y-2.5">
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 dark:text-amber-400"><Mail size={14} /></div>
+                            <input type="email" placeholder="Email Address *"
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
+                              value={companionData.email} onChange={e => setCompanionData({ ...companionData, email: e.target.value })} />
+                          </div>
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 dark:text-amber-400"><Globe size={14} /></div>
+                            <input placeholder="Language Preferred (e.g. English, Hindi) *"
+                              className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
+                              value={companionData.languagePreferred} onChange={e => setCompanionData({ ...companionData, languagePreferred: e.target.value })} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Message Section ── */}
+                      <div>
+                        <p className="text-[9px] text-amber-500/70 dark:text-amber-400/60 font-black uppercase tracking-[0.2em] mb-2.5 ml-1 flex items-center gap-1.5">
+                          <MessageSquare size={10} /> Your Message <span className="text-red-500">*</span>
+                        </p>
+                        <textarea placeholder="Tell others about your trip plans, interests, and what kind of companion you're looking for..." rows={3}
+                          className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 dark:focus:border-amber-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-sm text-slate-900 dark:text-white"
+                          value={companionData.message} onChange={e => setCompanionData({ ...companionData, message: e.target.value })} />
+                      </div>
+
+                      {/* ── Error Message ── */}
+                      <AnimatePresence>
+                        {companionError && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                            className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-500/[0.06] border border-red-200 dark:border-red-500/15"
+                          >
+                            <AlertTriangle size={14} className="text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-red-600 dark:text-red-400 font-medium leading-relaxed">{companionError}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                    <textarea placeholder="Pros (one per line)" rows={2} className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-slate-900 dark:text-white" value={travelPros} onChange={e => setTravelPros(e.target.value)} />
-                    <textarea placeholder="Cons (one per line)" rows={2} className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-slate-900 dark:text-white" value={travelCons} onChange={e => setTravelCons(e.target.value)} />
-                    <textarea placeholder="Hidden Gems (one per line)" rows={2} className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-slate-900 dark:text-white" value={travelGems} onChange={e => setTravelGems(e.target.value)} />
-                  </div>
-                )}
+                  ) : (
+                    /* ═══ DEFAULT FORM (experience / accommodation) ═══ */
+                    <>
+                      <input placeholder="Headline"
+                        className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-sm text-slate-900 dark:text-white"
+                        value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                      <input placeholder="Country / Region"
+                        className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 text-sm text-slate-900 dark:text-white"
+                        value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} />
+                      <textarea placeholder="Share your intelligence..." rows={3}
+                        className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 resize-none text-sm text-slate-900 dark:text-white"
+                        value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+                    </>
+                  )}
 
-                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} disabled={isSubmitting} type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/15 uppercase tracking-wider mt-2">
-                  {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <><Send size={14} /> Post Intel</>}
-                </motion.button>
-              </form>
+                  {/* ── EXPERIENCE: Mistake Analysis ── */}
+                  {activeTab === "experience" && (
+                    <div className="border border-red-200 dark:border-red-500/10 rounded-xl p-4 space-y-2.5 bg-red-50/50 dark:bg-red-500/[0.02]">
+                      <p className="text-[9px] text-red-500/70 dark:text-red-400/70 font-black uppercase tracking-widest">🔴 Mistake Analysis (Optional)</p>
+                      <input placeholder="Mistake phrase" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeText} onChange={e => setMistakeText(e.target.value)} />
+                      <input placeholder="Why it's wrong" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeExplanation} onChange={e => setMistakeExplanation(e.target.value)} />
+                      <input placeholder="Pro Tip: correct approach" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeProTip} onChange={e => setMistakeProTip(e.target.value)} />
+                      <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={addMistake} disabled={!mistakeText}
+                        className="px-4 py-2 bg-red-100 dark:bg-red-600/15 text-red-600 dark:text-red-300 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-red-200 dark:border-red-500/15 disabled:opacity-20 transition-all">
+                        + Add ({mistakes.length})
+                      </motion.button>
+                    </div>
+                  )}
+
+                  {/* ── Submit Button ── */}
+                  <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.97 }} disabled={isSubmitting} type="submit"
+                    className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all uppercase tracking-wider mt-3
+                      shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
+                      ${activeTab === "companion"
+                        ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:via-orange-400 hover:to-amber-400 shadow-amber-600/20"
+                        : activeTab === "accommodation"
+                          ? "bg-gradient-to-r from-violet-500 via-purple-600 to-violet-500 hover:from-violet-400 hover:via-purple-500 hover:to-violet-400 shadow-violet-600/20"
+                          : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 shadow-blue-600/20"
+                      } text-white disabled:opacity-40 disabled:cursor-not-allowed`}>
+                    {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <><Send size={14} /> {activeTab === "companion" ? "Submit Request" : activeTab === "accommodation" ? "Share Gem" : "Post Intel"}</>}
+                  </motion.button>
+                </form>
+              </div>
             </motion.div>
           </div>
         )}
