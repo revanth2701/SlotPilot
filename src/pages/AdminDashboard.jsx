@@ -60,13 +60,19 @@ const AdminDashboard = () => {
   /* ── Supabase state (Recruitment) ── */
   const [studentsData, setStudentsData] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [studentsSearch, setStudentsSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [docLoading, setDocLoading] = useState(false);
 
   /* ── Supabase state (Visas) ── */
   const [visaData, setVisaData] = useState([]);
   const [visaLoading, setVisaLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  /* ── Supabase state (Enquiries) ── */
+  const [enquiriesData, setEnquiriesData] = useState([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(false);
+  const [enquiriesSearch, setEnquiriesSearch] = useState("");
 
   /* ── Mobile detection ── */
   const [isMobile, setIsMobile] = useState(
@@ -135,12 +141,22 @@ const AdminDashboard = () => {
     finally { setVisaExperiencesLoading(false); }
   };
 
+  const fetchEnquiries = async () => {
+    setEnquiriesLoading(true);
+    try {
+      const { data, error } = await supabase.from("PersonalisedGuidance").select("*");
+      if (error) { console.error("Enquiries fetch error:", error); setEnquiriesData([]); }
+      else setEnquiriesData(Array.isArray(data) ? data : []);
+    } catch (e) { console.error("Enquiries fetch exception:", e); setEnquiriesData([]); }
+    finally { setEnquiriesLoading(false); }
+  };
+
   /* ── Fetch all on initial auth ── */
   useEffect(() => {
-    if (authenticated) { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); }
+    if (authenticated) { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); fetchEnquiries(); }
   }, [authenticated]);
 
-  const refreshAll = () => { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); };
+  const refreshAll = () => { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); fetchEnquiries(); };
 
   /* ──────────────── FIREBASE ACTIONS ──────────────── */
   const handleVerify = async (postId) => {
@@ -226,8 +242,19 @@ const AdminDashboard = () => {
     return String(val);
   };
 
+  const exportStudentsAsCSV = () => {
+    if (!studentsData || studentsData.length === 0) { alert("No student data to download."); return; }
+    const cols = Array.from(new Set(studentsData.flatMap(Object.keys)));
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return "";
+      const str = typeof val === "object" ? JSON.stringify(val) : String(val);
+      return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+    };
+    const csv = [cols.map(escapeCsv).join(","), ...studentsData.map(row => cols.map(col => escapeCsv(row[col])).join(","))].join("\r\n");
+    saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), `students_${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
   const exportVisasAsCSV = () => {
-    if (!visaData || visaData.length === 0) { alert("No visa data to download."); return; }
     const cols = Array.from(new Set(visaData.flatMap(Object.keys)));
     const escapeCsv = (val) => {
       if (val === null || val === undefined) return "";
@@ -238,15 +265,28 @@ const AdminDashboard = () => {
     saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), `visa_applications_${new Date().toISOString().slice(0, 10)}.csv`);
   };
 
+  const exportEnquiriesAsCSV = () => {
+    if (!enquiriesData || enquiriesData.length === 0) { alert("No enquiry data to download."); return; }
+    const cols = Array.from(new Set(enquiriesData.flatMap(Object.keys)));
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return "";
+      const str = typeof val === "object" ? JSON.stringify(val) : String(val);
+      return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+    };
+    const csv = [cols.map(escapeCsv).join(","), ...enquiriesData.map(row => cols.map(col => escapeCsv(row[col])).join(","))].join("\r\n");
+    saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), `enquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
   /* ──────────────── COMPUTED ──────────────── */
   const unverifiedPosts = posts.filter(p => !p.verified);
   const verifiedPosts = posts.filter(p => p.verified);
   const visaCols = visaData.length ? Array.from(new Set(visaData.flatMap(Object.keys))) : [];
 
-  const filteredStudents = studentsData.filter(s =>
-    (((s?.["First Name"] || "") + " " + (s?.["Last Name"] || "")).toLowerCase().includes(searchTerm.toLowerCase())) ||
-    ((s?.Email || "").toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredStudents = studentsData.filter(s => {
+    const q = studentsSearch.trim().toLowerCase();
+    if (!q) return true;
+    return Object.values(s).some(v => (v == null ? "" : String(v)).toLowerCase().includes(q));
+  });
 
   const filteredVisa = visaData.filter((row) => {
     const q = searchTerm.trim().toLowerCase();
@@ -254,7 +294,12 @@ const AdminDashboard = () => {
     return Object.values(row).some(v => (v == null ? "" : String(v)).toLowerCase().includes(q));
   });
 
-  /* Login gate removed — authentication is handled by EmployerLoginRegister */
+  const filteredEnquiries = enquiriesData.filter((row) => {
+    const q = enquiriesSearch.trim().toLowerCase();
+    if (!q) return true;
+    return Object.values(row).some(v => (v == null ? "" : String(v)).toLowerCase().includes(q));
+  });
+  const enquiryCols = enquiriesData.length ? Array.from(new Set(enquiriesData.flatMap(Object.keys))) : [];
 
   /* ════════════════════════════════════════════
      UNIFIED DASHBOARD
@@ -263,6 +308,7 @@ const AdminDashboard = () => {
     { id: "hq", label: "Communities", icon: <Shield size={16} /> },
     { id: "recruitment", label: "Students", icon: <Users size={16} /> },
     { id: "visas", label: "Visas", icon: <Globe size={16} /> },
+    { id: "enquiries", label: "Enquiries", icon: <Mail size={16} /> },
   ];
 
   const statCards = [
@@ -272,6 +318,7 @@ const AdminDashboard = () => {
     { label: "Accommodation Tasks", value: tasks.length, color: "text-violet-600 dark:text-violet-400", icon: <Home size={16} />, tab: "hq" },
     { label: "Students", value: studentsData.length, color: "text-cyan-600 dark:text-cyan-400", icon: <GraduationCap size={16} />, tab: "recruitment" },
     { label: "Visa Apps", value: visaData.length, color: "text-rose-600 dark:text-rose-400", icon: <Briefcase size={16} />, tab: "visas" },
+    { label: "Enquiries", value: enquiriesData.length, color: "text-amber-600 dark:text-amber-400", icon: <Mail size={16} />, tab: "enquiries" },
   ];
 
   return (
@@ -410,12 +457,15 @@ const AdminDashboard = () => {
           <TabPanel tabKey="recruitment">
             <RecruitmentTab
               studentsLoading={studentsLoading}
+              studentsData={studentsData}
               filteredStudents={filteredStudents}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
+              studentsSearch={studentsSearch}
+              setStudentsSearch={setStudentsSearch}
+              exportStudentsAsCSV={exportStudentsAsCSV}
               downloadStudentDocuments={downloadStudentDocuments}
               docLoading={docLoading}
               selectedStudent={selectedStudent}
+              fetchStudents={fetchStudents}
               isMobile={isMobile}
             />
           </TabPanel>
@@ -434,6 +484,24 @@ const AdminDashboard = () => {
               exportVisasAsCSV={exportVisasAsCSV}
               formatCell={formatCell}
               fetchVisas={fetchVisas}
+              isMobile={isMobile}
+            />
+          </TabPanel>
+        )}
+
+        {/* ── ENQUIRIES ── */}
+        {activeTab === "enquiries" && (
+          <TabPanel tabKey="enquiries">
+            <EnquiriesTab
+              enquiriesData={enquiriesData}
+              enquiriesLoading={enquiriesLoading}
+              filteredEnquiries={filteredEnquiries}
+              enquiryCols={enquiryCols}
+              enquiriesSearch={enquiriesSearch}
+              setEnquiriesSearch={setEnquiriesSearch}
+              exportEnquiriesAsCSV={exportEnquiriesAsCSV}
+              formatCell={formatCell}
+              fetchEnquiries={fetchEnquiries}
               isMobile={isMobile}
             />
           </TabPanel>
@@ -690,79 +758,124 @@ const HqCommandTab = ({
    RECRUITMENT TAB (Student Applications)
    ═══════════════════════════════════════════════ */
 const RecruitmentTab = ({
-  studentsLoading, filteredStudents, searchTerm, setSearchTerm,
-  downloadStudentDocuments, docLoading, selectedStudent, isMobile
-}) => (
+  studentsLoading, studentsData, filteredStudents, studentsSearch, setStudentsSearch,
+  exportStudentsAsCSV, downloadStudentDocuments, docLoading, selectedStudent, fetchStudents, isMobile
+}) => {
+  const COLS = [
+    { key: "First Name",             label: "First Name" },
+    { key: "Last Name",              label: "Last Name" },
+    { key: "Email",                  label: "Email" },
+    { key: "contact Number",         label: "Contact No." },
+    { key: "Date of Birth",          label: "Date of Birth" },
+    { key: "Address",                label: "Address" },
+    { key: "Passport Number",        label: "Passport No." },
+    { key: "Issued Date",            label: "Issued Date" },
+    { key: "Expiry Date",            label: "Expiry Date" },
+    { key: "Emergency Contact",      label: "Emergency Contact" },
+    { key: "Emergency Contact Name", label: "Emerg. Name" },
+  ];
+  // Only show columns that actually exist in the data
+  const activeCols = studentsData.length
+    ? COLS.filter(c => studentsData.some(s => s[c.key] != null && s[c.key] !== ""))
+    : COLS;
+
+  return (
   <div>
-    {/* Search */}
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+    {/* Header */}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
       <div>
-        <h2 className="text-lg sm:text-xl font-black text-white">Student Applications</h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Manage and review student applications for international studies</p>
+        <h2 className="text-lg sm:text-xl font-black text-white">Students</h2>
+        <p className="text-xs sm:text-sm text-slate-500">All registered student profiles from Studentpersonaldata</p>
       </div>
-      <div className="relative w-full sm:w-64">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-        <Input placeholder="Search students..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)}
-          className="pl-10 w-full border-white/10 rounded-xl text-white placeholder:text-slate-500"
-          style={{background:'rgba(255,255,255,0.07)'}} />
+      <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="relative flex-1 sm:w-64">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <Input placeholder="Search students..." value={studentsSearch} onChange={(e) => setStudentsSearch(e.target.value)}
+            className="pl-10 w-full border-white/10 rounded-xl text-white placeholder:text-slate-500"
+            style={{background:'rgba(255,255,255,0.07)'}} />
+        </div>
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}
+          onClick={fetchStudents}
+          className="p-2.5 border border-white/10 rounded-xl hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-300"
+          style={{background:'rgba(255,255,255,0.06)'}}>
+          <RefreshCw size={16} />
+        </motion.button>
       </div>
     </div>
 
+    {/* Summary + Export */}
+    <div className="flex flex-wrap items-center gap-3 mb-6">
+      <span className="px-3 py-1.5 border border-white/10 rounded-xl text-sm font-bold text-cyan-300 backdrop-blur-sm" style={{background:'rgba(255,255,255,0.05)'}}>Total: {studentsData.length}</span>
+      <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+        onClick={exportStudentsAsCSV}
+        disabled={studentsLoading || studentsData.length === 0}
+        className="ml-auto px-4 py-2 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 min-h-[40px]"
+        style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
+        <Download size={14} />
+        Export CSV
+      </motion.button>
+    </div>
+
     {/* Table */}
-      <div className="border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm backdrop-blur-sm" style={{background:'rgba(255,255,255,0.04)'}}>
+    <div className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
       {studentsLoading ? (
         <div className="flex items-center justify-center py-16 sm:py-20">
           <Loader2 className="animate-spin text-blue-500" size={32} />
         </div>
       ) : !isMobile ? (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-slate-200 dark:border-white/[0.08]">
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Student Name</TableHead>
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Contact</TableHead>
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Passport</TableHead>
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Expiry</TableHead>
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Issued</TableHead>
-                <TableHead className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="overflow-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead className="sticky top-0 z-20 backdrop-blur-sm" style={{background:'rgba(10,5,35,0.92)'}}>
+              <tr>
+                {activeCols.map(c => (
+                  <th key={c.key} className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                    {c.label}
+                  </th>
+                ))}
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Docs</th>
+              </tr>
+            </thead>
+            <tbody>
               {filteredStudents.length === 0 ? (
-                <TableRow className="border-white/5">
-                  <TableCell colSpan={6} className="text-center py-12 text-slate-400">No students found.</TableCell>
-                </TableRow>
+                <tr>
+                  <td colSpan={activeCols.length + 1} className="px-6 py-12 text-center">
+                    <div className="inline-flex flex-col items-center gap-2">
+                      <GraduationCap size={40} className="text-slate-300 dark:text-slate-700" />
+                      <div className="text-sm font-medium text-slate-500">No students found</div>
+                    </div>
+                  </td>
+                </tr>
               ) : filteredStudents.map((student, idx) => (
-                <TableRow key={(student.Email||"") + idx} className="border-white/[0.04] hover:bg-white/[0.03] transition-colors">
-                  <TableCell>
-                    <p className="font-bold text-white">{student["First Name"]} {student["Last Name"]}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{student.Email}</p>
-                  </TableCell>
-                  <TableCell className="text-slate-300">{student["contact Number"]}</TableCell>
-                  <TableCell className="font-mono text-sm text-slate-200">{student["Passport Number"]}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-bold border border-blue-200 dark:border-blue-500/20">
-                      {student["Expiry Date"]}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-300">{student["Issued Date"]}</TableCell>
-                  <TableCell>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.92 }}
+                <tr key={(student.Email || "") + idx} className="border-t border-slate-100 dark:border-white/[0.04] hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                  {activeCols.map(c => (
+                    <td key={c.key} className="px-4 py-3 align-top text-sm text-slate-300 break-words max-w-[200px]">
+                      {c.key === "Expiry Date" ? (
+                        <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full text-[10px] font-bold border border-blue-500/20">
+                          {student[c.key] || "—"}
+                        </span>
+                      ) : c.key === "Email" ? (
+                        <span className="text-slate-300 text-xs">{student[c.key] || "—"}</span>
+                      ) : c.key === "Passport Number" ? (
+                        <span className="font-mono text-sm text-slate-200">{student[c.key] || "—"}</span>
+                      ) : (
+                        student[c.key] != null && student[c.key] !== "" ? String(student[c.key]) : "—"
+                      )}
+                    </td>
+                  ))}
+                  <td className="px-4 py-3 align-top">
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}
                       onClick={() => downloadStudentDocuments(student)}
                       disabled={docLoading && selectedStudent?.Email === student.Email}
                       className="px-3 py-1.5 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-indigo-500/20 transition-all disabled:opacity-50 min-h-[36px]"
-                      style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
-                    >
+                      style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
                       <Download size={12} />
                       {docLoading && selectedStudent?.Email === student.Email ? "..." : "Docs"}
                     </motion.button>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       ) : (
         /* Mobile card view */
@@ -770,19 +883,21 @@ const RecruitmentTab = ({
           {filteredStudents.length === 0 ? (
             <div className="text-center py-12 text-slate-500 text-sm">No students found.</div>
           ) : filteredStudents.map((student, idx) => (
-          <div key={(student.Email||"") + idx} className="rounded-xl p-4 border border-white/10" style={{background:'rgba(255,255,255,0.05)'}}>
+            <div key={(student.Email || "") + idx} className="rounded-xl p-4 border border-white/10" style={{background:'rgba(255,255,255,0.05)'}}>
               <p className="font-bold text-white">{student["First Name"]} {student["Last Name"]}</p>
-              <p className="text-xs text-slate-500 mb-2">{student.Email}</p>
-              <div className="grid grid-cols-2 gap-2 text-xs text-slate-400 mb-3">
-                <span>📞 {student["contact Number"] || "—"}</span>
-                <span>🛂 {student["Passport Number"] || "—"}</span>
+              <p className="text-xs text-slate-500 mb-3">{student.Email}</p>
+              <div className="grid grid-cols-1 gap-1.5 mb-3">
+                {activeCols.filter(c => !["First Name","Last Name","Email"].includes(c.key)).map(c => (
+                  <div key={c.key} className="flex justify-between items-start text-xs">
+                    <span className="text-slate-400 mr-2 font-medium">{c.label}</span>
+                    <span className="text-right text-slate-300">{student[c.key] != null && student[c.key] !== "" ? String(student[c.key]) : "—"}</span>
+                  </div>
+                ))}
               </div>
-              <button
-                onClick={() => downloadStudentDocuments(student)}
+              <button onClick={() => downloadStudentDocuments(student)}
                 disabled={docLoading && selectedStudent?.Email === student.Email}
-              className="w-full px-3 py-2 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] disabled:opacity-50"
-                style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
-              >
+                className="w-full px-3 py-2 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] disabled:opacity-50"
+                style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
                 <Download size={12} />
                 {docLoading && selectedStudent?.Email === student.Email ? "Downloading..." : "Download Docs"}
               </button>
@@ -792,7 +907,8 @@ const RecruitmentTab = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 /* ═══════════════════════════════════════════════
    VISAS TAB (Visa Applications)
@@ -931,3 +1047,128 @@ const VisasTab = ({
 );
 
 export default AdminDashboard;
+
+/* ═══════════════════════════════════════════════
+   ENQUIRIES TAB (Personalised Guidance)
+   ═══════════════════════════════════════════════ */
+const EnquiriesTab = ({
+  enquiriesData, enquiriesLoading, filteredEnquiries, enquiryCols,
+  enquiriesSearch, setEnquiriesSearch, exportEnquiriesAsCSV, formatCell, fetchEnquiries, isMobile
+}) => (
+  <div>
+    {/* Header */}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+      <div>
+        <h2 className="text-lg sm:text-xl font-black text-white">Enquiries</h2>
+        <p className="text-xs sm:text-sm text-slate-500">All personalised guidance submissions</p>
+      </div>
+      <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="relative flex-1 sm:w-64">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <Input placeholder="Search enquiries..." value={enquiriesSearch} onChange={(e) => setEnquiriesSearch(e.target.value)}
+            className="pl-10 w-full border-white/10 rounded-xl text-white placeholder:text-slate-500"
+            style={{background:'rgba(255,255,255,0.07)'}} />
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}
+          onClick={fetchEnquiries}
+          className="p-2.5 border border-white/10 rounded-xl hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-300"
+          style={{background:'rgba(255,255,255,0.06)'}}
+        >
+          <RefreshCw size={16} />
+        </motion.button>
+      </div>
+    </div>
+
+    {/* Summary chips + Export */}
+    <div className="flex flex-wrap items-center gap-3 mb-6">
+      <span className="px-3 py-1.5 border border-white/10 rounded-xl text-sm font-bold text-amber-300 backdrop-blur-sm" style={{background:'rgba(255,255,255,0.05)'}}>Total: {enquiriesData.length}</span>
+      <motion.button
+        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+        onClick={exportEnquiriesAsCSV}
+        disabled={enquiriesLoading || enquiriesData.length === 0}
+        className="ml-auto px-4 py-2 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 min-h-[40px]"
+        style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
+      >
+        <Download size={14} />
+        Export CSV
+      </motion.button>
+    </div>
+
+    {/* Table */}
+    <div className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-sm border border-slate-200 dark:border-white/[0.08] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
+      {enquiriesLoading ? (
+        <div className="flex items-center justify-center py-16 sm:py-20">
+          <Loader2 className="animate-spin text-blue-500" size={32} />
+        </div>
+      ) : !isMobile ? (
+        <div className="overflow-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead className="sticky top-0 z-20 backdrop-blur-sm" style={{background:'rgba(10,5,35,0.92)'}}>
+              <tr>
+                {enquiryCols.length === 0 ? (
+                  <th className="px-4 py-3 text-left text-sm text-slate-400">No Columns</th>
+                ) : enquiryCols.map(col => (
+                  <th key={col} className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {enquiriesData.length === 0 ? (
+                <tr>
+                  <td colSpan={enquiryCols.length || 1} className="px-6 py-12 text-center">
+                    <div className="inline-flex flex-col items-center gap-2">
+                      <Mail size={40} className="text-slate-300 dark:text-slate-700" />
+                      <div className="text-sm font-medium text-slate-500">No enquiries yet</div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredEnquiries.map((row, i) => (
+                  <tr key={i} className="border-t border-slate-100 dark:border-white/[0.04] hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                    {enquiryCols.map(col => (
+                      <td key={col} className="px-4 py-3 align-top text-sm text-slate-300 break-words max-w-[220px]">
+                        {formatCell(row[col])}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        /* Mobile card view */
+        <div className="p-3 space-y-3">
+          {enquiriesData.length === 0 ? (
+            <div className="text-center py-12">
+              <Mail size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+              <p className="text-sm text-slate-500">No enquiries yet</p>
+            </div>
+          ) : filteredEnquiries.map((row, idx) => (
+            <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/[0.06] shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] text-slate-400 font-bold">#{idx + 1}</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {formatCell(row["Student Name"] || row["Email Id"] || "Enquiry")}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-1.5">
+                {enquiryCols.slice(0, 6).map(col => (
+                  <div key={col} className="flex justify-between items-start text-xs">
+                    <span className="text-slate-400 mr-2 truncate font-medium">{col}</span>
+                    <span className="text-right text-slate-700 dark:text-slate-300 break-words">{formatCell(row[col])}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
