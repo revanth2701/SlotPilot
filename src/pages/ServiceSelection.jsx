@@ -274,7 +274,7 @@ const ServiceSelection = () => {
               </div>
             </div>
 
-            {/* Right Column: Theme Toggle & Employer Login */}
+            {/* Right Column: Theme Toggle */}
             <div className="w-auto md:w-40 flex justify-end items-center gap-2 sm:gap-4">
               {/* Theme Switcher Button */}
               <Button
@@ -291,19 +291,6 @@ const ServiceSelection = () => {
                 ) : (
                   <Moon className="h-[1.2rem] w-[1.2rem] text-slate-700 transition-all" />
                 )}
-              </Button>
-
-              {/* Employer Login Button (Desktop) */}
-
-
-              {/* Employer Login Icon (Mobile) */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigate('/employer-login')}
-                className="sm:hidden rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center p-0"
-              >
-                <Users className="h-4 w-4" />
               </Button>
             </div>
 
