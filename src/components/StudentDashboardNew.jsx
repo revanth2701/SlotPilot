@@ -775,7 +775,7 @@ const StudentDashboardNew = ({ onBack }) => {
         </div>
 
         {/* \u2500\u2500 Stat chips \u2500\u2500 */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-7 sdn-rise" style={{animationDelay:'0.08s'}}>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-7 sdn-rise" style={{animationDelay:'0.08s'}}>
           <div className="rounded-2xl p-4 sdn-glass border border-white/10 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Profile</span>
@@ -799,18 +799,6 @@ const StudentDashboardNew = ({ onBack }) => {
             <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full rounded-full bg-emerald-500 transition-all duration-700" style={{width:`${Math.round(uploadedCount/9*100)}%`}} />
             </div>
-          </div>
-          <div className="rounded-2xl p-4 sdn-glass border border-white/10 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${applicationSubmitted ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-amber-100 dark:bg-amber-900/40'}`}>
-                {applicationSubmitted ? <CheckCircle className="w-3.5 h-3.5 text-blue-500" /> : <Clock className="w-3.5 h-3.5 text-amber-500" />}
-              </div>
-            </div>
-            <p className={`text-sm font-black ${applicationSubmitted ? 'text-blue-300' : 'text-amber-300'}`}>
-              {applicationSubmitted ? 'Submitted' : 'In Progress'}
-            </p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{applicationSubmitted ? 'Under review' : 'Pending docs'}</p>
           </div>
         </div>
 
