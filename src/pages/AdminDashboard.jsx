@@ -52,6 +52,11 @@ const AdminDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [tasksLoading, setTasksLoading] = useState(true);
 
+  /* ── Supabase state (Visa Experiences) ── */
+  const [visaExperiencesData, setVisaExperiencesData] = useState([]);
+  const [visaExperiencesLoading, setVisaExperiencesLoading] = useState(false);
+  const [verifyingExp, setVerifyingExp] = useState(null);
+
   /* ── Supabase state (Recruitment) ── */
   const [studentsData, setStudentsData] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
@@ -121,12 +126,21 @@ const AdminDashboard = () => {
     finally { setVisaLoading(false); }
   };
 
+  const fetchVisaExperiences = async () => {
+    setVisaExperiencesLoading(true);
+    try {
+      const { data, error } = await supabase.from("VisaExperiences").select("*").order("id", { ascending: false });
+      setVisaExperiencesData(!error && data ? data : []);
+    } catch { setVisaExperiencesData([]); }
+    finally { setVisaExperiencesLoading(false); }
+  };
+
   /* ── Fetch all on initial auth ── */
   useEffect(() => {
-    if (authenticated) { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); }
+    if (authenticated) { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); }
   }, [authenticated]);
 
-  const refreshAll = () => { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); };
+  const refreshAll = () => { fetchPosts(); fetchTasks(); fetchStudents(); fetchVisas(); fetchVisaExperiences(); };
 
   /* ──────────────── FIREBASE ACTIONS ──────────────── */
   const handleVerify = async (postId) => {
@@ -138,6 +152,15 @@ const AdminDashboard = () => {
       setPosts(prev => prev.map(p => (p.id === postId ? { ...p, verified: true } : p)));
     } catch (e) { console.error(e); }
     finally { setVerifying(null); }
+  };
+
+  const handleVerifyVisaExperience = async (id) => {
+    setVerifyingExp(id);
+    try {
+      const { error } = await supabase.from("VisaExperiences").update({ verified: true }).eq("id", id);
+      if (!error) setVisaExperiencesData(prev => prev.map(e => e.id === id ? { ...e, verified: true } : e));
+    } catch (e) { console.error(e); }
+    finally { setVerifyingExp(null); }
   };
 
   
@@ -243,10 +266,10 @@ const AdminDashboard = () => {
   ];
 
   const statCards = [
-    { label: "Unverified", value: unverifiedPosts.length, color: "text-amber-600 dark:text-amber-400", icon: <AlertTriangle size={16} />, tab: "hq" },
-    { label: "Verified", value: verifiedPosts.length, color: "text-emerald-600 dark:text-emerald-400", icon: <CheckCircle size={16} />, tab: "hq" },
-    { label: "Total Posts", value: posts.length, color: "text-blue-600 dark:text-blue-400", icon: <MessageSquare size={16} />, tab: "hq" },
-    { label: "Stays Tasks", value: tasks.length, color: "text-violet-600 dark:text-violet-400", icon: <Home size={16} />, tab: "hq" },
+    { label: "Pending Review", value: visaExperiencesData.filter(e => !e.verified).length, color: "text-amber-600 dark:text-amber-400", icon: <AlertTriangle size={16} />, tab: "hq" },
+    { label: "Verified", value: visaExperiencesData.filter(e => e.verified).length, color: "text-emerald-600 dark:text-emerald-400", icon: <CheckCircle size={16} />, tab: "hq" },
+    { label: "Total Experiences", value: visaExperiencesData.length, color: "text-blue-600 dark:text-blue-400", icon: <MessageSquare size={16} />, tab: "hq" },
+    { label: "Accommodation Tasks", value: tasks.length, color: "text-violet-600 dark:text-violet-400", icon: <Home size={16} />, tab: "hq" },
     { label: "Students", value: studentsData.length, color: "text-cyan-600 dark:text-cyan-400", icon: <GraduationCap size={16} />, tab: "recruitment" },
     { label: "Visa Apps", value: visaData.length, color: "text-rose-600 dark:text-rose-400", icon: <Briefcase size={16} />, tab: "visas" },
   ];
@@ -371,12 +394,10 @@ const AdminDashboard = () => {
           <TabPanel tabKey="hq">
             {/* Sub-section toggle for Verify / Stays */}
             <HqCommandTab
-              posts={posts}
-              postsLoading={postsLoading}
-              unverifiedPosts={unverifiedPosts}
-              verifiedPosts={verifiedPosts}
-              verifying={verifying}
-              handleVerify={handleVerify}
+              visaExperiencesData={visaExperiencesData}
+              visaExperiencesLoading={visaExperiencesLoading}
+              verifyingExp={verifyingExp}
+              handleVerifyVisaExperience={handleVerifyVisaExperience}
               tasks={tasks}
               tasksLoading={tasksLoading}
               handleTaskStatus={handleTaskStatus}
@@ -427,8 +448,8 @@ const AdminDashboard = () => {
    HQ COMMAND TAB (Verify Posts + Stays Tasks)
    ═══════════════════════════════════════════════ */
 const HqCommandTab = ({
-  posts, postsLoading, unverifiedPosts, verifiedPosts,
-  verifying, handleVerify, tasks, tasksLoading, handleTaskStatus
+  visaExperiencesData, visaExperiencesLoading, verifyingExp, handleVerifyVisaExperience,
+  tasks, tasksLoading, handleTaskStatus
 }) => {
   const [hqView, setHqView] = useState("verify");
 
@@ -436,7 +457,7 @@ const HqCommandTab = ({
     <div>
       {/* Sub-nav */}
       <div className="flex gap-2 mb-6">
-        {[{id:"verify",label:"Verify Posts",icon:<CheckCircle size={14}/>},{id:"tasks",label:"Stays Tasks",icon:<Home size={14}/>}].map((sub)=>(
+        {[{id:"verify",label:"Visa Experiences",icon:<CheckCircle size={14}/>},{id:"tasks",label:"Accommodation",icon:<Home size={14}/>}].map((sub)=>(
           <button key={sub.id} onClick={()=>setHqView(sub.id)}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all min-h-[44px] border ${
               hqView===sub.id
@@ -449,56 +470,63 @@ const HqCommandTab = ({
         ))}
       </div>
 
-      {/* Verify Posts */}
+      {/* Visa Experiences */}
       {hqView === "verify" && (
         <div className="space-y-3 sm:space-y-4">
-          {postsLoading ? (
+          {visaExperiencesLoading ? (
             <div className="flex items-center justify-center py-16 sm:py-20">
               <Loader2 className="animate-spin text-blue-500" size={32} />
             </div>
-          ) : unverifiedPosts.length === 0 ? (
+          ) : visaExperiencesData.filter(e => !e.verified).length === 0 ? (
             <div className="text-center py-16 sm:py-20">
               <CheckCircle size={48} className="mx-auto text-emerald-500/30 mb-4" />
-              <p className="text-slate-500 font-semibold">All posts verified!</p>
+              <p className="text-slate-500 font-semibold">All experiences verified!</p>
             </div>
           ) : (
             <AnimatePresence>
-              {unverifiedPosts.map((post, idx) => (
+              {visaExperiencesData.filter(e => !e.verified).map((exp, idx) => (
                 <motion.div
-                  key={post.id}
+                  key={exp.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: idx * 0.04 }}
-                  className="border border-white/10 p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/5 transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 shadow-sm backdrop-blur-sm"
+                  className="border border-white/10 p-4 sm:p-6 rounded-xl sm:rounded-[2rem] hover:bg-white/5 transition-all duration-300 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 shadow-sm backdrop-blur-sm"
                   style={{background:'rgba(255,255,255,0.04)'}}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
-                      <span className="px-2.5 sm:px-3 py-1 bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-blue-200 dark:border-blue-500/20">
-                        {post.type || "general"}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
+                        {exp.VisaType || "Unknown Visa"}
                       </span>
-                      <span className="px-2.5 sm:px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-500 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest border border-slate-200 dark:border-transparent">
-                        {post.country || "GLOBAL"}
+                      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        exp.VisaStatus === "approved"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-red-500/10 text-red-400 border-red-500/20"
+                      }`}>
+                        {exp.VisaStatus === "approved" ? "✓ Approved" : "✗ Rejected"}
+                      </span>
+                      <span className="px-2.5 py-1 bg-slate-500/10 text-slate-400 rounded-full text-[9px] font-bold uppercase tracking-widest border border-white/10">
+                        {exp.InterviewPlace || "—"}
                       </span>
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1 truncate">
-                      {post.title}
-                    </h3>
-                    <p className="text-slate-500 text-xs sm:text-sm line-clamp-2">
-                      {post.content}
+                    <p className="text-white font-bold text-sm sm:text-base">
+                      {exp.VisaType} Visa — {exp.InterviewPlace}
+                    </p>
+                    <p className="text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                      {exp.Experience}
                     </p>
                   </div>
 
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.92 }}
-                    disabled={verifying === post.id}
-                    onClick={() => handleVerify(post.id)}
+                    disabled={verifyingExp === exp.id}
+                    onClick={() => handleVerifyVisaExperience(exp.id)}
                     className="flex-shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 min-h-[44px] min-w-[44px] w-full sm:w-auto"
                     style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}
                   >
-                    {verifying === post.id ? (
+                    {verifyingExp === exp.id ? (
                       <Loader2 size={16} className="animate-spin" />
                     ) : (
                       <CheckCircle size={16} />

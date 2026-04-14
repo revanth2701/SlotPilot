@@ -1115,8 +1115,8 @@ const StudentDashboardNew = ({ onBack }) => {
                 <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-white mb-2">Application Submitted! \uD83C\uDF89</h2>
-            <p className="text-slate-300 text-sm mb-6 leading-relaxed">Your documents have been securely submitted. Our team will review your application and reach out within 24\u201348 hours.</p>
+            <h2 className="text-2xl font-black text-white mb-2">Application Submitted!</h2>
+            <p className="text-slate-300 text-sm mb-6 leading-relaxed">Your documents have been securely submitted. Our team will review your application and reach out within 24 hours.</p>
             <Button onClick={() => setShowSuccessPopup(false)}
               className="w-full h-11 rounded-2xl font-black"
               style={{background:'linear-gradient(135deg,#4f46e5,#2563eb)'}}>
