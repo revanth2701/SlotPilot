@@ -5,6 +5,7 @@ import {
   onSnapshot, where
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   MessageSquare, Plane, Home, ArrowLeft, Plus, X, Globe, Zap, Send,
@@ -243,7 +244,10 @@ const Communities = () => {
   const [activeTab, setActiveTab] = useState("experience");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visaExpPosts, setVisaExpPosts] = useState([]);
+  const [visaExpLoading, setVisaExpLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showExpSuccess, setShowExpSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingPostId, setBookingPostId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -260,7 +264,7 @@ const Communities = () => {
   const [taskDetailsMap, setTaskDetailsMap] = useState({});
 
   // Form state
-  const [formData, setFormData] = useState({ title: "", content: "", country: "" });
+  const [formData, setFormData] = useState({ title: "", content: "", country: "", visaType: "", interviewPlace: "", interviewDate: "", visaOutcome: "" });
   const [mistakeText, setMistakeText] = useState("");
   const [mistakeExplanation, setMistakeExplanation] = useState("");
   const [mistakeProTip, setMistakeProTip] = useState("");
@@ -294,7 +298,34 @@ const Communities = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchPosts(); }, []);
+  const fetchVisaExperiences = async () => {
+    try {
+      setVisaExpLoading(true);
+      const { data, error } = await supabase
+        .from("VisaExperiences")
+        .select("*")
+        .eq("verified", true)
+        .order("InterviewDate", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: false });
+      if (!error && data) {
+        setVisaExpPosts(data.map(row => ({
+          id: String(row.id),
+          type: "experience",
+          title: `${row.VisaType} — ${row.VisaStatus === "approved" ? "Approved ✓" : "Rejected ✗"}`,
+          content: row.Experience,
+          country: row.InterviewPlace,
+          visaType: row.VisaType,
+          interviewPlace: row.InterviewPlace,
+          interviewDate: row.InterviewDate,
+          visaOutcome: row.VisaStatus,
+          verified: true,
+        })));
+      }
+    } catch (e) { console.error(e); }
+    finally { setVisaExpLoading(false); }
+  };
+
+  useEffect(() => { fetchPosts(); fetchVisaExperiences(); }, []);
 
   // Live listener for employee_tasks → build status map per postId
   useEffect(() => {
@@ -336,7 +367,7 @@ const Communities = () => {
   };
 
   const resetForm = () => {
-    setFormData({ title: "", content: "", country: "" });
+    setFormData({ title: "", content: "", country: "", visaType: "", interviewPlace: "", interviewDate: "", visaOutcome: "" });
     setMistakes([]); setMistakeText(""); setMistakeExplanation(""); setMistakeProTip("");
     setTravelRating(0); setTravelPros(""); setTravelCons(""); setTravelGems("");
     setCompanionData({ departureFrom: "", destination: "", dateOfJourney: "", dateOfReturn: "", airlinesName: "", gender: "", email: "", languagePreferred: "", message: "" });
@@ -360,6 +391,8 @@ const Communities = () => {
         return;
       }
       setCompanionError("");
+    } else if (activeTab === "experience") {
+      if (!formData.visaType || !formData.interviewPlace || !formData.visaOutcome || !formData.content) return;
     } else {
       if (!formData.title || !formData.content) return;
     }
@@ -375,6 +408,19 @@ const Communities = () => {
           companionDetails: { ...companionData },
           createdAt: serverTimestamp(),
         };
+      } else if (activeTab === "experience") {
+        const { error: sbError } = await supabase.from("VisaExperiences").insert({
+          VisaType: formData.visaType,
+          InterviewPlace: formData.interviewPlace,
+          InterviewDate: formData.interviewDate || null,
+          VisaStatus: formData.visaOutcome,
+          Experience: formData.content,
+        });
+        if (sbError) throw sbError;
+        resetForm(); setShowModal(false);
+        setShowExpSuccess(true);
+        setTimeout(() => setShowExpSuccess(false), 4000);
+        return;
       } else {
         postData = { ...formData, type: activeTab, createdAt: serverTimestamp() };
       }
@@ -425,8 +471,7 @@ const Communities = () => {
     }
   };
 
-  const filteredPosts = posts
-    .filter(p => p.type === activeTab)
+  const filteredPosts = (activeTab === "experience" ? visaExpPosts : posts.filter(p => p.type === activeTab))
     .filter(p => {
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
@@ -561,7 +606,7 @@ const Communities = () => {
             >
               {/* ── POSTS FEED ── */}
               <div className="space-y-5">
-                {loading ? (
+                {(activeTab === "experience" ? visaExpLoading : loading) ? (
                   [1, 2, 3].map(n => (
                     <div key={n} className="relative rounded-[1.75rem] overflow-hidden bg-white/70 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] p-6 sm:p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-none">
                       <div className="absolute inset-0 sp-shimmer pointer-events-none" />
@@ -609,17 +654,36 @@ const Communities = () => {
                   const style = POST_TYPE_STYLES[post.type] || POST_TYPE_STYLES.experience;
                   const TypeIcon = style.icon;
                   const isRejectionStory = post.type === "experience" && post.rejectionInsights?.mistakes?.length > 0;
+                  const isApproved = post.type === "experience" && post.visaOutcome === "approved";
+                  const isRejected = post.type === "experience" && post.visaOutcome === "rejected";
+
+                  // Outcome-specific card overrides
+                  const cardBorder = isApproved
+                    ? "border-emerald-300/60 dark:border-emerald-500/25"
+                    : isRejected
+                    ? "border-red-300/60 dark:border-red-500/20"
+                    : "border-slate-200/80 dark:border-white/[0.06]";
+                  const cardBg = isApproved
+                    ? "bg-emerald-50/60 dark:bg-emerald-500/[0.04]"
+                    : isRejected
+                    ? "bg-red-50/50 dark:bg-red-500/[0.03]"
+                    : "bg-white/70 dark:bg-white/[0.025]";
+                  const accentBar = isApproved
+                    ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500"
+                    : isRejected
+                    ? "bg-gradient-to-r from-red-400 via-rose-400 to-red-500"
+                    : style.accentGradient;
 
                   return (
                     <RevealCard key={post.id} index={index}>
                       <div className={`relative p-6 sm:p-7 rounded-[1.75rem] overflow-hidden transition-all duration-500
-                        bg-white/70 dark:bg-white/[0.025]
+                        ${cardBg}
                         backdrop-blur-[15px] saturate-[1.3]
-                        border border-slate-200/80 dark:border-white/[0.06]
+                        ${cardBorder}
+                        border
                         shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_24px_rgba(0,0,0,0.06)]
                         dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.15)]
-                        hover:bg-white/90 dark:hover:bg-white/[0.06]
-                        hover:border-slate-300 dark:hover:border-white/[0.10]
+                        hover:brightness-[1.03] dark:hover:bg-white/[0.06]
                         hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_12px_40px_rgba(0,0,0,0.08)]
                         dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.25)]
                         hover:-translate-y-[3px]
@@ -628,7 +692,7 @@ const Communities = () => {
                         {/* Inner glow gradient overlay */}
                         <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-gradient-to-br from-white/30 dark:from-white/[0.03] via-transparent to-transparent" />
                         {/* Type accent bar */}
-                        <div className={`absolute top-0 left-0 right-0 h-[3px] pointer-events-none rounded-t-[1.75rem] ${style.accentGradient} opacity-80 dark:opacity-50`} />
+                        <div className={`absolute top-0 left-0 right-0 h-[3px] pointer-events-none rounded-t-[1.75rem] ${accentBar} opacity-80 dark:opacity-60`} />
 
                         {/* Red Flag Chip */}
                         {isRejectionStory && <RedFlagChip rejectionInsights={post.rejectionInsights} />}
@@ -644,13 +708,27 @@ const Communities = () => {
                               <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${style.badgeBg} ${style.badgeText} ${style.badgeBorder}`}>
                                 {style.label}
                               </span>
-                              <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-white/[0.03] text-slate-500 rounded-full text-[9px] font-bold uppercase tracking-widest border border-slate-200 dark:border-white/[0.04]">
-                                {post.country || "GLOBAL"}
-                              </span>
+                              {post.type !== "experience" && (
+                                <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-white/[0.03] text-slate-500 rounded-full text-[9px] font-bold uppercase tracking-widest border border-slate-200 dark:border-white/[0.04]">
+                                  {post.country || "GLOBAL"}
+                                </span>
+                              )}
                               {post.verified && (
                                 <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
                                   className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300 rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-200 dark:border-blue-400/20 flex items-center gap-1">
                                   <CheckCircle size={9} /> Certified
+                                </motion.span>
+                              )}
+                              {isApproved && (
+                                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                  className="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1">
+                                  <CheckCircle size={9} /> Approved
+                                </motion.span>
+                              )}
+                              {isRejected && (
+                                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                  className="px-2.5 py-0.5 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 rounded-full text-[9px] font-black uppercase tracking-widest border border-red-300 dark:border-red-500/30 flex items-center gap-1">
+                                  <X size={9} /> Rejected
                                 </motion.span>
                               )}
                             </div>
@@ -665,6 +743,24 @@ const Communities = () => {
                                 </motion.span>
                               )}
                             </h3>
+                            {post.type === "experience" && (post.interviewPlace || post.interviewDate) && (
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                                {post.interviewPlace && (
+                                  <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <MapPin size={11} className={isApproved ? "text-emerald-500" : isRejected ? "text-red-400" : "text-slate-400"} />
+                                    <span className="font-semibold text-slate-600 dark:text-slate-300">Interview Location:</span>
+                                    {post.interviewPlace}
+                                  </p>
+                                )}
+                                {post.interviewDate && (
+                                  <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <Calendar size={11} className={isApproved ? "text-emerald-500" : isRejected ? "text-red-400" : "text-slate-400"} />
+                                    <span className="font-semibold text-slate-600 dark:text-slate-300">Interview Date:</span>
+                                    {post.interviewDate}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -875,9 +971,23 @@ const Communities = () => {
                 dark:shadow-[0_32px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]">
 
               {/* ── Decorative gradient blobs ── */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-400/20 dark:bg-amber-600/15 rounded-full blur-[80px] pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-orange-400/15 dark:bg-orange-600/10 rounded-full blur-[70px] pointer-events-none" />
-              <div className="absolute top-1/2 right-0 w-32 h-32 bg-violet-400/10 dark:bg-violet-600/10 rounded-full blur-[60px] pointer-events-none" />
+              {activeTab === "experience" ? (
+                <>
+                  <div className="absolute -top-24 -left-24 w-56 h-56 bg-emerald-400/25 dark:bg-emerald-500/15 rounded-full blur-[90px] pointer-events-none" />
+                  <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-teal-400/20 dark:bg-teal-600/12 rounded-full blur-[80px] pointer-events-none" />
+                  <div className="absolute top-1/3 right-0 w-36 h-36 bg-cyan-400/10 dark:bg-cyan-600/08 rounded-full blur-[60px] pointer-events-none" />
+                </>
+              ) : activeTab === "companion" ? (
+                <>
+                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-400/20 dark:bg-amber-600/15 rounded-full blur-[80px] pointer-events-none" />
+                  <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-orange-400/15 dark:bg-orange-600/10 rounded-full blur-[70px] pointer-events-none" />
+                </>
+              ) : (
+                <>
+                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-400/20 dark:bg-violet-600/15 rounded-full blur-[80px] pointer-events-none" />
+                  <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-purple-400/15 dark:bg-purple-600/10 rounded-full blur-[70px] pointer-events-none" />
+                </>
+              )}
 
               {/* ── Close button ── */}
               <button onClick={() => { setShowModal(false); resetForm(); }}
@@ -1060,8 +1170,110 @@ const Communities = () => {
                         )}
                       </AnimatePresence>
                     </div>
+                  ) : activeTab === "experience" ? (
+                    /* ═══ VISA EXPERIENCE FORM ═══ */
+                    <div className="space-y-5">
+
+                      {/* ── Decorative step banner ── */}
+                      <div className="flex items-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/[0.10] dark:to-teal-500/[0.07] border border-emerald-200/60 dark:border-emerald-500/20">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/30 flex-shrink-0">
+                          <ShieldCheck size={13} className="text-white" />
+                        </div>
+                        <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 leading-snug">
+                          Your experience helps thousands prepare for their visa journey.
+                        </p>
+                      </div>
+
+                      {/* ── Type of Visa ── */}
+                      <div className="space-y-1.5">
+                        <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 ml-1">
+                          <ShieldCheck size={10} /> Type of Visa <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 dark:text-emerald-400 pointer-events-none"><ShieldCheck size={15} /></div>
+                          <input placeholder="e.g. Student F-1, Tourist B-2, Work H-1B"
+                            className="w-full bg-white dark:bg-white/[0.05] border border-emerald-200 dark:border-emerald-500/20 pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 dark:focus:border-emerald-400/60 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium text-slate-800 dark:text-slate-100 shadow-sm"
+                            value={formData.visaType} onChange={e => setFormData({ ...formData, visaType: e.target.value })} />
+                        </div>
+                      </div>
+
+                      {/* ── Interview Place + Date row ── */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 ml-1">
+                            <MapPin size={10} /> Interview Place <span className="text-rose-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 dark:text-emerald-400 pointer-events-none"><MapPin size={15} /></div>
+                            <input placeholder="City / Consulate"
+                              className="w-full bg-white dark:bg-white/[0.05] border border-emerald-200 dark:border-emerald-500/20 pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 dark:focus:border-emerald-400/60 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium text-slate-800 dark:text-slate-100 shadow-sm"
+                              value={formData.interviewPlace} onChange={e => setFormData({ ...formData, interviewPlace: e.target.value })} />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 ml-1">
+                            <Calendar size={10} /> Interview Date
+                          </label>
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 dark:text-emerald-400 pointer-events-none"><Calendar size={15} /></div>
+                            <input type="date"
+                              className="w-full bg-white dark:bg-white/[0.05] border border-emerald-200 dark:border-emerald-500/20 pl-11 pr-4 py-3.5 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 dark:focus:border-emerald-400/60 outline-none transition-all text-sm font-medium text-slate-800 dark:text-slate-100 shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
+                              value={formData.interviewDate} onChange={e => setFormData({ ...formData, interviewDate: e.target.value })} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Visa Outcome toggle pills ── */}
+                      <div className="space-y-1.5">
+                        <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 ml-1">
+                          <CheckCircle size={10} /> Visa Outcome <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <motion.button type="button"
+                            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+                            onClick={() => setFormData({ ...formData, visaOutcome: "approved" })}
+                            className={`relative flex items-center justify-center gap-2.5 py-4 rounded-2xl border-2 font-bold text-sm transition-all duration-200 overflow-hidden
+                              ${ formData.visaOutcome === "approved"
+                                ? "bg-gradient-to-br from-emerald-400/20 to-teal-400/10 border-emerald-400 dark:border-emerald-400/60 text-emerald-800 dark:text-emerald-200 shadow-lg shadow-emerald-500/15"
+                                : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:border-emerald-300 dark:hover:border-emerald-500/30"
+                              }`}
+                          >
+                            {formData.visaOutcome === "approved" && (
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-teal-400/5 pointer-events-none" />
+                            )}
+                            <CheckCircle size={18} className={formData.visaOutcome === "approved" ? "text-emerald-500" : "text-slate-400"} />
+                            <span>Approved</span>
+                          </motion.button>
+                          <motion.button type="button"
+                            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+                            onClick={() => setFormData({ ...formData, visaOutcome: "rejected" })}
+                            className={`relative flex items-center justify-center gap-2.5 py-4 rounded-2xl border-2 font-bold text-sm transition-all duration-200 overflow-hidden
+                              ${ formData.visaOutcome === "rejected"
+                                ? "bg-gradient-to-br from-red-400/20 to-rose-400/10 border-red-400 dark:border-red-400/60 text-red-800 dark:text-red-200 shadow-lg shadow-red-500/15"
+                                : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:border-red-300 dark:hover:border-red-500/30"
+                              }`}
+                          >
+                            {formData.visaOutcome === "rejected" && (
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-rose-400/5 pointer-events-none" />
+                            )}
+                            <X size={18} className={formData.visaOutcome === "rejected" ? "text-red-500" : "text-slate-400"} />
+                            <span>Rejected</span>
+                          </motion.button>
+                        </div>
+                      </div>
+
+                      {/* ── Visa Experience ── */}
+                      <div className="space-y-1.5">
+                        <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 ml-1">
+                          <MessageSquare size={10} /> Your Experience <span className="text-rose-500">*</span>
+                        </label>
+                        <textarea placeholder="Walk us through your interview experience — questions asked, documents checked, wait time, officer behavior..." rows={4}
+                          className="w-full bg-white dark:bg-white/[0.05] border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 dark:focus:border-emerald-400/60 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none text-sm font-medium text-slate-800 dark:text-slate-100 shadow-sm leading-relaxed"
+                          value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+                      </div>
+                    </div>
                   ) : (
-                    /* ═══ DEFAULT FORM (experience / accommodation) ═══ */
+                    /* ═══ ACCOMMODATION FORM ═══ */
                     <>
                       <input placeholder="Headline"
                         className="w-full bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] p-4 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500/30 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-sm text-slate-900 dark:text-white"
@@ -1075,20 +1287,6 @@ const Communities = () => {
                     </>
                   )}
 
-                  {/* ── EXPERIENCE: Mistake Analysis ── */}
-                  {activeTab === "experience" && (
-                    <div className="border border-red-200 dark:border-red-500/10 rounded-xl p-4 space-y-2.5 bg-red-50/50 dark:bg-red-500/[0.02]">
-                      <p className="text-[9px] text-red-500/70 dark:text-red-400/70 font-black uppercase tracking-widest">🔴 Mistake Analysis (Optional)</p>
-                      <input placeholder="Mistake phrase" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeText} onChange={e => setMistakeText(e.target.value)} />
-                      <input placeholder="Why it's wrong" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeExplanation} onChange={e => setMistakeExplanation(e.target.value)} />
-                      <input placeholder="Pro Tip: correct approach" className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/[0.04] p-3 rounded-lg outline-none text-xs placeholder:text-slate-400 dark:placeholder:text-slate-700 text-slate-900 dark:text-white" value={mistakeProTip} onChange={e => setMistakeProTip(e.target.value)} />
-                      <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={addMistake} disabled={!mistakeText}
-                        className="px-4 py-2 bg-red-100 dark:bg-red-600/15 text-red-600 dark:text-red-300 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-red-200 dark:border-red-500/15 disabled:opacity-20 transition-all">
-                        + Add ({mistakes.length})
-                      </motion.button>
-                    </div>
-                  )}
-
                   {/* ── Submit Button ── */}
                   <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.97 }} disabled={isSubmitting} type="submit"
                     className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all uppercase tracking-wider mt-3
@@ -1099,12 +1297,73 @@ const Communities = () => {
                           ? "bg-gradient-to-r from-violet-500 via-purple-600 to-violet-500 hover:from-violet-400 hover:via-purple-500 hover:to-violet-400 shadow-violet-600/20"
                           : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 shadow-blue-600/20"
                       } text-white disabled:opacity-40 disabled:cursor-not-allowed`}>
-                    {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <><Send size={14} /> {activeTab === "companion" ? "Submit Request" : activeTab === "accommodation" ? "Share Gem" : "Post Intel"}</>}
+                    {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <><Send size={14} /> {activeTab === "companion" ? "Submit Request" : activeTab === "accommodation" ? "Share Gem" : "Submit Experience"}</> }
                   </motion.button>
                 </form>
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* ════════════════════════════════════════════
+          EXPERIENCE SUBMITTED SUCCESS TOAST
+         ════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showExpSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.88, y: 20 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[200] flex items-center justify-center px-4"
+          >
+            {/* backdrop */}
+            <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" onClick={() => setShowExpSuccess(false)} />
+
+            <div className="relative w-full max-w-md overflow-hidden rounded-3xl flex flex-col items-center gap-5 px-8 py-10 text-center
+              bg-white/95 dark:bg-[#0a1628]/95 backdrop-blur-2xl
+              border border-emerald-200/60 dark:border-emerald-500/20
+              shadow-[0_32px_80px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.7)]
+              dark:shadow-[0_32px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]">
+
+              {/* ambient glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-transparent to-teal-400/5 pointer-events-none rounded-3xl" />
+
+              {/* close button */}
+              <button onClick={() => setShowExpSuccess(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors z-10">
+                <X size={16} />
+              </button>
+
+              {/* animated checkmark */}
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-400/10 animate-pulse" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-xl shadow-emerald-500/30 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 stroke-white">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* text */}
+              <div className="relative space-y-2">
+                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Experience Submitted!</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
+                  Thank you for sharing. Once our team verifies your experience, it will be published in the <span className="font-semibold text-emerald-600 dark:text-emerald-400">Visa Experience</span> section.
+                </p>
+              </div>
+
+              {/* progress bar */}
+              <motion.div
+                initial={{ scaleX: 1 }}
+                animate={{ scaleX: 0 }}
+                transition={{ duration: 4, ease: "linear" }}
+                style={{ originX: 0 }}
+                className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500"
+              />
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

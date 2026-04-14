@@ -81,6 +81,7 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showCheckMailModal, setShowCheckMailModal] = useState(false);
   const { toast } = useToast();
 
   const validatePassword = (password) => {
@@ -213,20 +214,17 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
 
       if (dataError) {
         console.error('Failed to persist student profile data.');
-        toast({
-          title: "Registration successful",
-          description: alreadyConfirmed
-            ? "Your account is ready. You can log in now."
-            : "A confirmation email has been sent. Please check your inbox (and spam folder).",
-          variant: "default"
-        });
+      }
+
+      // Reset form fields
+      setRegisterData({ firstName: "", surname: "", email: "", contactNumber: "", password: "", confirmPassword: "" });
+      setPasswordStrength({ score: 0, feedback: [] });
+
+      if (alreadyConfirmed) {
+        toast({ title: "Account ready", description: "Your account is confirmed. You can log in now." });
+        setActiveTab("login");
       } else {
-        toast({
-          title: "Registration successful",
-          description: alreadyConfirmed
-            ? "Your account is ready. You can log in now."
-            : "A confirmation email has been sent. Please check your inbox (and spam folder).",
-        });
+        setShowCheckMailModal(true);
       }
 
     } catch (error) {
@@ -243,7 +241,32 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
   //   setActiveTab("login");
   // }, [location.key]);
 
-  return (  
+  return (
+    <>
+    {/* ── Check Mail Modal ── */}
+    {showCheckMailModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-sm p-8 flex flex-col items-center text-center gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-200 dark:border-blue-500/30">
+            <Mail className="h-8 w-8 text-blue-500" />
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Check Your Email</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              A confirmation link has been sent to your email address.<br />
+              Kindly check your mail (and spam folder) for further steps.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setShowCheckMailModal(false); setActiveTab("login"); }}
+            className="mt-2 w-full h-11 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm transition-colors"
+          >
+            Got it, go to Sign In
+          </button>
+        </div>
+      </div>
+    )}
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
@@ -576,6 +599,7 @@ const StudentLoginRegister = ({ onBack, onLogin }) => {
         </Card>
       </div>
     </div>
+    </>
   );
 };
 
