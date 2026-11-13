@@ -1,27 +1,34 @@
-import { useEffect, useLayoutEffect } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import ServiceSelection from "./pages/ServiceSelection";
-import Index from "./pages/Index";
-import VisaStart from "./pages/VisaStart";
-import VisaServices from "./pages/VisaServices";
-import VisaApplication from "./pages/VisaApplication";
-import Communities from "./pages/Communities";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import EmployerLoginRegister from "@/components/EmployerLoginRegister";
-import ResetPassword from "./pages/ResetPassword";
-import CollegesListPage from "./pages/CollegesListPage";
-import StudentLoginRegister from "@/components/StudentLoginRegister";
-import JourneyForm from "./components/JourneyForm";
-import StudentDashboard from "./components/StudentDashboard";
-import StudentDashboardNew from "./components/StudentDashboardNew";
-import AdminDashboard from "./pages/AdminDashboard";
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+
+// Only the landing page loads up front; every other page loads when first opened.
+const Index = lazy(() => import("./pages/Index"));
+const VisaStart = lazy(() => import("./pages/VisaStart"));
+const VisaServices = lazy(() => import("./pages/VisaServices"));
+const VisaApplication = lazy(() => import("./pages/VisaApplication"));
+const Communities = lazy(() => import("./pages/Communities"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const EmployerLoginRegister = lazy(() => import("@/components/EmployerLoginRegister"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CollegesListPage = lazy(() => import("./pages/CollegesListPage"));
+const StudentLoginRegister = lazy(() => import("@/components/StudentLoginRegister"));
+const JourneyForm = lazy(() => import("./components/JourneyForm"));
+const StudentDashboardNew = lazy(() => import("./components/StudentDashboardNew"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="h-8 w-8 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -65,6 +72,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<ServiceSelection />} />
           <Route path="/higher-education" element={<Index />} />
@@ -85,6 +93,7 @@ const App = () => (
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard/></AdminRoute>} />
 
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
