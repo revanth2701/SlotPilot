@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SlotPilot</string>
+    <string name="title_activity_main">SlotPilot</string>
+    <string name="package_name">com.slotpilot.app</string>
+    <string name="custom_url_scheme">com.slotpilot.app</string>
+</resources>

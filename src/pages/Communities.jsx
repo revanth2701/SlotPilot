@@ -17,6 +17,7 @@ import {
 
 import MistakeAnalysis from "../components/MistakeAnalysis";
 import TravelReview from "../components/TravelReview";
+import ChatRoom from "../components/ChatRoom";
 
 /* ─────────────────────────────────────────────────────
    CSS-IN-JS: Theme-Adaptive Liquid Glass + Spatial UI
@@ -513,7 +514,6 @@ const Communities = () => {
               </div>
             </div>
           </header>
-
           {/* ════════════════════════════════════════════
               HORIZONTAL CATEGORY BAR
              ════════════════════════════════════════════ */}
@@ -604,8 +604,11 @@ const Communities = () => {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
-              {/* ── POSTS FEED ── */}
-              <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Posts column (spans 2 on md+) */}
+                <div className="md:col-span-2">
+                  {/* ── POSTS FEED ── */}
+                  <div className="space-y-5">
                 {(activeTab === "experience" ? visaExpLoading : loading) ? (
                   [1, 2, 3].map(n => (
                     <div key={n} className="relative rounded-[1.75rem] overflow-hidden bg-white/70 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] p-6 sm:p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-none">
@@ -934,6 +937,13 @@ const Communities = () => {
                   );
                 })
               )}
+                  </div>
+                </div>
+
+                {/* Chat column */}
+                <div className="md:col-span-1">
+                  {activeTab === "experience" && <ChatRoom />}
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>

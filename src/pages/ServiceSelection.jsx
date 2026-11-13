@@ -64,10 +64,45 @@ const Earth = () => (
 /* NOTE: Place a suitable equirectangular world map image at: public/images/world-map.jpg
    Example: download an open-source equirectangular map and save it there so the globe texture looks realistic. */
 
+// Defined at module level so it keeps its state when the page re-renders.
+const CountUp = ({ end, duration = 2000, suffix = "" }) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const node = countRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.5 }
+    );
+    if (node) observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let frame;
+    let startTime;
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * end));
+      if (progress < 1) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [isVisible, end, duration]);
+
+  return <span ref={countRef}>{count}{suffix}</span>;
+};
+
 const ServiceSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [scrollY, setScrollY] = useState(0);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -172,12 +207,6 @@ const ServiceSelection = () => {
     }
   ];
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const [benefitsVisible, setBenefitsVisible] = useState(false);
   const benefitsRef = useRef(null);
 
@@ -208,54 +237,10 @@ const ServiceSelection = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  const CountUp = ({ end, duration = 2000, suffix = "" }) => {
-    const [count, setCount] = useState(0);
-    const countRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting && !isVisible) {
-            setIsVisible(true);
-          }
-        },
-        { threshold: 0.5 }
-      );
-
-      if (countRef.current) {
-        observer.observe(countRef.current);
-      }
-
-      return () => {
-        if (countRef.current) {
-          observer.unobserve(countRef.current);
-        }
-      };
-    }, [isVisible]);
-
-    useEffect(() => {
-      if (!isVisible) return;
-
-      let startTime;
-      const animate = (currentTime) => {
-        if (!startTime) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-        setCount(Math.floor(progress * end));
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      requestAnimationFrame(animate);
-    }, [isVisible, end, duration]);
-
-    return <span ref={countRef}>{count}{suffix}</span>;
-  };
-
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50 transition-colors duration-500">
+      <header className="bg-card md:bg-card/80 md:backdrop-blur-sm border-b sticky top-0 z-50 transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative h-16 flex items-center justify-between">
 
